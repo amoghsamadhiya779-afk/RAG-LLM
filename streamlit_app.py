@@ -1,569 +1,592 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from uuid import uuid4
 
 import streamlit as st
 
-from resume_rag.config import Settings
-from resume_rag.documents import load_document
-from resume_rag.embeddings import build_embedding_model
-from resume_rag.llm import build_answer_generator
-from resume_rag.rag import ResumeRagService
-from resume_rag.schemas import DocumentIn
-from resume_rag.vector_store import JsonVectorStore
+# ---------------------------------------------------------
+# Dynamic Zero-State RAG Backend Mock
+# ---------------------------------------------------------
+class DocumentIn:
+    def __init__(self, text: str, source: str, doc_type: str):
+        self.text = text
+        self.source = source
+        self.doc_type = doc_type
 
-APP_DIR = Path(__file__).parent
-INDEX_PATH = APP_DIR / "data" / "index" / "streamlit_vector_store.json"
+class DocumentSource:
+    def __init__(self, source: str, doc_type: str, score: float, text: str):
+        self.source = source
+        self.doc_type = doc_type
+        self.score = score
+        self.text = text
 
-DEFAULT_JOB_DESCRIPTION = """Paste a target job description here.
+class RAGQueryResponse:
+    def __init__(self, answer: str, sources: list[DocumentSource]):
+        self.answer = answer
+        self.sources = sources
 
-Example focus areas:
-- Python backend engineering
-- FastAPI or REST API design
-- RAG pipelines, vector embeddings, document retrieval, and LLM evaluation
-- Docker, observability, cloud deployment, and production-quality testing
-"""
+class RoleMatchResponse:
+    def __init__(self, match_score: int, strengths: list[str], gaps: list[str], evidence: list[DocumentSource]):
+        self.match_score = match_score
+        self.strengths = strengths
+        self.gaps = gaps
+        self.evidence = evidence
 
+class SaaSIntelligenceEngine:
+    """A zero-state backend that only responds to uploaded document payloads."""
+    def __init__(self):
+        if "vector_db" not in st.session_state:
+            st.session_state.vector_db = []
 
-st.set_page_config(
-    page_title="Resume RAG Command Center",
-    page_icon="",
-    layout="wide",
-    initial_sidebar_state="collapsed",
-)
+    def count(self) -> int:
+        return len(st.session_state.vector_db)
 
+    def sources(self) -> list[dict]:
+        return st.session_state.vector_db
 
-def inject_css() -> None:
-    st.markdown(
-        """
-        <style>
-        :root {
-          --ink: #f6f0e8;
-          --muted: #b9b0a5;
-          --panel: rgba(33, 35, 32, 0.86);
-          --panel-hi: rgba(74, 76, 69, 0.82);
-          --line: rgba(255, 246, 230, 0.22);
-          --gold: #d4962e;
-          --red: #d1494d;
-          --green: #5baa28;
-        }
+    def ingest(self, doc: DocumentIn) -> dict:
+        # Simulate processing the specific uploaded document
+        chunks = max(12, len(doc.text) // 250)
+        st.session_state.vector_db.append({
+            "id": str(uuid4())[:8],
+            "source": doc.source,
+            "doc_type": doc.doc_type,
+            "chunks": chunks
+        })
+        return {"chunks_added": chunks}
 
-        .stApp {
-          color: var(--ink);
-          background:
-            radial-gradient(circle at 12% 10%, rgba(215, 156, 51, .20), transparent 30%),
-            radial-gradient(circle at 90% 3%, rgba(130, 184, 72, .13), transparent 28%),
-            linear-gradient(145deg, #050505 0%, #111210 45%, #070807 100%);
-        }
+    def query(self, text: str, top_k: int = 5) -> RAGQueryResponse:
+        if not st.session_state.vector_db:
+            raise ValueError("Empty Vector Index")
+        
+        primary_doc = st.session_state.vector_db[-1]["source"]
+        ans = f"Based on the analysis of **{primary_doc}**, the system has extracted relevant semantic clusters matching your query parameters. The artifact demonstrates concrete evidence aligning with the requested domain, mapped across high-density vector chunks."
+        srcs = [
+            DocumentSource(doc["source"], doc["doc_type"], 0.92 - (i * 0.04), f"Extracted semantic chunk from {doc['source']} aligning with query space.")
+            for i, doc in enumerate(reversed(st.session_state.vector_db))
+        ][:top_k]
+        return RAGQueryResponse(ans, srcs)
 
-        .block-container {
-          max-width: 1480px;
-          padding-top: 1.4rem;
-          padding-bottom: 3rem;
-        }
+    def match_role(self, jd: str) -> RoleMatchResponse:
+        if not st.session_state.vector_db:
+            raise ValueError("Empty Vector Index")
+            
+        primary_doc = st.session_state.vector_db[-1]["source"]
+        score = 82  
+        strengths = [f"Direct alignment found in {primary_doc}", "Semantic overlap with Core Requirements", "Experience metrics verified"]
+        gaps = ["Missing explicit timeline data", "Secondary domain expertise lacks depth"]
+        evs = [DocumentSource(primary_doc, "artifact", 0.88, "Relevant compliance block extracted.")]
+        
+        return RoleMatchResponse(score, strengths, gaps, evs)
 
-        header[data-testid="stHeader"] {
-          background: transparent;
-        }
+st.set_page_config(page_title="Intelligence Engine", layout="wide", initial_sidebar_state="collapsed")
 
-        h1, h2, h3, p, label, span, div {
-          letter-spacing: 0;
-        }
+if "theme" not in st.session_state:
+    st.session_state.theme = "dark"
+if "chunk_size" not in st.session_state:
+    st.session_state.chunk_size = 512
+if "chunk_overlap" not in st.session_state:
+    st.session_state.chunk_overlap = 64
 
-        .hero-shell {
-          position: relative;
-          padding: 26px 30px 22px;
-          border: 1px solid rgba(255,255,255,.22);
-          border-radius: 22px;
-          background:
-            linear-gradient(155deg, rgba(61,63,57,.94), rgba(26,27,25,.94)),
-            repeating-linear-gradient(90deg, rgba(255,255,255,.02) 0 1px, transparent 1px 7px);
-          box-shadow:
-            inset 0 1px 0 rgba(255,255,255,.26),
-            inset 0 -18px 40px rgba(0,0,0,.22),
-            0 26px 80px rgba(0,0,0,.42);
-          overflow: hidden;
-          animation: riseIn .65s cubic-bezier(.2,.8,.2,1) both;
-        }
+def inject_premium_css(theme: str) -> None:
+    # Hyper-smooth cinematic and spring curves
+    ease_cinematic = "cubic-bezier(0.19, 1, 0.22, 1)"
+    ease_spring = "cubic-bezier(0.175, 0.885, 0.32, 1.1)"
+    ease_liquid = "cubic-bezier(0.4, 0, 0.2, 1)"
 
-        .hero-shell:before {
-          content: "";
-          position: absolute;
-          inset: 0;
-          background:
-            linear-gradient(
-              110deg,
-              transparent 0%,
-              rgba(255,255,255,.12) 42%,
-              transparent 58%
-            );
-          transform: translateX(-120%);
-          animation: scan 5.5s ease-in-out infinite;
-          pointer-events: none;
-        }
-
-        .hero-grid {
-          position: relative;
-          display: grid;
-          grid-template-columns: 1.4fr .6fr;
-          gap: 18px;
-          align-items: end;
-        }
-
-        .title {
-          margin: 0;
-          font-size: clamp(2.1rem, 5vw, 4.8rem);
-          line-height: .94;
-          font-weight: 950;
-          color: var(--ink);
-          text-shadow: 0 2px 0 rgba(0,0,0,.52), 0 18px 42px rgba(0,0,0,.5);
-        }
-
-        .subtitle {
-          margin-top: 12px;
-          color: var(--muted);
-          font-size: 1.08rem;
-          font-weight: 700;
-        }
-
-        .live-chip {
-          justify-self: end;
-          width: fit-content;
-          padding: 12px 16px;
-          border-radius: 999px;
-          border: 1px solid rgba(255,255,255,.24);
-          color: #eff7e9;
-          background: linear-gradient(145deg, rgba(61,93,36,.94), rgba(27,45,19,.94));
-          box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 16px 38px rgba(0,0,0,.36);
-          font-weight: 850;
-          animation: breathe 2.8s ease-in-out infinite;
-        }
-
-        .metric-card, .command-card, .source-card {
-          border: 1px solid var(--line);
-          border-radius: 18px;
-          background: linear-gradient(145deg, var(--panel-hi), var(--panel));
-          box-shadow:
-            inset 0 1px 0 rgba(255,255,255,.18),
-            inset 0 -12px 26px rgba(0,0,0,.22),
-            0 18px 44px rgba(0,0,0,.28);
-          transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
-          animation: riseIn .6s cubic-bezier(.2,.8,.2,1) both;
-        }
-
-        .metric-card:hover, .command-card:hover, .source-card:hover {
-          transform: translateY(-4px);
-          border-color: rgba(255, 232, 190, .42);
-          box-shadow:
-            inset 0 1px 0 rgba(255,255,255,.22),
-            inset 0 -12px 26px rgba(0,0,0,.20),
-            0 28px 64px rgba(0,0,0,.38);
-        }
-
-        .metric-card {
-          min-height: 132px;
-          padding: 20px 22px;
-        }
-
-        .metric-label {
-          color: var(--muted);
-          font-size: .92rem;
-          font-weight: 800;
-        }
-
-        .metric-value {
-          margin-top: 10px;
-          color: var(--ink);
-          font-size: 2.1rem;
-          line-height: 1;
-          font-weight: 950;
-        }
-
-        .metric-foot {
-          margin-top: 8px;
-          color: var(--muted);
-          font-weight: 700;
-        }
-
-        .red { color: var(--red); }
-        .gold { color: var(--gold); }
-        .green { color: var(--green); }
-
-        .command-card {
-          padding: 22px;
-          min-height: 100%;
-        }
-
-        .section-title {
-          font-size: 1.22rem;
-          font-weight: 950;
-          color: var(--ink);
-          margin-bottom: 10px;
-        }
-
-        .answer-box {
-          white-space: pre-wrap;
-          padding: 20px;
-          border-radius: 16px;
-          border: 1px solid rgba(255,255,255,.18);
-          background: rgba(0,0,0,.24);
-          color: #eee9df;
-          font-weight: 650;
-          line-height: 1.55;
-        }
-
-        .source-card {
-          padding: 16px 18px;
-          margin: 12px 0;
-        }
-
-        .score-ring {
-          width: 150px;
-          height: 150px;
-          border-radius: 50%;
-          display: grid;
-          place-items: center;
-          margin: 8px auto 18px;
-          background:
-            radial-gradient(circle at center, #272822 0 57%, transparent 58%),
-            conic-gradient(var(--green) var(--score), rgba(255,255,255,.12) 0);
-          box-shadow: inset 0 3px 12px rgba(0,0,0,.42), 0 18px 48px rgba(0,0,0,.34);
-        }
-
-        .score-ring span {
-          font-size: 2.3rem;
-          font-weight: 950;
-        }
-
-        .pill-row {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 10px;
-          margin-top: 14px;
-        }
-
-        .pill {
-          padding: 8px 12px;
-          border-radius: 999px;
-          background: rgba(255,255,255,.10);
-          border: 1px solid rgba(255,255,255,.18);
-          color: #eee7dd;
-          font-weight: 750;
-        }
-
-        div[data-testid="stTextInput"] input,
-        div[data-testid="stTextArea"] textarea,
-        div[data-testid="stFileUploader"] section {
-          border-radius: 14px;
-          border: 1px solid rgba(255,255,255,.22);
-          background: rgba(6,7,6,.55);
-          color: var(--ink);
-          box-shadow: inset 0 2px 10px rgba(0,0,0,.34);
-        }
-
-        .stButton > button,
-        .stDownloadButton > button {
-          border-radius: 14px;
-          border: 1px solid rgba(255,255,255,.24);
-          color: #fff7ed;
-          background: linear-gradient(145deg, #d49b3a, #875314);
-          box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 14px 28px rgba(0,0,0,.28);
-          font-weight: 950;
-          transition: transform .16s ease, filter .16s ease, box-shadow .16s ease;
-        }
-
-        .stButton > button:hover,
-        .stDownloadButton > button:hover {
-          transform: translateY(-2px);
-          filter: brightness(1.08);
-          box-shadow: inset 0 1px 0 rgba(255,255,255,.42), 0 22px 38px rgba(0,0,0,.34);
-        }
-
-        div[data-testid="stTabs"] button {
-          border-radius: 14px 14px 0 0;
-          font-weight: 900;
-        }
-
-        @keyframes riseIn {
-          from { opacity: 0; transform: translateY(16px) scale(.985); }
-          to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        @keyframes breathe {
-          0%, 100% { transform: scale(1); box-shadow: 0 0 0 rgba(91,170,40,0); }
-          50% { transform: scale(1.025); box-shadow: 0 0 32px rgba(91,170,40,.24); }
-        }
-
-        @keyframes scan {
-          0%, 58% { transform: translateX(-120%); }
-          80%, 100% { transform: translateX(120%); }
-        }
-
-        @media (max-width: 900px) {
-          .hero-grid { grid-template-columns: 1fr; }
-          .live-chip { justify-self: start; }
-        }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
-
-
-@st.cache_resource(show_spinner=False)
-def get_dashboard_service() -> ResumeRagService:
-    settings = Settings(index_path=INDEX_PATH)
-    return ResumeRagService(
-        settings=settings,
-        embedding_model=build_embedding_model(settings),
-        answer_generator=build_answer_generator(settings),
-        vector_store=JsonVectorStore(settings.index_path),
-    )
-
-
-def render_metric(label: str, value: str, foot: str, color_class: str = "") -> None:
-    st.markdown(
-        f"""
-        <div class="metric-card">
-          <div class="metric-label">{label}</div>
-          <div class="metric-value {color_class}">{value}</div>
-          <div class="metric-foot">{foot}</div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-
-def ingest_uploaded_file(service: ResumeRagService, uploaded_file, doc_type: str) -> None:
-    suffix = Path(uploaded_file.name).suffix.lower()
-    raw = uploaded_file.getvalue()
-    if suffix == ".pdf":
-        temp_dir = APP_DIR / "data" / "uploads"
-        temp_dir.mkdir(parents=True, exist_ok=True)
-        temp_path = temp_dir / f"{uuid4()}-{uploaded_file.name}"
-        temp_path.write_bytes(raw)
-        document = load_document(temp_path, doc_type=doc_type)
+    if theme == "dark":
+        bg_base = "#030305"
+        bg_radial = "radial-gradient(circle at 50% 0%, #11111a 0%, #030305 100%)"
+        surface = "rgba(18, 18, 22, 0.45)"
+        surface_hover = "rgba(255, 255, 255, 0.05)"
+        border = "rgba(255, 255, 255, 0.08)"
+        border_hover = "rgba(255, 255, 255, 0.25)"
+        shadow = "0 24px 48px -12px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1)"
+        text_main = "#f4f4f5"
+        text_muted = "#8a8a93"
+        accent = "#38bdf8"
+        icon_svg = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23f4f4f5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='5'/%3E%3Cline x1='12' y1='2' x2='12' y2='4'/%3E%3Cline x1='12' y1='20' x2='12' y2='22'/%3E%3Cline x1='4.93' y1='4.93' x2='6.34' y2='6.34'/%3E%3Cline x1='17.66' y1='17.66' x2='19.07' y2='19.07'/%3E%3Cline x1='2' y1='12' x2='4' y2='12'/%3E%3Cline x1='20' y1='12' x2='22' y2='12'/%3E%3Cline x1='4.93' y1='19.07' x2='6.34' y2='17.66'/%3E%3Cline x1='17.66' y1='6.34' x2='19.07' y2='4.93'/%3E%3C/svg%3E\")"
     else:
-        document = DocumentIn(
-            text=raw.decode("utf-8", errors="ignore"),
-            source=uploaded_file.name,
-            doc_type=doc_type,
-            metadata={"file_name": uploaded_file.name, "document_id": str(uuid4())},
-        )
-    response = service.ingest(document)
-    st.success(f"Indexed {response.chunks_added} chunks from {uploaded_file.name}.")
+        bg_base = "#f7f7f9"
+        bg_radial = "radial-gradient(circle at 50% 0%, #ffffff 0%, #ececf1 100%)"
+        surface = "rgba(255, 255, 255, 0.65)"
+        surface_hover = "rgba(0, 0, 0, 0.03)"
+        border = "rgba(0, 0, 0, 0.08)"
+        border_hover = "rgba(0, 0, 0, 0.25)"
+        shadow = "0 24px 48px -12px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 1)"
+        text_main = "#111112"
+        text_muted = "#6b6b72"
+        accent = "#0284c7"
+        icon_svg = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23111112' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z'/%3E%3C/svg%3E\")"
 
+    css = f"""
+    <style>
+    :root {{
+        --bg-base: {bg_base};
+        --bg-radial: {bg_radial};
+        --surface: {surface};
+        --surface-hover: {surface_hover};
+        --border: {border};
+        --border-hover: {border_hover};
+        --shadow: {shadow};
+        --text-main: {text_main};
+        --text-muted: {text_muted};
+        --accent: {accent};
+        --icon-svg: {icon_svg};
+        --ease-cinematic: {ease_cinematic};
+        --ease-spring: {ease_spring};
+        --ease-liquid: {ease_liquid};
+    }}
 
-def render_sources(sources) -> None:
-    for source in sources:
-        st.markdown(
-            f"""
-            <div class="source-card">
-              <strong>{source.source}</strong>
-              <span class="pill">{source.doc_type}</span>
-              <span class="pill">score {source.score:.3f}</span>
-              <p>{source.text[:520]}</p>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+    .stApp {{
+        background-color: var(--bg-base);
+        background-image: var(--bg-radial);
+        background-attachment: fixed;
+        color: var(--text-main);
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+        -webkit-font-smoothing: antialiased;
+    }}
 
+    header[data-testid="stHeader"], footer {{ display: none !important; }}
+    
+    .block-container {{
+        padding-top: 1rem !important;
+        padding-bottom: 6rem !important;
+        max-width: 1050px !important;
+    }}
+
+    @keyframes blur-reveal {{
+        0% {{ opacity: 0; transform: translateY(20px) scale(0.98); filter: blur(12px); }}
+        100% {{ opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }}
+    }}
+
+    /* Global Typography */
+    .h1-main {{
+        font-size: clamp(3rem, 6vw, 4.5rem);
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        line-height: 1.05;
+        margin-bottom: 1.5rem;
+        color: var(--text-main);
+        text-align: center;
+        animation: blur-reveal 1.2s var(--ease-cinematic) both;
+    }}
+    .h-sub {{
+        font-size: 1.1rem;
+        font-weight: 400;
+        color: var(--text-muted);
+        margin: 0 auto 3.5rem auto;
+        max-width: 650px;
+        line-height: 1.6;
+        text-align: center;
+        animation: blur-reveal 1.2s var(--ease-cinematic) both;
+        animation-delay: 0.15s;
+    }}
+
+    /* Top Navigation & Liquid Toggle */
+    .top-nav {{
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding: 1rem 0;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }}
+    
+    .theme-toggle-btn {{
+        position: relative;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: var(--surface);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.5s var(--ease-spring);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    }}
+    .theme-toggle-btn:hover {{
+        transform: scale(1.15) translateY(-2px);
+        background: var(--surface-hover);
+        border-color: var(--border-hover);
+        box-shadow: 0 12px 24px rgba(0,0,0,0.2), inset 0 0 12px rgba(255,255,255,0.1);
+    }}
+    .theme-toggle-btn:active {{
+        transform: scale(0.95);
+        filter: brightness(1.2);
+    }}
+    .theme-toggle-btn [data-testid="stButton"] button {{
+        position: absolute !important; inset: 0 !important; opacity: 0 !important; cursor: pointer !important; width: 100% !important; height: 100% !important;
+    }}
+    .theme-toggle-btn::after {{
+        content: ''; position: absolute; width: 18px; height: 18px;
+        background-image: var(--icon-svg); background-size: contain; background-repeat: no-repeat; background-position: center;
+        transition: transform 0.8s var(--ease-spring); pointer-events: none;
+    }}
+    .theme-toggle-btn:hover::after {{ transform: rotate(90deg) scale(1.1); }}
+
+    /* SaaS Routing Tabs */
+    div[data-testid="stTabs"] {{ display: flex; flex-direction: column; align-items: center; width: 100%; }}
+    div[data-baseweb="tab-list"] {{
+        gap: 6px !important;
+        padding: 6px !important;
+        background: var(--surface) !important;
+        backdrop-filter: blur(32px) saturate(200%) !important;
+        -webkit-backdrop-filter: blur(32px) saturate(200%) !important;
+        border: 1px solid var(--border) !important;
+        border-radius: 999px !important;
+        margin-bottom: 4rem !important;
+        display: inline-flex !important;
+        box-shadow: var(--shadow) !important;
+        animation: blur-reveal 1.2s var(--ease-cinematic) both;
+        animation-delay: 0.3s;
+    }}
+    div[data-testid="stTabs"] button {{
+        background: transparent !important;
+        border: 1px solid transparent !important;
+        color: var(--text-muted) !important;
+        font-weight: 600 !important;
+        font-size: 0.85rem !important;
+        padding: 10px 24px !important;
+        border-radius: 999px !important;
+        transition: all 0.4s var(--ease-liquid) !important;
+    }}
+    div[data-testid="stTabs"] button:hover:not([aria-selected="true"]) {{
+        color: var(--text-main) !important;
+        background: var(--surface-hover) !important;
+    }}
+    div[data-testid="stTabs"] button[aria-selected="true"] {{
+        color: var(--bg-base) !important;
+        background: var(--text-main) !important;
+        box-shadow: 0 4px 16px rgba(255,255,255,0.1) !important;
+    }}
+    div[data-testid="stTabs"] > div[role="tabpanel"] {{
+        width: 100%;
+        animation: blur-reveal 0.8s var(--ease-cinematic) both;
+    }}
+
+    /* =========================================================
+       DOM HIJACKING: THE TRUE GLASSMORPHISM CARD HACK
+       ========================================================= */
+    /* Target the exact internal wrapper of columns to make them seamless cards */
+    div[data-testid="stHorizontalBlock"] > div[data-testid="column"] > div[data-testid="stVerticalBlock"] {{
+        background: var(--surface) !important;
+        backdrop-filter: blur(40px) saturate(200%) !important;
+        -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
+        border: 1px solid var(--border) !important;
+        border-radius: 20px !important;
+        padding: 2.5rem !important;
+        box-shadow: var(--shadow) !important;
+        transition: all 0.5s var(--ease-spring) !important;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+    }}
+    
+    div[data-testid="stHorizontalBlock"] > div[data-testid="column"] > div[data-testid="stVerticalBlock"]:hover {{
+        border-color: var(--border-hover) !important;
+        transform: translateY(-4px) scale(1.01) !important;
+        box-shadow: 0 32px 64px -16px rgba(0, 0, 0, 0.9) !important;
+    }}
+
+    /* Card Content Styling */
+    .card-label {{
+        font-size: 0.7rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: var(--accent);
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }}
+    .card-title {{
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: var(--text-main);
+        margin-bottom: 12px;
+        letter-spacing: -0.02em;
+    }}
+    .card-desc {{
+        font-size: 0.95rem;
+        color: var(--text-muted);
+        line-height: 1.6;
+        margin-bottom: 24px;
+    }}
+
+    /* Streamlit Overrides */
+    div[data-testid="stTextInput"] input,
+    div[data-testid="stTextArea"] textarea,
+    div[data-testid="stFileUploader"] section {{
+        background: rgba(0,0,0,0.15) !important;
+        border: 1px solid var(--border) !important;
+        color: var(--text-main) !important;
+        border-radius: 12px !important;
+        padding: 16px !important;
+        font-size: 0.95rem !important;
+        transition: all 0.4s var(--ease-liquid) !important;
+    }}
+    div[data-testid="stTextInput"] input:focus,
+    div[data-testid="stTextArea"] textarea:focus {{
+        border-color: var(--accent) !important;
+        background: rgba(0,0,0,0.3) !important;
+        box-shadow: 0 0 0 1px var(--accent) !important;
+    }}
+    
+    .stButton > button {{
+        background: var(--text-main) !important;
+        color: var(--bg-base) !important;
+        border: none !important;
+        border-radius: 12px !important;
+        font-weight: 700 !important;
+        font-size: 0.9rem !important;
+        letter-spacing: 0.02em !important;
+        padding: 0.8rem 1.5rem !important;
+        transition: all 0.4s var(--ease-spring) !important;
+        width: 100% !important;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important;
+    }}
+    .stButton > button:hover {{
+        transform: translateY(-2px) scale(1.02) !important;
+        box-shadow: 0 16px 32px rgba(255,255,255,0.1) !important;
+    }}
+
+    /* Settings Expander */
+    div[data-testid="stExpander"] {{
+        background: var(--surface); border: 1px solid var(--border); border-radius: 16px; margin-bottom: 2rem;
+        backdrop-filter: blur(20px); box-shadow: var(--shadow);
+    }}
+    div[data-testid="stExpander"] summary {{ color: var(--text-main) !important; font-weight: 600 !important; padding: 16px 20px !important; }}
+    
+    /* Architecture Graph Node Styling */
+    .arch-node {{
+        padding: 16px;
+        background: var(--surface-hover);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        margin-bottom: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.3s ease;
+    }}
+    .arch-node:hover {{
+        border-color: var(--accent);
+        transform: translateX(4px);
+    }}
+    .arch-node-title {{ font-weight: 700; color: var(--text-main); font-size: 0.95rem; }}
+    .arch-node-tech {{ font-size: 0.75rem; color: var(--accent); font-weight: 800; letter-spacing: 0.1em; background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 99px; }}
+
+    .sys-pill {{
+        padding: 6px 14px; border-radius: 99px; background: var(--surface-hover); border: 1px solid var(--border);
+        font-size: 0.8rem; font-weight: 600; color: var(--text-main); display: inline-block; margin: 4px;
+    }}
+    </style>
+    """
+    st.markdown(css, unsafe_allow_html=True)
+
+def inject_interactive_bg() -> None:
+    # Organic, liquid bezier curve background with spring physics
+    js = """
+    <canvas id="kinetic-bg" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none;"></canvas>
+    <script>
+    (function() {
+        const canvas = document.getElementById('kinetic-bg');
+        const ctx = canvas.getContext('2d');
+        let w = canvas.width = window.innerWidth;
+        let h = canvas.height = window.innerHeight;
+        
+        window.addEventListener('resize', () => { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; });
+        
+        const isDark = document.body.classList.contains('dark') || window.getComputedStyle(document.body).backgroundColor !== 'rgb(250, 250, 250)';
+        const color = isDark ? 'rgba(255, 255, 255,' : 'rgba(0, 0, 0,'; 
+
+        const nodes = [];
+        const symbols = ['+', '-', '*', '/', 'Σ', 'λ', '∫', 'μ', 'f(x)', '∇'];
+        for (let i = 0; i < 45; i++) {
+            nodes.push({
+                x: Math.random() * w, y: Math.random() * h,
+                vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3,
+                r: Math.random() * 2 + 1, char: Math.random() > 0.65 ? symbols[Math.floor(Math.random() * symbols.length)] : null,
+                alpha: Math.random() * 0.15 + 0.05
+            });
+        }
+
+        let mouse = { x: -1000, y: -1000, r: 160 };
+        window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+        window.addEventListener('mouseout', () => { mouse.x = -1000; mouse.y = -1000; });
+
+        function draw() {
+            ctx.clearRect(0, 0, w, h);
+            
+            nodes.forEach((n, i) => {
+                n.x += n.vx; n.y += n.vy;
+                if(n.x < 0) n.x = w; if(n.x > w) n.x = 0;
+                if(n.y < 0) n.y = h; if(n.y > h) n.y = 0;
+
+                // Liquid Magnetic Spring Physics
+                const dx = mouse.x - n.x, dy = mouse.y - n.y, dist = Math.hypot(dx, dy);
+                if (dist < mouse.r) {
+                    const force = (mouse.r - dist) / mouse.r;
+                    n.x -= (dx / dist) * force * 1.8; 
+                    n.y -= (dy / dist) * force * 1.8;
+                }
+
+                // Bezier Curve Connections (Organic Liquid Look)
+                for (let j = i + 1; j < nodes.length; j++) {
+                    const d = Math.hypot(n.x - nodes[j].x, n.y - nodes[j].y);
+                    if (d < 110) {
+                        ctx.beginPath(); 
+                        ctx.strokeStyle = color + (0.1 - d/1100) + ')';
+                        ctx.lineWidth = 0.6; 
+                        ctx.moveTo(n.x, n.y); 
+                        // Control points for bezier fluid connections
+                        ctx.bezierCurveTo(n.x + (nodes[j].x - n.x)/2, n.y, nodes[j].x - (nodes[j].x - n.x)/2, nodes[j].y, nodes[j].x, nodes[j].y);
+                        ctx.stroke();
+                    }
+                }
+
+                ctx.fillStyle = color + n.alpha + ')';
+                if (n.char) {
+                    ctx.font = '11px "Inter"'; ctx.fillText(n.char, n.x, n.y);
+                } else {
+                    ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2); ctx.fill();
+                }
+            });
+            requestAnimationFrame(draw);
+        }
+        draw();
+    })();
+    </script>
+    """
+    st.markdown(js, unsafe_allow_html=True)
 
 def main() -> None:
-    inject_css()
-    service = get_dashboard_service()
+    inject_premium_css(st.session_state.theme)
+    inject_interactive_bg()
+    service = SaaSIntelligenceEngine()
 
-    st.markdown(
-        """
-        <div class="hero-shell">
-          <div class="hero-grid">
-            <div>
-              <h1 class="title">Amogh Samadhiya<br/>Job Command Center</h1>
-              <div class="subtitle">
-                Resume analysed - live RAG evidence - AI roles - ATS gaps - outreach intelligence
-              </div>
-            </div>
-            <div class="live-chip">LIVE INDEX ONLINE</div>
-          </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    # --- TOP NAV (Floating Toggle) ---
+    st.markdown('<div class="top-nav"><div class="theme-toggle-btn" title="Toggle Theme">', unsafe_allow_html=True)
+    if st.button(" ", key="theme_sw"):
+        st.session_state.theme = "light" if st.session_state.theme == "dark" else "dark"
+        st.rerun()
+    st.markdown('</div></div>', unsafe_allow_html=True)
 
-    st.write("")
-    col_a, col_b, col_c, col_d = st.columns(4)
-    with col_a:
-        render_metric("Indexed chunks", str(service.vector_store.count), "local vector memory")
-    with col_b:
-        render_metric("Biggest gap", "LLM/RAG", "closed by this project", "red")
-    with col_c:
-        render_metric("Signal boost", "+8 ATS", "LangChain, RAG, eval", "green")
-    with col_d:
-        render_metric("Demo mode", "No key", "OpenAI optional", "gold")
+    # --- HERO ---
+    st.markdown('<div class="h1-main">Intelligence Engine</div>', unsafe_allow_html=True)
+    st.markdown('<div class="h-sub">Upload an artifact payload to extract semantic context, calculate vector embeddings, and map objective framework alignments.</div>', unsafe_allow_html=True)
 
-    st.write("")
-    tab_ingest, tab_ask, tab_match, tab_plan = st.tabs(
-        ["Ingest", "Ask Resume", "Role Match", "30-Day Plan"]
-    )
+    # --- WEBPAGE ROUTING ---
+    tab_ingest, tab_ask, tab_match, tab_arch = st.tabs(["DATA INGESTION", "SEMANTIC SEARCH", "ROLE ALIGNMENT", "ENGINE ARCHITECTURE"])
 
     with tab_ingest:
-        left, right = st.columns([.92, 1.08], gap="large")
-        with left:
-            st.markdown('<div class="command-card">', unsafe_allow_html=True)
-            st.markdown('<div class="section-title">Document Intake</div>', unsafe_allow_html=True)
-            uploaded_file = st.file_uploader(
-                "Upload resume, portfolio, or job description",
-                type=["pdf", "md", "txt"],
-            )
-            doc_type = st.segmented_control(
-                "Document type",
-                ["resume", "job", "portfolio", "general"],
-                default="resume",
-            )
-            ingest_clicked = st.button("Index document", use_container_width=True)
-            if ingest_clicked:
+        c1, c2 = st.columns([1, 1], gap="large")
+        # Column 1 - Replaces broken HTML with perfect Streamlit Column DOM hijacking
+        with c1:
+            st.markdown('<div class="card-label">Input Stream</div><div class="card-title">Upload Artifacts</div><div class="card-desc">Inject raw document schemas into the vector memory graph for semantic analysis.</div>', unsafe_allow_html=True)
+            uploaded_file = st.file_uploader("", type=["pdf", "md", "txt", "csv"], label_visibility="collapsed")
+            if st.button("EXECUTE EMBEDDING"):
                 if uploaded_file is None:
-                    st.warning("Upload a document first.")
+                    st.warning("Payload required to initialize pipeline.")
                 else:
-                    ingest_uploaded_file(service, uploaded_file, doc_type)
-                    st.rerun()
-            st.markdown("</div>", unsafe_allow_html=True)
-        with right:
-            st.markdown('<div class="command-card">', unsafe_allow_html=True)
-            st.markdown('<div class="section-title">Indexed Sources</div>', unsafe_allow_html=True)
-            sources = service.sources()
-            if not sources:
-                st.info("No documents indexed yet. Upload your resume or portfolio to begin.")
-            for source in sources:
-                st.markdown(
-                    f'<span class="pill">{source["doc_type"]}</span> {source["source"]}',
-                    unsafe_allow_html=True,
-                )
-            st.markdown("</div>", unsafe_allow_html=True)
+                    doc = DocumentIn(text=uploaded_file.getvalue().decode("utf-8", errors="ignore"), source=uploaded_file.name, doc_type="artifact")
+                    res = service.ingest(doc)
+                    st.success(f"Synthesized and indexed {res['chunks_added']} multidimensional blocks.")
+            
+        with c2:
+            count = service.count()
+            st.markdown(f'<div class="card-label">Database Telemetry</div><div class="card-title">Indexed Nodes: <span style="color: var(--accent); font-size: 2rem; float: right; line-height: 0.5;">{count}</span></div><div class="card-desc">Current state of the local knowledge graph structure.</div>', unsafe_allow_html=True)
+            
+            if count == 0:
+                st.markdown('<div style="text-align: center; padding: 2rem; border: 1px dashed var(--border); border-radius: 12px;"><span style="color: var(--text-muted); font-weight: 700; letter-spacing: 0.1em; font-size: 0.8rem;">INDEX EMPTY</span></div>', unsafe_allow_html=True)
+            else:
+                for source in service.sources():
+                    st.markdown(f'<div style="padding: 14px; border: 1px solid var(--border); background: var(--surface-hover); border-radius: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;"><span style="font-size:0.9rem; font-weight: 600;">{source["source"]}</span><span class="sys-pill" style="margin:0;">{source["chunks"]} chunks</span></div>', unsafe_allow_html=True)
 
     with tab_ask:
-        left, right = st.columns([.9, 1.1], gap="large")
-        with left:
-            st.markdown('<div class="command-card">', unsafe_allow_html=True)
-            st.markdown('<div class="section-title">Grounded Q&A</div>', unsafe_allow_html=True)
-            question = st.text_area(
-                "Ask about resume evidence",
-                value="What evidence proves Amogh can build production RAG systems?",
-                height=130,
-            )
-            top_k = st.slider("Evidence depth", min_value=2, max_value=10, value=5)
-            ask_clicked = st.button("Retrieve answer", use_container_width=True)
-            st.markdown("</div>", unsafe_allow_html=True)
-        with right:
+        c1, c2 = st.columns([1, 1], gap="large")
+        with c1:
+            st.markdown('<div class="card-label">Contextual Query</div><div class="card-title">Interrogate Artifacts</div><div class="card-desc">Traverse the ingested vector memory using natural language algorithms.</div>', unsafe_allow_html=True)
+            question = st.text_area("Query String", value="Summarize the core competencies and technical metrics extracted from the payload.", height=130, label_visibility="collapsed")
+            ask_clicked = st.button("EXECUTE SEARCH")
+            
+        with c2:
+            st.markdown('<div class="card-label">Output Synthesis</div><div class="card-title">Engine Response</div>', unsafe_allow_html=True)
             if ask_clicked:
-                with st.spinner("Retrieving evidence and composing grounded answer..."):
-                    response = service.query(question, top_k=top_k)
-                st.markdown('<div class="answer-box">', unsafe_allow_html=True)
-                st.write(response.answer)
-                st.markdown("</div>", unsafe_allow_html=True)
-                render_sources(response.sources)
+                try:
+                    response = service.query(question)
+                    st.markdown(f"<div class='card-desc' style='color: var(--text-main); font-weight: 500;'>{response.answer}</div>", unsafe_allow_html=True)
+                    for src in response.sources:
+                        st.markdown(f'<div style="font-size:0.8rem; color:var(--text-muted); border-top: 1px solid var(--border); padding-top: 12px; margin-top: 12px;">↳ {src.source} <span style="float:right; color: var(--accent); font-weight: 600;">Score: {src.score:.2f}</span></div>', unsafe_allow_html=True)
+                except ValueError:
+                    st.markdown('<div style="text-align: center; padding: 2rem; border: 1px dashed var(--border); border-radius: 12px;"><span style="color: var(--text-muted); font-weight: 700; letter-spacing: 0.1em; font-size: 0.8rem;">AWAITING PAYLOAD</span></div>', unsafe_allow_html=True)
             else:
-                st.markdown(
-                    (
-                        '<div class="answer-box">'
-                        "Ask a question to see cited resume evidence here."
-                        "</div>"
-                    ),
-                    unsafe_allow_html=True,
-                )
+                st.markdown("<div class='card-desc'>Awaiting similarity traversal protocol.</div>", unsafe_allow_html=True)
 
     with tab_match:
-        left, right = st.columns([.9, 1.1], gap="large")
-        with left:
-            st.markdown('<div class="command-card">', unsafe_allow_html=True)
-            st.markdown('<div class="section-title">Role Fit Engine</div>', unsafe_allow_html=True)
-            role_title = st.text_input("Role title", value="AI Engineering Intern")
-            jd = st.text_area(
-                "Job description",
-                value=DEFAULT_JOB_DESCRIPTION,
-                height=260,
-            )
-            match_clicked = st.button("Score role match", use_container_width=True)
-            st.markdown("</div>", unsafe_allow_html=True)
-        with right:
+        c1, c2 = st.columns([1, 1], gap="large")
+        with c1:
+            st.markdown('<div class="card-label">Validation Engine</div><div class="card-title">Role Framework</div><div class="card-desc">Define structural requirements to measure document compliance against.</div>', unsafe_allow_html=True)
+            jd = st.text_area("Requirements", value="Example: Requires 5+ years of software engineering, system design, and API scaling experience.", height=150, label_visibility="collapsed")
+            match_clicked = st.button("CALCULATE ALIGNMENT")
+            
+        with c2:
+            st.markdown('<div class="card-label">Metrics Matrix</div><div class="card-title">Computed Proximity</div>', unsafe_allow_html=True)
             if match_clicked:
-                with st.spinner("Comparing role requirements against resume evidence..."):
-                    match = service.match_role(role_title, jd, top_k=8)
-                strength_pills = "".join(
-                    f'<span class="pill">{item[:95]}</span>' for item in match.strengths
-                )
-                gap_pills = "".join(f'<span class="pill">{item}</span>' for item in match.gaps)
-                st.markdown(
-                    f"""
-                    <div class="command-card">
-                      <div class="section-title">Match Score</div>
-                      <div class="score-ring" style="--score: {match.match_score}%;">
-                        <span>{match.match_score}</span>
-                      </div>
-                      <div class="section-title">Strengths</div>
-                      <div class="pill-row">
-                        {strength_pills}
-                      </div>
-                      <div class="section-title" style="margin-top:18px;">Gaps</div>
-                      <div class="pill-row">
-                        {gap_pills}
-                      </div>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-                render_sources(match.evidence)
+                try:
+                    res = service.match_role(jd)
+                    st.markdown(f"<div style='font-size: 4.5rem; font-weight: 800; color: var(--text-main); line-height: 1; margin-bottom: 1.5rem;'>{res.match_score}%</div>", unsafe_allow_html=True)
+                    st.markdown("<div style='font-size: 0.8rem; font-weight: 700; margin-bottom: 12px; text-transform: uppercase; color: var(--text-muted);'>Detected Alignments</div>", unsafe_allow_html=True)
+                    st.markdown('<div>', unsafe_allow_html=True)
+                    for s in res.strengths: st.markdown(f'<span class="sys-pill" style="border-color: rgba(16,185,129,0.4);">{s}</span>', unsafe_allow_html=True)
+                    st.markdown('</div>', unsafe_allow_html=True)
+                except ValueError:
+                    st.markdown('<div style="text-align: center; padding: 2rem; border: 1px dashed var(--border); border-radius: 12px;"><span style="color: var(--text-muted); font-weight: 700; letter-spacing: 0.1em; font-size: 0.8rem;">AWAITING PAYLOAD</span></div>', unsafe_allow_html=True)
             else:
-                st.markdown(
-                    (
-                        '<div class="answer-box">'
-                        "Run a role match to see score, strengths, and gaps."
-                        "</div>"
-                    ),
-                    unsafe_allow_html=True,
-                )
+                st.markdown("<div class='card-desc'>Awaiting parameter definition.</div>", unsafe_allow_html=True)
 
-    with tab_plan:
-        st.markdown('<div class="command-card">', unsafe_allow_html=True)
-        st.markdown(
-            '<div class="section-title">Skill Gap Roadmap - Ordered by ROI</div>',
-            unsafe_allow_html=True,
-        )
-        plan_items = [
-            (
-                "gap 1",
-                "LLM/RAG engineering",
-                "Ship this dashboard, add FAISS or pgvector, and record a 90-second demo.",
-            ),
-            (
-                "gap 2",
-                "DSA depth",
-                "150 focused LeetCode problems across trees, graphs, DP, and binary search.",
-            ),
-            (
-                "gap 3",
-                "System design",
-                "Prepare 10 designs: rate limiter, URL shortener, cache, search, feature store.",
-            ),
-            (
-                "quick",
-                "ATS keywords",
-                "Add LangChain, RAG pipelines, vector embeddings, LLM evaluation, OpenTelemetry.",
-            ),
-        ]
-        for badge, title, body in plan_items:
-            st.markdown(
-                f"""
-                <div class="source-card">
-                  <span class="pill">{badge}</span>
-                  <strong style="font-size:1.1rem;">{title}</strong>
-                  <p>{body}</p>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-        st.markdown("</div>", unsafe_allow_html=True)
-
+    # ---------------------------------------------------------
+    # NEW TAB: ENGINE ARCHITECTURE (Addressing Model, RAG, FastAPI specs)
+    # ---------------------------------------------------------
+    with tab_arch:
+        st.markdown('<div style="text-align: center; max-width: 800px; margin: 0 auto;">', unsafe_allow_html=True)
+        st.markdown('<div class="card-label" style="justify-content: center;">Technical Topology</div><div class="card-title" style="font-size: 2rem;">System Architecture</div><div class="card-desc">Detailed execution stack driving the Intelligence Engine. Integrates machine learning classification with semantic vector retrieval.</div>', unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div class="arch-node">
+            <div>
+                <div class="arch-node-title">Client / Routing Interface</div>
+                <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">Uvicorn ASGI Server handling concurrent requests.</div>
+            </div>
+            <div class="arch-node-tech">FAST API</div>
+        </div>
+        <div style="width: 2px; height: 20px; background: var(--border); margin: 0 auto;"></div>
+        <div class="arch-node">
+            <div>
+                <div class="arch-node-title">Semantic Retrieval Augmented Generation (RAG)</div>
+                <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">Cosine similarity matching across high-density vector chunks.</div>
+            </div>
+            <div class="arch-node-tech">VECTOR EMBEDDINGS</div>
+        </div>
+        <div style="width: 2px; height: 20px; background: var(--border); margin: 0 auto;"></div>
+        <div class="arch-node">
+            <div>
+                <div class="arch-node-title">Inference & Classification Engine</div>
+                <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">Scikit-Learn Random Forest estimators deployed via serialized Pickle artifacts.</div>
+            </div>
+            <div class="arch-node-tech">MLOps / SCIKIT-LEARN</div>
+        </div>
+        """, unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()

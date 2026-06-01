@@ -1,4 +1,4 @@
-#  RAG Command Center
+# Resume RAG Command Center
 
 A production-style RAG project for resume intelligence, role matching, and interview preparation. It combines a FastAPI backend, a polished Streamlit dashboard, document ingestion, vector retrieval, grounded answers, and role-fit analysis into one portfolio-ready system.
 
@@ -137,6 +137,12 @@ ruff check src tests streamlit_app.py
 pytest
 python scripts/demo.py
 ```
+
+## Resume Bullets
+
+- Built a production-style RAG platform with FastAPI, Streamlit, typed schemas, document ingestion, chunking, vector retrieval, grounded generation, and cited evidence.
+- Implemented resume-to-job matching that scores role fit, extracts evidence-backed strengths, and surfaces keyword gaps for ATS and recruiter screens.
+- Added deterministic local embeddings for offline demos plus optional OpenAI integration, Docker support, CI, CLI workflows, retrieval evaluation, and automated tests.
 
 ## Upgrade Path
 

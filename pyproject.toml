@@ -38,8 +38,14 @@ pythonpath = ["src"]
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-[tool.poetry]
-package-mode = false
 
+
+[tool.poetry]
+name = "resume-rag-command-center"
+version = "0.1.0"
+description = ""
+authors = ["Amogh"]
+
+package-mode = false
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]

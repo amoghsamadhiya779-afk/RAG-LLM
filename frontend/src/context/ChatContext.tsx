@@ -91,6 +91,11 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
 
   // Load from local storage
   useEffect(() => {
+    // Collapse sidebar by default on mobile screens
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      setIsSidebarExpanded(false);
+    }
+
     const savedTheme = localStorage.getItem("chat-ui-theme") as "dark" | "light" | null;
     if (savedTheme) {
       setThemeState(savedTheme);

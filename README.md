@@ -1,152 +1,178 @@
-# Resume RAG Command Center
+# Aether Resume Intelligence: Full-Stack RAG System
 
-A production-style RAG project for resume intelligence, role matching, and interview preparation. It combines a FastAPI backend, a polished Streamlit dashboard, document ingestion, vector retrieval, grounded answers, and role-fit analysis into one portfolio-ready system.
+Aether Resume Intelligence is a production-grade Retrieval-Augmented Generation (RAG) platform designed for resume processing, job matching, and interview evaluation. The system consists of a Python FastAPI backend that serves vector ingestion and query endpoints, and a high-fidelity Next.js 15 App Router frontend that provides a playground interface for managing hyperparameters and conversation logs.
 
-The project is designed to demonstrate real LLM infrastructure skills: clean API boundaries, retrieval quality, source-grounded generation, testability, local-first development, and an upgrade path to hosted embeddings or managed vector databases.
+The architecture separates concerns across API boundaries to demonstrate scalable retrieval quality, local-first evaluation, and deployment capability to cloud and edge servers.
 
-## Highlights
+---
 
-- FastAPI service with typed Pydantic schemas.
-- Streamlit command-center dashboard for upload, retrieval, role matching, and skill planning.
-- PDF, Markdown, and text ingestion.
-- Configurable chunking with overlap.
-- Persistent local vector store for offline demos and CI.
-- Deterministic local embeddings by default.
-- Optional OpenAI embeddings and chat generation through environment variables.
-- Grounded answers with source snippets and similarity scores.
-- Resume-to-job matching with score, strengths, gaps, and evidence.
-- Retrieval evaluation utility, Docker assets, CI workflow, and automated tests.
+## Architecture and System Flow
 
-## Architecture
+The application handles document ingestion, chunking, and semantic search queries via a deterministic pipeline:
 
-```mermaid
-flowchart LR
-    A["Resume / Portfolio / Job Description"] --> B["Loader"]
-    B --> C["Chunker"]
-    C --> D["Embedding Provider"]
-    D --> E["Vector Store"]
-    F["Question or Target Role"] --> D
-    D --> G["Retriever"]
-    E --> G
-    G --> H["Answer Generator"]
-    H --> I["Answer, Score, Sources"]
+```
+[Resume / Job Description] ---> [Document Loader] ---> [Text Chunker] ---> [Vector Index]
+                                                                                |
+[User Matching Query]       ---> [Embedding Engine] ---> [Semantic Matcher] <---+
+                                                                   |
+                                                                   v
+                                                        [Grounded RAG Answer]
 ```
 
-## Quick Start
+1. **Document Ingestion**: Parses PDFs, Markdown, and plain text files.
+2. **Chunking Engine**: Splits documents into configurable sizes with overlap offsets.
+3. **Local Vector Index**: Stores high-dimensional vector representations locally for low latency.
+4. **Retrieval Grounding**: Matches user Q&A queries against stored documents, outputting grounded answers accompanied by citations and similarity scores.
 
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install -e ".[dev]"
-copy .env.example .env
-```
+---
 
-Run the dashboard:
+## Technical Stack
 
-```powershell
-streamlit run streamlit_app.py
-```
+### Backend
+- **Core Runtime**: Python 3.11
+- **API Framework**: FastAPI with typed Pydantic validation schemas
+- **Inference Server**: Uvicorn
+- **Evaluator Utilities**: Local indexing, similarity ranking, evaluation tests
 
-Open [http://127.0.0.1:8501](http://127.0.0.1:8501), upload a resume or portfolio file, then use the Q&A and role-match tabs.
+### Frontend
+- **Framework**: Next.js 15 (App Router Architecture)
+- **Language**: TypeScript (Strict type checks)
+- **Styling**: Tailwind CSS v4 featuring glassmorphism layers
+- **Animations**: Framer Motion spring physics (target 60 FPS)
+- **Background System**: HTML Canvas cinematic starfield with parallax mouse tracking
+- **Cursor System**: Custom spring-dampened inertial cursor matching theme states
 
-Run the API:
+---
 
-```powershell
-uvicorn resume_rag.api:app --reload
-```
+## Local Development Setup
 
-Open [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
+### Backend API Setup
 
-## CLI
+1. Create a Python virtual environment:
+   ```powershell
+   python -m venv .venv
+   ```
 
-Index your own files:
+2. Activate the virtual environment:
+   ```powershell
+   .\.venv\Scripts\Activate.ps1
+   ```
 
-```powershell
-resume-rag ingest path\to\resume.pdf --type resume
-resume-rag ingest path\to\portfolio.md --type portfolio
-resume-rag ingest path\to\job-description.txt --type job
-```
+3. Install backend dependencies in developer mode:
+   ```powershell
+   python -m pip install -e ".[dev]"
+   ```
 
-Ask a grounded question:
+4. Initialize environment configuration:
+   ```powershell
+   copy .env.example .env
+   ```
 
-```powershell
-resume-rag query "What evidence proves this candidate can build RAG systems?"
-```
+5. Run the FastAPI development server:
+   ```powershell
+   uvicorn resume_rag.api:app --reload
+   ```
+   The backend API document explorer will be accessible at `http://127.0.0.1:8000/docs`.
 
-Score a role:
+---
 
-```powershell
-resume-rag match "AI Engineering Intern" path\to\job-description.txt
-```
+### Frontend Setup
 
-## API Examples
+A portable Node.js environment is downloaded locally to `.bin/node` to isolate development.
 
-Ingest text:
+1. Navigate to the frontend workspace folder:
+   ```powershell
+   cd frontend
+   ```
 
-```powershell
-Invoke-RestMethod `
-  -Method Post `
-  -Uri http://127.0.0.1:8000/documents `
-  -ContentType "application/json" `
-  -Body '{
+2. Start the development server with Turbopack enabled:
+   ```powershell
+   & '..\.bin\node\node.exe' 'node_modules\next\dist\bin\next' dev --turbopack
+   ```
+   The interactive interface will be accessible at `http://localhost:3000`.
+
+---
+
+## Command Line Interface (CLI) Utilities
+
+You can perform administrative indexing and queries directly using the Python CLI:
+
+1. Index a resume or job description file:
+   ```powershell
+   resume-rag ingest path\to\resume.pdf --type resume
+   resume-rag ingest path\to\job-description.txt --type job
+   ```
+
+2. Execute a grounded query:
+   ```powershell
+   resume-rag query "What evidence proves this candidate has experience in RAG systems?"
+   ```
+
+3. Match a target job role against index credentials:
+   ```powershell
+   resume-rag match "AI Engineer" path\to\job-description.txt
+   ```
+
+---
+
+## API Integration Specifications
+
+### Ingest Document
+- **Endpoint**: `POST http://127.0.0.1:8000/documents`
+- **Payload**:
+  ```json
+  {
     "source": "resume.pdf",
     "doc_type": "resume",
-    "text": "Built a FastAPI RAG pipeline with embeddings, retrieval, and cited answers."
-  }'
-```
+    "text": "Built a FastAPI RAG pipeline with vector retrieval and grounded citations."
+  }
+  ```
 
-Ask a question:
+### Execute Grounded Query
+- **Endpoint**: `POST http://127.0.0.1:8000/query`
+- **Payload**:
+  ```json
+  {
+    "question": "What RAG experience is in the resume?",
+    "top_k": 4
+  }
+  ```
 
+### Role Fit Matching
+- **Endpoint**: `POST http://127.0.0.1:8000/match`
+- **Payload**:
+  ```json
+  {
+    "role_title": "AI Engineer",
+    "job_description": "Requires Python, FastAPI, RAG, and Docker experience."
+  }
+  ```
+
+---
+
+## Production Deployment Architecture
+
+To host a production release of the full-stack system:
+
+### 1. Backend: Hugging Face Spaces (Docker SDK)
+The backend uses a Docker configuration.
+- The project Dockerfile is configured to run Uvicorn on port `7860`, matching Hugging Face specifications.
+- Create a Space using the Docker SDK template.
+- Push the repository files (`src/`, `pyproject.toml`, `Dockerfile`) to the Space.
+- Add environment secrets such as `RESUME_RAG_OPENAI_API_KEY` under settings.
+
+### 2. Frontend: Vercel
+- Import the `frontend` directory repository on Vercel.
+- Configure the environment variable:
+  `NEXT_PUBLIC_API_URL` set to your public Hugging Face Space URL.
+- Deploy. Vercel compiles the static pages and serves the web UI at a global edge CDN.
+
+---
+
+## Testing and Linting
+
+Validate your local backend changes prior to committing:
 ```powershell
-Invoke-RestMethod `
-  -Method Post `
-  -Uri http://127.0.0.1:8000/query `
-  -ContentType "application/json" `
-  -Body '{"question": "What RAG evidence is in this resume?", "top_k": 4}'
-```
-
-Match a role:
-
-```powershell
-Invoke-RestMethod `
-  -Method Post `
-  -Uri http://127.0.0.1:8000/match `
-  -ContentType "application/json" `
-  -Body '{
-    "role_title": "AI Engineering Intern",
-    "job_description": "Python, FastAPI, RAG, embeddings, semantic search, Docker, testing."
-  }'
-```
-
-## OpenAI Mode
-
-The project runs locally by default. To use OpenAI-backed embeddings and generation:
-
-```powershell
-$env:RESUME_RAG_EMBEDDING_PROVIDER="openai"
-$env:RESUME_RAG_LLM_PROVIDER="openai"
-$env:RESUME_RAG_OPENAI_API_KEY="sk-..."
-```
-
-Re-ingest documents after changing embedding providers so stored vectors use the correct dimensions.
-
-## Quality Checks
-
-```powershell
-ruff check src tests streamlit_app.py
+ruff check src tests
 pytest
-python scripts/demo.py
 ```
-
-## Resume Bullets
-
-- Built a production-style RAG platform with FastAPI, Streamlit, typed schemas, document ingestion, chunking, vector retrieval, grounded generation, and cited evidence.
-- Implemented resume-to-job matching that scores role fit, extracts evidence-backed strengths, and surfaces keyword gaps for ATS and recruiter screens.
-- Added deterministic local embeddings for offline demos plus optional OpenAI integration, Docker support, CI, CLI workflows, retrieval evaluation, and automated tests.
-
-## Upgrade Path
-
-- Replace the JSON vector store with FAISS, Pinecone, Weaviate, or Postgres pgvector.
-- Add OpenTelemetry spans for ingestion, embedding, retrieval, generation, and dashboard actions.
-- Add a job-board ingestion pipeline and outreach-template generator.
-- Add auth and per-user indexes for a hosted multi-user version.

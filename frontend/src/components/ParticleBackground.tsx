@@ -47,7 +47,8 @@ export const ParticleBackground = () => {
     // Initialize particles
     const initParticles = () => {
       particles = [];
-      for (let i = 0; i < maxParticles; i++) {
+      const count = window.innerWidth < 768 ? 25 : maxParticles;
+      for (let i = 0; i < count; i++) {
         particles.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,

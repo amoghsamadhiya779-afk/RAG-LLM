@@ -1,7 +1,9 @@
 from typing import Annotated
+import json
 
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 
 from resume_rag.config import Settings, get_settings
 from resume_rag.factory import get_service
@@ -68,6 +70,21 @@ def delete_document(source: str, service: ServiceDep) -> dict[str, str | int]:
 @app.post("/query", response_model=QueryResponse)
 def query(request: QueryRequest, service: ServiceDep) -> QueryResponse:
     return service.query(request.question, top_k=request.top_k, filters=request.filters)
+
+
+@app.post("/query/stream")
+def query_stream(request: QueryRequest, service: ServiceDep) -> StreamingResponse:
+    sources, token_stream = service.query_stream(
+        request.question, top_k=request.top_k, filters=request.filters
+    )
+
+    def generator():
+        sources_list = [source.model_dump() for source in sources]
+        yield f"data: {json.dumps({'sources': sources_list})}\n\n"
+        for token in token_stream:
+            yield f"data: {json.dumps({'token': token})}\n\n"
+
+    return StreamingResponse(generator(), media_type="text/event-stream")
 
 
 @app.post("/match", response_model=MatchResponse)

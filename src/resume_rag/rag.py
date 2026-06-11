@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from typing import Iterator
 
 from resume_rag.chunking import chunk_document
 from resume_rag.config import Settings
@@ -59,6 +60,22 @@ class ResumeRagService:
             answer=self.answer_generator.answer(question, results),
             sources=[_to_source(result) for result in results],
         )
+
+    def query_stream(
+        self,
+        question: str,
+        top_k: int | None = None,
+        filters: dict[str, str] | None = None,
+    ) -> tuple[list[SourceSnippet], Iterator[str]]:
+        results = self.vector_store.search(
+            question,
+            self.embedding_model,
+            top_k=top_k or self.settings.top_k,
+            filters=filters,
+        )
+        sources = [_to_source(result) for result in results]
+        token_stream = self.answer_generator.answer_stream(question, results)
+        return sources, token_stream
 
     def match_role(self, role_title: str, job_description: str, top_k: int) -> MatchResponse:
         results = self.vector_store.search(

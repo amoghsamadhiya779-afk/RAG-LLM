@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 from abc import ABC, abstractmethod
+from typing import Iterator
 
 from resume_rag.config import Settings
 from resume_rag.vector_store import SearchResult
@@ -10,6 +11,10 @@ from resume_rag.vector_store import SearchResult
 class AnswerGenerator(ABC):
     @abstractmethod
     def answer(self, question: str, contexts: list[SearchResult]) -> str:
+        raise NotImplementedError
+
+    @abstractmethod
+    def answer_stream(self, question: str, contexts: list[SearchResult]) -> Iterator[str]:
         raise NotImplementedError
 
     @abstractmethod
@@ -37,6 +42,12 @@ class LocalExtractiveGenerator(AnswerGenerator):
             + "\n".join(bullets)
             + "\n\nUse the cited sources below to verify every claim."
         )
+
+    def answer_stream(self, question: str, contexts: list[SearchResult]) -> Iterator[str]:
+        full_answer = self.answer(question, contexts)
+        words = full_answer.split(" ")
+        for i, word in enumerate(words):
+            yield (word + " ") if i < len(words) - 1 else word
 
     def evaluate_match(
         self, role_title: str, job_description: str, contexts: list[SearchResult]
@@ -80,6 +91,33 @@ class OpenAIAnswerGenerator(AnswerGenerator):
             ],
         )
         return response.choices[0].message.content or ""
+
+    def answer_stream(self, question: str, contexts: list[SearchResult]) -> Iterator[str]:
+        context_text = "\n\n".join(
+            f"Source: {result.chunk.source}\n{result.chunk.text}" for result in contexts
+        )
+        response = self.client.chat.completions.create(
+            model=self.model,
+            temperature=0.2,
+            stream=True,
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are a resume intelligence assistant. Answer only from the "
+                        "provided context. Be specific, concise, and cite source names."
+                    ),
+                },
+                {
+                    "role": "user",
+                    "content": f"Question: {question}\n\nContext:\n{context_text}",
+                },
+            ],
+        )
+        for chunk in response:
+            token = chunk.choices[0].delta.content or ""
+            if token:
+                yield token
 
     def evaluate_match(
         self, role_title: str, job_description: str, contexts: list[SearchResult]

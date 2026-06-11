@@ -47,3 +47,81 @@ class MatchResponse(BaseModel):
     strengths: list[str]
     gaps: list[str]
     evidence: list[SourceSnippet]
+
+
+# ATS Career Intelligence Schemas
+class ResumeAnalyzeRequest(BaseModel):
+    text: str
+    openai_key: str | None = None
+
+
+class CandidateProfile(BaseModel):
+    skills: list[str]
+    experience_years: int
+    current_title: str
+    education: str
+    projects: list[str]
+    achievements: list[str]
+
+
+class ScoreBreakdown(BaseModel):
+    formatting: int
+    content: int
+    style: int
+    match: int
+
+
+class AtsScoring(BaseModel):
+    total_score: int
+    breakdown: ScoreBreakdown
+    logs: list[str]
+
+
+class ResumeAnalyzeResponse(BaseModel):
+    profile: CandidateProfile
+    scoring: AtsScoring
+
+
+class AtsMatchRequest(BaseModel):
+    profile: CandidateProfile
+    top_k: int | None = 10
+
+
+class MatchedJob(BaseModel):
+    id: str
+    title: str
+    company: str
+    match_score: int
+    skills: list[str]
+    skill_match_percentage: int
+    missing_skills: list[str]
+    salary_range: str
+    location: str
+    tech_stack: list[str]
+    culture: str
+    experience_level: str
+    application_confidence: str
+
+
+class UpgradeRequest(BaseModel):
+    profile: CandidateProfile
+    learned_skills: list[str]
+
+
+class UpgradeResponse(BaseModel):
+    new_scores: dict[str, int]
+
+
+class InterviewRequest(BaseModel):
+    job_id: str
+    profile: CandidateProfile
+
+
+class InterviewQuestion(BaseModel):
+    type: str
+    question: str
+    answer_guide: str
+
+
+class InterviewResponse(BaseModel):
+    questions: list[InterviewQuestion]

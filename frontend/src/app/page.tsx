@@ -8,8 +8,11 @@ import { SettingsPanel } from "@/components/SettingsPanel";
 import { ParticleBackground } from "@/components/ParticleBackground";
 import { useChat } from "@/context/ChatContext";
 
+import { ResumeMatcher } from "@/components/ResumeMatcher";
+import { JobBoard } from "@/components/JobBoard";
+
 export default function Home() {
-  const { theme } = useChat();
+  const { theme, activeView } = useChat();
   const isDark = theme === "dark";
 
   return (
@@ -26,8 +29,14 @@ export default function Home() {
 
         {/* Conversation Workspace Workspace */}
         <section className="flex-1 flex flex-col h-full overflow-hidden min-w-0">
-          <ChatWindow />
-          <Composer />
+          {activeView === "chat" && (
+            <>
+              <ChatWindow />
+              <Composer />
+            </>
+          )}
+          {activeView === "matcher" && <ResumeMatcher />}
+          {activeView === "board" && <JobBoard />}
         </section>
 
         {/* Right Settings panel parameters */}

@@ -5,20 +5,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useChat } from "@/context/ChatContext";
 import { X, Sun, Moon, Sliders, Settings2 } from "lucide-react";
 
-const MODELS = [
-  { id: "gemini-2.5-pro", name: "Gemini 2.5 Pro", desc: "Complex reasoning & coding" },
-  { id: "gemini-2.5-flash", name: "Gemini 2.5 Flash", desc: "Ultra-fast response time" },
-  { id: "claude-3-5-sonnet", name: "Claude 3.5 Sonnet", desc: "Highly creative & detailed" },
-  { id: "gpt-4o", name: "GPT-4o", desc: "General-purpose excellence" },
-  { id: "deepseek-reasoner", name: "DeepSeek R1", desc: "Math, code & logic focus" },
-];
-
 export const SettingsPanel = () => {
   const {
     isSettingsOpen,
     setIsSettingsOpen,
-    activeModel,
-    setActiveModel,
     temperature,
     setTemperature,
     topK,
@@ -117,42 +107,6 @@ export const SettingsPanel = () => {
                     <Sun className="w-3.5 h-3.5" />
                     <span>Light</span>
                   </button>
-                </div>
-              </div>
-
-              {/* Model Select (Segmented/Chip Cards) */}
-              <div className="space-y-2.5">
-                <label className={`text-[10px] font-bold uppercase tracking-wider ${isDark ? "text-slate-500" : "text-slate-400"}`}>
-                  Active LLM Engine
-                </label>
-                <div className="grid grid-cols-1 gap-2">
-                  {MODELS.map((model) => {
-                    const isSelected = activeModel === model.id;
-                    return (
-                      <motion.button
-                        key={model.id}
-                        whileHover={{ scale: 1.015 }}
-                        whileTap={{ scale: 0.985 }}
-                        onClick={() => setActiveModel(model.id)}
-                        className={`text-left p-3 rounded-xl border transition-all duration-200 cursor-pointer flex flex-col gap-0.5
-                          ${
-                            isSelected
-                              ? isDark
-                                ? "bg-dark-accent/10 border-dark-accent text-white shadow-[0_2px_10px_rgba(129,140,248,0.1)]"
-                                : "bg-light-accent/5 border-light-accent text-light-accent font-medium shadow-[0_2px_10px_rgba(79,70,229,0.05)]"
-                              : isDark
-                              ? "bg-white/1 border-dark-border text-dark-text-secondary hover:bg-white/4"
-                              : "bg-black/1 border-light-border text-light-text-secondary hover:bg-black/4"
-                          }
-                        `}
-                      >
-                        <span className="text-xs font-semibold">{model.name}</span>
-                        <span className={`text-[10px] ${isSelected ? (isDark ? "text-indigo-300" : "text-indigo-600") : (isDark ? "text-slate-500" : "text-slate-400")}`}>
-                          {model.desc}
-                        </span>
-                      </motion.button>
-                    );
-                  })}
                 </div>
               </div>
 

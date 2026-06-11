@@ -17,7 +17,7 @@ interface Particle {
 export const ParticleBackground = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { theme } = useChat();
-  const mouseRef = useRef({ x: 0, y: 0, targetX: 0, targetY: 0 });
+  const mouseRef = useRef({ x: 0, y: 0, targetX: 0, targetY: 0, actualX: -9999, actualY: -9999 });
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -37,10 +37,12 @@ export const ParticleBackground = () => {
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
 
-    // Track mouse for parallax drift
+    // Track mouse for parallax drift & direct repulsion coordinates
     const handleMouseMove = (e: MouseEvent) => {
       mouseRef.current.targetX = (e.clientX - window.innerWidth / 2) * 0.05;
       mouseRef.current.targetY = (e.clientY - window.innerHeight / 2) * 0.05;
+      mouseRef.current.actualX = e.clientX;
+      mouseRef.current.actualY = e.clientY;
     };
     window.addEventListener("mousemove", handleMouseMove);
 
@@ -98,6 +100,18 @@ export const ParticleBackground = () => {
         }
 
         ctx.fill();
+
+        // Localized Antigravity Repulsion Force
+        const dx = drawX - mouseRef.current.actualX;
+        const dy = drawY - mouseRef.current.actualY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const forceRadius = 135;
+
+        if (dist < forceRadius && dist > 1) {
+          const force = (forceRadius - dist) / forceRadius;
+          p.x += (dx / dist) * force * 1.6;
+          p.y += (dy / dist) * force * 1.6;
+        }
 
         // Update positions (drifting)
         p.x += p.speedX;

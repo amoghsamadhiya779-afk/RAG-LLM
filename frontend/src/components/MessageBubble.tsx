@@ -11,7 +11,7 @@ interface MessageBubbleProps {
 }
 
 export const MessageBubble = ({ message, isLast }: MessageBubbleProps) => {
-  const { copyMessage, regenerateMessage, isStreaming, theme, activeModel } = useChat();
+  const { copyMessage, regenerateMessage, isStreaming, theme } = useChat();
   const [copied, setCopied] = useState(false);
 
   const isUser = message.role === "user";
@@ -124,8 +124,8 @@ export const MessageBubble = ({ message, isLast }: MessageBubbleProps) => {
           {/* Header metadata */}
           {!isUser && (
             <div className="flex items-center gap-2 mb-1.5">
-              <span className={`text-[9px] font-mono tracking-wider uppercase font-semibold ${isDark ? "text-slate-500" : "text-slate-400"}`}>
-                {activeModel}
+              <span className={`text-[9px] font-mono tracking-wider uppercase font-semibold ${isDark ? "text-[#818cf8]" : "text-indigo-650"}`}>
+                RAG Engine
               </span>
             </div>
           )}

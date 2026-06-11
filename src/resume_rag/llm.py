@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from abc import ABC, abstractmethod
 
 from resume_rag.config import Settings
@@ -65,7 +66,8 @@ class OpenAIAnswerGenerator(AnswerGenerator):
 
 def build_answer_generator(settings: Settings) -> AnswerGenerator:
     if settings.llm_provider == "openai":
-        if not settings.openai_api_key:
-            raise ValueError("RESUME_RAG_OPENAI_API_KEY is required for OpenAI generation.")
-        return OpenAIAnswerGenerator(settings.openai_api_key, settings.openai_chat_model)
+        api_key = settings.openai_api_key or os.environ.get("OPENAI_API_KEY")
+        if not api_key:
+            raise ValueError("RESUME_RAG_OPENAI_API_KEY or OPENAI_API_KEY is required for OpenAI generation.")
+        return OpenAIAnswerGenerator(api_key, settings.openai_chat_model)
     return LocalExtractiveGenerator()

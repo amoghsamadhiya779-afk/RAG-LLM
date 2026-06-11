@@ -1,46 +1,51 @@
-# Aether Resume Intelligence: Full-Stack RAG System
+# Aether Resume Intelligence: Full-Stack Career RAG System
 
-Aether Resume Intelligence is a production-grade Retrieval-Augmented Generation (RAG) platform designed for resume processing, job matching, and interview evaluation. The system consists of a Python FastAPI backend that serves vector ingestion and query endpoints, and a high-fidelity Next.js 15 App Router frontend that provides a playground interface for managing hyperparameters and conversation logs.
+Aether Resume Intelligence is a production-grade Retrieval-Augmented Generation (RAG) platform and Career Intelligence Board. It is designed for resume processing, ATS evaluation, skill gap analysis, job matching, and AI-driven interview preparation. The system consists of a Python FastAPI backend that serves vector ingestion, streaming queries, and ATS analysis endpoints, and a high-fidelity Next.js 15 App Router frontend featuring a modern workspace and Job Intelligence Board.
 
 The architecture separates concerns across API boundaries to demonstrate scalable retrieval quality, local-first evaluation, and deployment capability to cloud and edge servers.
 
 ---
 
+## 🌟 Key Features
+
+1. **Job Intelligence Board**: A dedicated career UI to paste your resume and instantly receive an ATS compatibility score, a skill graph breakdown, and semantic job matching against an indexed job database.
+2. **AI Interview Prep Simulations**: Automatically generates custom technical, behavioral, and system design interview questions tailored directly to the intersection of the candidate's resume and the job's demands.
+3. **SSE Streaming RAG Workspace**: A fully interactive chat interface that leverages Server-Sent Events (SSE) to stream answers from grounded context in real-time.
+4. **Document Ingestion & Chunking**: Parses PDFs, Markdown, and text, converting them into optimized vector embeddings stored locally (SQLite/JSON) for low latency.
+
+---
+
 ## Architecture and System Flow
 
-The application handles document ingestion, chunking, and semantic search queries via a deterministic pipeline:
+The application handles document ingestion, semantic matching, and ATS evaluations via deterministic and AI pipelines:
 
 ```
-[Resume / Job Description] ---> [Document Loader] ---> [Text Chunker] ---> [Vector Index]
-                                                                                |
-[User Matching Query]       ---> [Embedding Engine] ---> [Semantic Matcher] <---+
-                                                                   |
-                                                                   v
-                                                        [Grounded RAG Answer]
+[Candidate Resume] ---> [Skill Graph Extraction] ---> [ATS Formatting & Content Scorer]
+                            |
+                            v
+[Job Embeddings]   <--- [Semantic Vector Search] ---> [Job Recommendation Matcher]
+                                                          |
+                                                          v
+                                              [AI Interview Question Generator]
 ```
-
-1. **Document Ingestion**: Parses PDFs, Markdown, and plain text files.
-2. **Chunking Engine**: Splits documents into configurable sizes with overlap offsets.
-3. **Local Vector Index**: Stores high-dimensional vector representations locally for low latency.
-4. **Retrieval Grounding**: Matches user Q&A queries against stored documents, outputting grounded answers accompanied by citations and similarity scores.
 
 ---
 
 ## Technical Stack
 
 ### Backend
-- **Core Runtime**: Python 3.11
+- **Core Runtime**: Python 3.12
 - **API Framework**: FastAPI with typed Pydantic validation schemas
-- **Inference Server**: Uvicorn
-- **Evaluator Utilities**: Local indexing, similarity ranking, evaluation tests
+- **Inference Server**: Uvicorn, Server-Sent Events (SSE)
+- **Vector Operations**: SQLite Vector Store, Embedding Engines, RRF (Reciprocal Rank Fusion)
+- **Evaluator Utilities**: Regex heuristic parsing and fallback LLM profile extraction
 
 ### Frontend
 - **Framework**: Next.js 15 (App Router Architecture)
 - **Language**: TypeScript (Strict type checks)
-- **Styling**: Tailwind CSS v4 featuring glassmorphism layers
+- **Styling**: Tailwind CSS v4 featuring glassmorphism layers and custom radial SVG dials
 - **Animations**: Framer Motion spring physics (target 60 FPS)
-- **Background System**: HTML Canvas cinematic starfield with parallax mouse tracking
-- **Cursor System**: Custom spring-dampened inertial cursor matching theme states
+- **Design Elements**: Cinematic starfield, animated progress rings, responsive sidebars
 
 ---
 
@@ -85,68 +90,36 @@ A portable Node.js environment is downloaded locally to `.bin/node` to isolate d
    cd frontend
    ```
 
-2. Start the development server with Turbopack enabled:
+2. Install dependencies:
    ```powershell
-   & '..\.bin\node\node.exe' 'node_modules\next\dist\bin\next' dev --turbopack
+   npm install
+   ```
+
+3. Start the development server with Turbopack enabled:
+   ```powershell
+   npm run dev
    ```
    The interactive interface will be accessible at `http://localhost:3000`.
 
 ---
 
-## Command Line Interface (CLI) Utilities
-
-You can perform administrative indexing and queries directly using the Python CLI:
-
-1. Index a resume or job description file:
-   ```powershell
-   resume-rag ingest path\to\resume.pdf --type resume
-   resume-rag ingest path\to\job-description.txt --type job
-   ```
-
-2. Execute a grounded query:
-   ```powershell
-   resume-rag query "What evidence proves this candidate has experience in RAG systems?"
-   ```
-
-3. Match a target job role against index credentials:
-   ```powershell
-   resume-rag match "AI Engineer" path\to\job-description.txt
-   ```
-
----
-
 ## API Integration Specifications
 
-### Ingest Document
-- **Endpoint**: `POST http://127.0.0.1:8000/documents`
-- **Payload**:
-  ```json
-  {
-    "source": "resume.pdf",
-    "doc_type": "resume",
-    "text": "Built a FastAPI RAG pipeline with vector retrieval and grounded citations."
-  }
-  ```
+### 1. ATS Profile Parsing & Analysis
+- **Endpoint**: `POST http://127.0.0.1:8000/analyze/resume`
+- **Description**: Analyzes a raw resume string, extracts a structured skill graph, and computes an ATS score.
 
-### Execute Grounded Query
-- **Endpoint**: `POST http://127.0.0.1:8000/query`
-- **Payload**:
-  ```json
-  {
-    "question": "What RAG experience is in the resume?",
-    "top_k": 4
-  }
-  ```
+### 2. Job Recommendations
+- **Endpoint**: `POST http://127.0.0.1:8000/analyze/match`
+- **Description**: Conducts RAG similarity searches within the job database, computing a hybrid match score combining semantic context overlap and skill graph intersections.
 
-### Role Fit Matching
-- **Endpoint**: `POST http://127.0.0.1:8000/match`
-- **Payload**:
-  ```json
-  {
-    "role_title": "AI Engineer",
-    "job_description": "Requires Python, FastAPI, RAG, and Docker experience."
-  }
-  ```
+### 3. Interview Preparation
+- **Endpoint**: `POST http://127.0.0.1:8000/analyze/interview`
+- **Description**: Generates dynamic interview simulations (behavioral, technical, and system design) tailored to the candidate's exact profile and the specific job role.
+
+### 4. Streaming Grounded RAG Query
+- **Endpoint**: `POST http://127.0.0.1:8000/query/stream`
+- **Description**: Uses Server-Sent Events (SSE) to stream citations and LLM tokens.
 
 ---
 
@@ -159,7 +132,7 @@ The backend uses a Docker configuration.
 - The project Dockerfile is configured to run Uvicorn on port `7860`, matching Hugging Face specifications.
 - Create a Space using the Docker SDK template.
 - Push the repository files (`src/`, `pyproject.toml`, `Dockerfile`) to the Space.
-- Add environment secrets such as `RESUME_RAG_OPENAI_API_KEY` under settings.
+- Add environment secrets such as `OPENAI_API_KEY` under settings.
 
 ### 2. Frontend: Vercel
 - Import the `frontend` directory repository on Vercel.
@@ -174,5 +147,5 @@ The backend uses a Docker configuration.
 Validate your local backend changes prior to committing:
 ```powershell
 ruff check src tests
-pytest
+pytest -p no:cacheprovider
 ```

@@ -94,7 +94,7 @@ interface ChatContextType {
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://rag-llm-production-86e7.up.railway.app";
 
 export const ChatProvider = ({ children }: { children: ReactNode }) => {
   // Theme state

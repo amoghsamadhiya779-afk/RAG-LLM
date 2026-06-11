@@ -6,7 +6,6 @@ import { ChatWindow } from "@/components/ChatWindow";
 import { Composer } from "@/components/Composer";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { ParticleBackground } from "@/components/ParticleBackground";
-import { AntigravityCursor } from "@/components/AntigravityCursor";
 import { useChat } from "@/context/ChatContext";
 
 export default function Home() {
@@ -20,9 +19,6 @@ export default function Home() {
     >
       {/* Cinematic Starfield Canvas Layer */}
       <ParticleBackground />
-
-      {/* Ultra-Smooth Spring Inertia Cursor */}
-      <AntigravityCursor />
 
       <div className="relative z-10 flex w-full h-full overflow-hidden">
         {/* Left Sidebar Menu */}

@@ -62,14 +62,9 @@ export const AntigravityCursor = () => {
       const target = e.target as HTMLElement;
       if (!target) return;
 
-      const interactiveEl = target.closest("button") || 
-                            target.closest("a") || 
-                            target.closest('[role="button"]') ||
-                            target.closest('input[type="range"]') ||
-                            (target.tagName === "INPUT" && target.getAttribute("type") !== "hidden") ||
-                            target.tagName === "TEXTAREA" ||
-                            target.tagName === "SELECT" ||
-                            target.getAttribute("data-hover") === "true";
+      const interactiveEl = target.closest(
+        'button, a, [role="button"], input:not([type="hidden"]), textarea, select, [data-hover="true"]'
+      );
 
       if (interactiveEl) {
         setIsHovered(true);

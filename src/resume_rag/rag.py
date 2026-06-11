@@ -18,6 +18,7 @@ from resume_rag.schemas import (
 )
 from resume_rag.vector_store import JsonVectorStore, SearchResult
 from resume_rag.analyzer import ResumeAnalyzer
+from duckduckgo_search import DDGS
 
 
 class ResumeRagService:
@@ -152,9 +153,42 @@ class ResumeRagService:
                 "tech_stack": job["tech_stack"],
                 "culture": job["culture"],
                 "experience_level": job["experience_level"],
-                "application_confidence": confidence
+                "application_confidence": confidence,
+                "href": None
             })
-        return matched_jobs
+            
+        # Live Web Search
+        try:
+            live_query = f'{title} "{", ".join(skills[:3])}" job site:linkedin.com/jobs OR site:indeed.com'
+            with DDGS() as ddgs:
+                results = list(ddgs.text(live_query, max_results=top_k))
+                
+            for idx, r in enumerate(results):
+                match_score = max(50, 95 - (idx * 3))
+                confidence = "HIGH" if match_score >= 75 else "MEDIUM"
+                matched_jobs.append({
+                    "id": f"live-{idx}",
+                    "title": r.get("title", "Live Job Role")[:60] + "...",
+                    "company": "Live Web Result",
+                    "match_score": match_score,
+                    "skills": [],
+                    "skill_match_percentage": 100,
+                    "missing_skills": [],
+                    "salary_range": "N/A",
+                    "location": "Remote / See Link",
+                    "tech_stack": [],
+                    "culture": r.get("body", "")[:120] + "...",
+                    "experience_level": "N/A",
+                    "application_confidence": confidence,
+                    "href": r.get("href", "")
+                })
+        except Exception as e:
+            print(f"Live search failed: {e}")
+            
+        # Sort combined results by match score descending
+        matched_jobs.sort(key=lambda x: x["match_score"], reverse=True)
+            
+        return matched_jobs[:top_k]
 
     def upgrade_skills(self, profile: dict, learned_skills: list[str]) -> dict:
         current_skills = list(profile.get("skills", []))

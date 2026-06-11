@@ -8,6 +8,7 @@ import { Activity, Target, FileText, Code2, AlertTriangle, Lightbulb, PlayCircle
 
 export const JobBoard = () => {
   const {
+    uploadResume,
     analyzeResume,
     matchJobs,
     seedJobs,
@@ -18,6 +19,7 @@ export const JobBoard = () => {
   const isDark = theme === "dark";
 
   const [resumeText, setResumeText] = useState("");
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [profileData, setProfileData] = useState<any | null>(null);
   const [atsScore, setAtsScore] = useState<any | null>(null);
@@ -32,10 +34,15 @@ export const JobBoard = () => {
   }, [seedJobs]);
 
   const handleAnalyze = async () => {
-    if (!resumeText.trim()) return;
+    if (!resumeText.trim() && !resumeFile) return;
     setIsAnalyzing(true);
     try {
-      const data = await analyzeResume(resumeText);
+      let textToAnalyze = resumeText;
+      if (resumeFile) {
+        textToAnalyze = await uploadResume(resumeFile);
+      }
+      
+      const data = await analyzeResume(textToAnalyze);
       setProfileData(data.profile);
       setAtsScore(data.scoring);
 
@@ -112,20 +119,48 @@ export const JobBoard = () => {
             <h2 className="text-sm font-semibold uppercase tracking-wider">Candidate Input</h2>
           </div>
           <div className="space-y-4">
-            <textarea
-              rows={12}
-              placeholder="Paste the candidate's resume text here to extract their skill graph and evaluate ATS compatibility..."
-              value={resumeText}
-              onChange={(e) => setResumeText(e.target.value)}
-              className={`w-full p-4 text-xs leading-relaxed rounded-xl border focus:outline-none transition-all duration-200 resize-none ${isDark ? "bg-dark-bg border-dark-border text-white focus:border-dark-accent/40" : "bg-light-bg border-light-border text-light-text-primary focus:border-light-accent/40"}`}
-            />
+            <div className="flex flex-col gap-4">
+              <label className={`w-full flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-200 ${isDark ? "border-dark-border hover:border-dark-accent/50 bg-dark-bg/50" : "border-light-border hover:border-light-accent/50 bg-light-bg/50"}`}>
+                <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
+                  <FileText className={`w-8 h-8 mb-3 ${isDark ? "text-slate-400" : "text-slate-500"}`} />
+                  <p className={`mb-2 text-sm font-semibold ${isDark ? "text-slate-300" : "text-slate-700"}`}>
+                    {resumeFile ? resumeFile.name : "Click to upload Resume (PDF, DOCX)"}
+                  </p>
+                  <p className={`text-xs ${isDark ? "text-slate-500" : "text-slate-400"}`}>or drag and drop</p>
+                </div>
+                <input type="file" className="hidden" accept=".pdf,.docx,.txt" onChange={(e) => {
+                  if (e.target.files && e.target.files.length > 0) {
+                    setResumeFile(e.target.files[0]);
+                    setResumeText(""); // clear text if file uploaded
+                  }
+                }} />
+              </label>
+              
+              <div className="flex items-center gap-4">
+                <div className={`flex-1 h-px ${isDark ? "bg-white/10" : "bg-black/10"}`}></div>
+                <span className={`text-[10px] font-bold uppercase tracking-widest ${isDark ? "text-slate-500" : "text-slate-400"}`}>OR PASTE TEXT</span>
+                <div className={`flex-1 h-px ${isDark ? "bg-white/10" : "bg-black/10"}`}></div>
+              </div>
+
+              <textarea
+                rows={8}
+                placeholder="Paste the candidate's resume text here..."
+                value={resumeText}
+                onChange={(e) => {
+                  setResumeText(e.target.value);
+                  setResumeFile(null); // clear file if typing
+                }}
+                className={`w-full p-4 text-xs leading-relaxed rounded-xl border focus:outline-none transition-all duration-200 resize-none ${isDark ? "bg-dark-bg border-dark-border text-white focus:border-dark-accent/40" : "bg-light-bg border-light-border text-light-text-primary focus:border-light-accent/40"}`}
+              />
+            </div>
+            
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleAnalyze}
-              disabled={isAnalyzing || resumeText.length < 50}
+              disabled={isAnalyzing || (!resumeText.trim() && !resumeFile)}
               className={`w-full p-3.5 rounded-xl border text-xs font-semibold uppercase tracking-wider transition-all duration-200 justify-center flex items-center gap-2
-                ${isAnalyzing || resumeText.length < 50 ? "bg-slate-800 text-slate-500 border-transparent cursor-not-allowed opacity-50" : isDark ? "bg-dark-accent border-dark-accent text-dark-bg hover:bg-dark-accent-hover shadow-[0_4px_14px_rgba(129,140,248,0.2)]" : "bg-light-accent border-light-accent text-white hover:bg-light-accent-hover shadow-[0_4px_14px_rgba(79,70,229,0.15)]"}`}
+                ${isAnalyzing || (!resumeText.trim() && !resumeFile) ? "bg-slate-800 text-slate-500 border-transparent cursor-not-allowed opacity-50" : isDark ? "bg-dark-accent border-dark-accent text-dark-bg hover:bg-dark-accent-hover shadow-[0_4px_14px_rgba(129,140,248,0.2)]" : "bg-light-accent border-light-accent text-white hover:bg-light-accent-hover shadow-[0_4px_14px_rgba(79,70,229,0.15)]"}`}
             >
               {isAnalyzing ? (
                 <>
@@ -259,9 +294,16 @@ export const JobBoard = () => {
                          <span key={i} className={`text-[9px] px-1.5 py-0.5 rounded border ${isDark ? "bg-red-500/10 border-red-500/20 text-red-400" : "bg-red-50 border-red-200 text-red-600"}`}>Missing: {ms}</span>
                       ))}
                     </div>
-                    <button className={`w-full py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider border transition-all flex items-center justify-center gap-1.5 ${isDark ? "bg-dark-elevated border-dark-border hover:bg-dark-accent/20 hover:text-dark-accent hover:border-dark-accent/30" : "bg-light-bg border-light-border hover:bg-light-accent/10 hover:text-light-accent hover:border-light-accent/30"}`}>
-                      <PlayCircle className="w-3.5 h-3.5" /> Interview Prep
-                    </button>
+                    <div className="flex gap-2">
+                      <button className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider border transition-all flex items-center justify-center gap-1.5 ${isDark ? "bg-dark-elevated border-dark-border hover:bg-dark-accent/20 hover:text-dark-accent hover:border-dark-accent/30" : "bg-light-bg border-light-border hover:bg-light-accent/10 hover:text-light-accent hover:border-light-accent/30"}`}>
+                        <PlayCircle className="w-3.5 h-3.5" /> Prep
+                      </button>
+                      {job.href && (
+                        <a href={job.href} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider border transition-all flex items-center justify-center gap-1.5 ${isDark ? "bg-dark-accent text-dark-bg border-dark-accent hover:bg-dark-accent-hover" : "bg-light-accent text-white border-light-accent hover:bg-light-accent-hover"}`}>
+                          Apply Now
+                        </a>
+                      )}
+                    </div>
                   </div>
                 </motion.div>
               ))}

@@ -101,6 +101,7 @@ class MatchedJob(BaseModel):
     culture: str
     experience_level: str
     application_confidence: str
+    href: str | None = None
 
 
 class UpgradeRequest(BaseModel):

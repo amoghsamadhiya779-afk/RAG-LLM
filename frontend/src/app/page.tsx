@@ -2,8 +2,6 @@
 
 import React from "react";
 import { Sidebar } from "@/components/Sidebar";
-import { ChatWindow } from "@/components/ChatWindow";
-import { Composer } from "@/components/Composer";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { ParticleBackground } from "@/components/ParticleBackground";
 import { useChat } from "@/context/ChatContext";
@@ -27,14 +25,8 @@ export default function Home() {
         {/* Left Sidebar Menu */}
         <Sidebar />
 
-        {/* Conversation Workspace Workspace */}
+        {/* Central Content Area */}
         <section className="flex-1 flex flex-col h-full overflow-hidden min-w-0">
-          {activeView === "chat" && (
-            <>
-              <ChatWindow />
-              <Composer />
-            </>
-          )}
           {activeView === "matcher" && <ResumeMatcher />}
           {activeView === "board" && <JobBoard />}
         </section>

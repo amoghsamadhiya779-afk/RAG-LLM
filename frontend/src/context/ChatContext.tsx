@@ -84,7 +84,8 @@ interface ChatContextType {
   backendStats: { indexedChunks: number; environment: string } | null;
   
   // Board State
-  analyzeResume: (text: string) => Promise<any>;
+  uploadResume: (file: File) => Promise<string>;
+  analyzeResume: (text: string) => Promise<Record<string, unknown>>;
   matchJobs: (profile: any) => Promise<any[]>;
   upgradeSkills: (profile: any, skills: string[]) => Promise<any>;
   generateInterview: (jobId: string, profile: any) => Promise<any>;
@@ -121,7 +122,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const [abortController, setAbortController] = useState<AbortController | null>(null);
 
   // RAG States
-  const [activeView, setActiveView] = useState<"chat" | "matcher" | "board">("chat");
+  const [activeView, setActiveView] = useState<"chat" | "matcher" | "board">("board");
   const [ingestedDocs, setIngestedDocs] = useState<string[]>([]);
   const [matchResult, setMatchResult] = useState<MatchResult | null>(null);
   const [matchLoading, setMatchLoading] = useState<boolean>(false);
@@ -204,7 +205,20 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
 
   const clearMatchResult = () => setMatchResult(null);
 
-  const analyzeResume = async (text: string): Promise<any> => {
+  const uploadResume = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    
+    const res = await fetch(`${API_URL}/upload/resume`, {
+      method: "POST",
+      body: formData
+    });
+    if (!res.ok) throw new Error("Failed to upload resume file");
+    const data = await res.json();
+    return data.text;
+  };
+
+  const analyzeResume = async (text: string): Promise<Record<string, unknown>> => {
     const res = await fetch(`${API_URL}/analyze/resume`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -639,6 +653,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         backendStats,
         
         // Board API
+        uploadResume,
         analyzeResume,
         matchJobs,
         upgradeSkills,

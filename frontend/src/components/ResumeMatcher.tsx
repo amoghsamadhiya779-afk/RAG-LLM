@@ -12,6 +12,8 @@ export const ResumeMatcher = () => {
     matchLoading,
     runMatchEvaluation,
     clearMatchResult,
+    ingestDocument,
+    uploadResume,
     theme,
   } = useChat();
 
@@ -20,7 +22,20 @@ export const ResumeMatcher = () => {
   const [jobDescription, setJobDescription] = useState("");
   const [activeTab, setActiveTab] = useState<"strengths" | "gaps" | "evidence">("strengths");
 
+  const [isUploading, setIsUploading] = useState(false);
   const isDark = theme === "dark";
+
+  const handleFileUpload = async (file: File) => {
+    setIsUploading(true);
+    try {
+      const text = await uploadResume(file);
+      await ingestDocument(file.name, text);
+      setSelectedDoc(file.name);
+    } catch (e) {
+      console.error(e);
+    }
+    setIsUploading(false);
+  };
 
   const handleEvaluate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,7 +98,7 @@ export const ResumeMatcher = () => {
                 <select
                   value={selectedDoc}
                   onChange={(e) => setSelectedDoc(e.target.value)}
-                  className={`w-full p-2.5 text-xs rounded-xl border focus:outline-none transition-all duration-200 cursor-pointer
+                  className={`w-full p-2.5 text-xs rounded-xl border focus:outline-none transition-all duration-200 cursor-pointer mb-3
                     ${isDark 
                       ? "bg-dark-bg border-dark-border text-white focus:border-dark-accent/40" 
                       : "bg-light-bg border-light-border text-light-text-primary focus:border-light-accent/40"}`}
@@ -93,11 +108,26 @@ export const ResumeMatcher = () => {
                     <option key={idx} value={doc}>{doc}</option>
                   ))}
                 </select>
-                {ingestedDocs.length === 0 && (
-                  <p className="text-[10px] text-red-400 mt-1">
-                    No resumes ingested. Please go to Chat and upload a text resume first.
-                  </p>
-                )}
+
+                <div className="flex items-center gap-4 mb-3">
+                  <div className={`flex-1 h-px ${isDark ? "bg-white/10" : "bg-black/10"}`}></div>
+                  <span className={`text-[10px] font-bold uppercase tracking-widest ${isDark ? "text-slate-500" : "text-slate-400"}`}>OR UPLOAD NEW</span>
+                  <div className={`flex-1 h-px ${isDark ? "bg-white/10" : "bg-black/10"}`}></div>
+                </div>
+
+                <label className={`w-full flex flex-col items-center justify-center p-4 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-200 ${isDark ? "border-dark-border hover:border-dark-accent/50 bg-dark-bg/50" : "border-light-border hover:border-light-accent/50 bg-light-bg/50"}`}>
+                  <div className="flex flex-col items-center justify-center text-center">
+                    <FileText className={`w-5 h-5 mb-2 ${isDark ? "text-slate-400" : "text-slate-500"}`} />
+                    <p className={`mb-1 text-xs font-semibold ${isDark ? "text-slate-300" : "text-slate-700"}`}>
+                      {isUploading ? "Uploading & Ingesting..." : "Upload Resume (PDF, DOCX)"}
+                    </p>
+                  </div>
+                  <input type="file" className="hidden" accept=".pdf,.docx,.txt" onChange={(e) => {
+                    if (e.target.files && e.target.files.length > 0) {
+                      handleFileUpload(e.target.files[0]);
+                    }
+                  }} disabled={isUploading} />
+                </label>
               </div>
 
               {/* Target Role Title */}

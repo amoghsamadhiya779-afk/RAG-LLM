@@ -2,11 +2,20 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
+export interface SourceSnippet {
+  source: string;
+  doc_type: string;
+  score: number;
+  text: string;
+  metadata: Record<string, unknown>;
+}
+
 export interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
   timestamp: string;
+  sources?: SourceSnippet[];
 }
 
 export interface ChatSession {
@@ -19,6 +28,14 @@ export interface ChatSession {
   topP: number;
   maxTokens: number;
   timestamp: string;
+}
+
+export interface MatchResult {
+  role_title: string;
+  match_score: number;
+  strengths: string[];
+  gaps: string[];
+  evidence: SourceSnippet[];
 }
 
 interface ChatContextType {
@@ -44,25 +61,31 @@ interface ChatContextType {
   messages: Message[];
   isStreaming: boolean;
   streamingText: string;
-  sendMessage: (content: string, attachment?: string | null) => Promise<void>;
+  sendMessage: (content: string, attachmentName?: string | null, attachmentText?: string | null) => Promise<void>;
   regenerateMessage: (messageId: string) => Promise<void>;
   copyMessage: (content: string) => void;
   stopGeneration: () => void;
   createNewChat: () => void;
   deleteSession: (id: string) => void;
   clearHistory: () => void;
+  
+  // Enterprise RAG additions
+  activeView: "chat" | "matcher";
+  setActiveView: (view: "chat" | "matcher") => void;
+  ingestedDocs: string[];
+  fetchIngestedDocs: () => Promise<void>;
+  ingestDocument: (name: string, content: string) => Promise<{ chunksAdded: number; success: boolean }>;
+  matchResult: MatchResult | null;
+  matchLoading: boolean;
+  runMatchEvaluation: (roleTitle: string, jobDescription: string) => Promise<void>;
+  clearMatchResult: () => void;
+  isBackendConnected: boolean;
+  backendStats: { indexedChunks: number; environment: string } | null;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
-const DEFAULT_MODELS = [
-  "gemini-2.5-pro",
-  "gemini-2.5-flash",
-  "claude-3-5-sonnet",
-  "gpt-4o",
-  "deepseek-reasoner",
-  "llama-3.3-70b"
-];
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
 export const ChatProvider = ({ children }: { children: ReactNode }) => {
   // Theme state
@@ -71,7 +94,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   // Model settings
   const [activeModel, setActiveModel] = useState<string>("gemini-2.5-pro");
   const [temperature, setTemperature] = useState<number>(0.7);
-  const [topK, setTopK] = useState<number>(40);
+  const [topK, setTopK] = useState<number>(4);
   const [topP, setTopP] = useState<number>(0.9);
   const [maxTokens, setMaxTokens] = useState<number>(2048);
 
@@ -88,6 +111,90 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const [isStreaming, setIsStreaming] = useState<boolean>(false);
   const [streamingText, setStreamingText] = useState<string>("");
   const [abortController, setAbortController] = useState<AbortController | null>(null);
+
+  // RAG States
+  const [activeView, setActiveView] = useState<"chat" | "matcher">("chat");
+  const [ingestedDocs, setIngestedDocs] = useState<string[]>([]);
+  const [matchResult, setMatchResult] = useState<MatchResult | null>(null);
+  const [matchLoading, setMatchLoading] = useState<boolean>(false);
+  const [isBackendConnected, setIsBackendConnected] = useState<boolean>(false);
+  const [backendStats, setBackendStats] = useState<{ indexedChunks: number; environment: string } | null>(null);
+
+  // Check backend connection & fetch stats
+  const checkBackendHealth = async () => {
+    try {
+      const res = await fetch(`${API_URL}/health`);
+      if (res.ok) {
+        const data = await res.json();
+        setIsBackendConnected(true);
+        setBackendStats({
+          indexedChunks: data.indexed_chunks,
+          environment: data.environment,
+        });
+      } else {
+        setIsBackendConnected(false);
+      }
+    } catch {
+      setIsBackendConnected(false);
+    }
+  };
+
+  const fetchIngestedDocs = async () => {
+    try {
+      const res = await fetch(`${API_URL}/documents`);
+      if (res.ok) {
+        const data = await res.json();
+        // Extract unique source names
+        const docs = data.map((d: { source?: string; name?: string }) => d.source || d.name);
+        setIngestedDocs(Array.from(new Set(docs)) as string[]);
+      }
+    } catch {}
+  };
+
+  const ingestDocument = async (name: string, content: string) => {
+    try {
+      const res = await fetch(`${API_URL}/documents`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: content,
+          source: name,
+          doc_type: "resume",
+          metadata: {}
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        await checkBackendHealth();
+        await fetchIngestedDocs();
+        return { chunksAdded: data.chunks_added, success: true };
+      }
+    } catch {}
+    return { chunksAdded: 0, success: false };
+  };
+
+  const runMatchEvaluation = async (roleTitle: string, jobDescription: string) => {
+    setMatchLoading(true);
+    setMatchResult(null);
+    try {
+      const res = await fetch(`${API_URL}/match`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          role_title: roleTitle,
+          job_description: jobDescription,
+          top_k: 8
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setMatchResult(data);
+      }
+    } catch {}
+    setMatchLoading(false);
+  };
+
+  const clearMatchResult = () => setMatchResult(null);
 
   // Load from local storage
   useEffect(() => {
@@ -113,32 +220,35 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
           setCurrentSessionId(parsed[0].id);
           setMessages(parsed[0].messages);
         } else {
-          // Initialize first session
           initDefaultSession();
         }
-      } catch (e) {
+      } catch {
         initDefaultSession();
       }
     } else {
       initDefaultSession();
     }
+
+    // Ping backend API on mount
+    checkBackendHealth();
+    fetchIngestedDocs();
   }, []);
 
   const initDefaultSession = () => {
     const defaultSession: ChatSession = {
       id: "default-session-id",
-      title: "New Chat",
+      title: "RAG Evaluation Session",
       messages: [
         {
           id: "welcome",
           role: "assistant",
-          content: "Welcome. How can I assist you with inference today?",
+          content: "Welcome to Aether Resume Intelligence. You can upload candidate resumes (text files) using the attachment tool to index them, or test matching credentials against active roles using the **Role Matcher** console.",
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         }
       ],
       model: "gemini-2.5-pro",
       temperature: 0.7,
-      topK: 40,
+      topK: 4,
       topP: 0.9,
       maxTokens: 2048,
       timestamp: new Date().toISOString()
@@ -167,6 +277,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
       setMaxTokens(session.maxTokens);
       setMessages(session.messages);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentSessionId]);
 
   // Update session settings in local storage
@@ -256,45 +367,45 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     setIsStreaming(false);
   };
 
-  // Simulated AI response streaming (typewriter/token feel)
-  const streamAIResponse = async (userMsg: string, currentMsgs: Message[]) => {
+  // Real API RAG query executor with typewriter text simulation
+  const executeRAGQuery = async (userMsg: string, currentMsgs: Message[]) => {
     setIsStreaming(true);
     setStreamingText("");
     const controller = new AbortController();
     setAbortController(controller);
 
-    const prompts: Record<string, string> = {
-      "hello": "Hello! I am your LLM assistant. How can I assist with your development or analysis goals today?",
-      "help": "I can assist you in writing clean code, reviewing architectural designs, explaining neural network parameters (like Temperature, Top-K, Top-P), or parsing complex documents. What are you working on?",
-      "explain parameters": "Here is a breakdown of the sampling parameters you can adjust in the settings panel:\n\n1. **Temperature**: Controls the randomness of the model. Lower values (e.g., 0.2) make output deterministic and focused, while higher values (e.g., 0.8) increase creativity and variety.\n2. **Top-P (Nucleus Sampling)**: Filters out tokens whose cumulative probability is lower than the value P (e.g., 0.9). It balances predictability and vocabulary diversity.\n3. **Top-K**: Limits the search to the top K most likely words. Lower Top-K leads to highly consistent generation; larger values permit rare words.\n4. **Max Tokens**: The absolute length threshold of the output response.",
-      "default": `This is a simulated token-by-token generation response from **${activeModel}**.
+    let answer = "";
+    let sources: SourceSnippet[] = [];
 
-Your query: *"${userMsg}"*
+    try {
+      const res = await fetch(`${API_URL}/query`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          question: userMsg,
+          top_k: topK
+        }),
+        signal: controller.signal
+      });
 
-### Parameters Applied:
-* **Temperature**: ${temperature}
-* **Top-P**: ${topP}
-* **Top-K**: ${topK}
-* **Max Tokens**: ${maxTokens}
-
-### Model Context:
-As a Principal Frontend Architect, Senior Product Designer, and Staff Engineer, I can confirm that this interface is rendering at a target **60 FPS** with premium CSS layout systems, responsive 8px grid spacing, and hardware-accelerated animations. 
-
-Let me know if you want me to write code snippets or help analyze logs!`
-    };
-
-    let replyText = prompts.default;
-    const lower = userMsg.toLowerCase().trim();
-    if (lower.includes("hello") || lower.includes("hi")) {
-      replyText = prompts.hello;
-    } else if (lower.includes("help")) {
-      replyText = prompts.help;
-    } else if (lower.includes("parameter") || lower.includes("temperature") || lower.includes("top-p")) {
-      replyText = prompts["explain parameters"];
+      if (res.ok) {
+        const data = await res.json();
+        answer = data.answer;
+        sources = data.sources;
+      } else {
+        answer = "Error: Failed to fetch RAG evaluation from backend API. Please make sure the FastAPI server is running.";
+      }
+    } catch (e) {
+      if ((e as Error).name === "AbortError") {
+        setIsStreaming(false);
+        setAbortController(null);
+        return;
+      }
+      answer = "Network Error: Unable to connect to the local FastAPI backend. Ensure the backend is active at http://localhost:8000.";
     }
 
-    // Split response into tokens (words or short sequences)
-    const tokens = replyText.split(" ");
+    // Split response into tokens to simulate typewriter reveal
+    const tokens = answer.split(" ");
     let currentResponse = "";
     
     for (let i = 0; i < tokens.length; i++) {
@@ -303,8 +414,7 @@ Let me know if you want me to write code snippets or help analyze logs!`
       currentResponse += (i === 0 ? "" : " ") + tokens[i];
       setStreamingText(currentResponse);
       
-      // Variable speed to simulate realistic network/generation lag
-      const delay = Math.random() * 40 + 20; 
+      const delay = Math.random() * 25 + 10; 
       await new Promise(resolve => setTimeout(resolve, delay));
     }
 
@@ -313,18 +423,19 @@ Let me know if you want me to write code snippets or help analyze logs!`
         id: `msg-${Date.now()}`,
         role: "assistant",
         content: currentResponse,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        sources: sources
       };
 
       const finalMessages = [...currentMsgs, assistantMsg];
       setMessages(finalMessages);
       
-      // Update session in list & local storage
       if (currentSessionId) {
         const updated = sessions.map(s => {
           if (s.id === currentSessionId) {
-            // Update title from the first user query if it was named "New Chat"
-            const title = s.title === "New Chat" ? (userMsg.length > 24 ? userMsg.substring(0, 24) + "..." : userMsg) : s.title;
+            const title = s.title === "New Chat" || s.title === "RAG Evaluation Session"
+              ? (userMsg.length > 24 ? userMsg.substring(0, 24) + "..." : userMsg)
+              : s.title;
             return {
               ...s,
               title,
@@ -344,25 +455,31 @@ Let me know if you want me to write code snippets or help analyze logs!`
     setAbortController(null);
   };
 
-  const sendMessage = async (content: string, attachment?: string | null) => {
-    if (!content.trim() && !attachment) return;
+  const sendMessage = async (content: string, attachmentName?: string | null, attachmentText?: string | null) => {
+    if (!content.trim() && !attachmentText) return;
     if (isStreaming) return;
+
+    let userContent = content;
+    if (attachmentName) {
+      userContent = `[Grounded on document: ${attachmentName}]\n${content}`;
+    }
 
     const userMsg: Message = {
       id: `msg-${Date.now()}`,
       role: "user",
-      content: attachment ? `[Attachment: ${attachment}] ${content}` : content,
+      content: userContent,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
 
     const newMsgs = [...messages, userMsg];
     setMessages(newMsgs);
 
-    // If current session is empty, make sure it is updated
     if (currentSessionId) {
       const updated = sessions.map(s => {
         if (s.id === currentSessionId) {
-          const title = s.title === "New Chat" ? (content.length > 24 ? content.substring(0, 24) + "..." : content) : s.title;
+          const title = s.title === "New Chat" || s.title === "RAG Evaluation Session"
+            ? (content.length > 24 ? content.substring(0, 24) + "..." : content)
+            : s.title;
           return {
             ...s,
             title,
@@ -376,24 +493,20 @@ Let me know if you want me to write code snippets or help analyze logs!`
       localStorage.setItem("chat-ui-sessions", JSON.stringify(updated));
     }
 
-    // Stream simulated AI response
-    await streamAIResponse(content, newMsgs);
+    await executeRAGQuery(userMsg.content, newMsgs);
   };
 
   const regenerateMessage = async (messageId: string) => {
     if (isStreaming) return;
 
-    // Find the message index
     const msgIdx = messages.findIndex(m => m.id === messageId);
     if (msgIdx === -1) return;
 
-    // We want to slice messages up to the user query prior to this assistant response
     let lastUserQuery = "";
     let cleanMsgs: Message[] = [];
 
     if (messages[msgIdx].role === "assistant") {
       cleanMsgs = messages.slice(0, msgIdx);
-      // Find the last user message
       for (let i = cleanMsgs.length - 1; i >= 0; i--) {
         if (cleanMsgs[i].role === "user") {
           lastUserQuery = cleanMsgs[i].content;
@@ -401,7 +514,6 @@ Let me know if you want me to write code snippets or help analyze logs!`
         }
       }
     } else {
-      // It's a user message, regenerate from this query
       lastUserQuery = messages[msgIdx].content;
       cleanMsgs = messages.slice(0, msgIdx);
     }
@@ -409,7 +521,7 @@ Let me know if you want me to write code snippets or help analyze logs!`
     if (!lastUserQuery) return;
     setMessages(cleanMsgs);
 
-    await streamAIResponse(lastUserQuery, cleanMsgs);
+    await executeRAGQuery(lastUserQuery, cleanMsgs);
   };
 
   return (
@@ -443,7 +555,20 @@ Let me know if you want me to write code snippets or help analyze logs!`
         stopGeneration,
         createNewChat,
         deleteSession,
-        clearHistory
+        clearHistory,
+        
+        // RAG States & Utilities
+        activeView,
+        setActiveView,
+        ingestedDocs,
+        fetchIngestedDocs,
+        ingestDocument,
+        matchResult,
+        matchLoading,
+        runMatchEvaluation,
+        clearMatchResult,
+        isBackendConnected,
+        backendStats
       }}
     >
       {children}

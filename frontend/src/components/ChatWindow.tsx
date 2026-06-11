@@ -5,7 +5,7 @@ import { useChat } from "@/context/ChatContext";
 import { MessageBubble } from "./MessageBubble";
 import { Logo } from "./Logo";
 import { motion } from "framer-motion";
-import { Terminal, BookOpen, Cpu, Menu } from "lucide-react";
+import { Terminal, BookOpen, Menu } from "lucide-react";
 
 export const ChatWindow = () => {
   const {

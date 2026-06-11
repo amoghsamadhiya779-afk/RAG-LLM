@@ -1,6 +1,7 @@
 from typing import Annotated
 
 from fastapi import Depends, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from resume_rag.config import Settings, get_settings
 from resume_rag.factory import get_service
@@ -21,6 +22,14 @@ app = FastAPI(
         "A production-style RAG API for resume evidence, role matching, "
         "and interview prep."
     ),
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 SettingsDep = Annotated[Settings, Depends(get_settings)]

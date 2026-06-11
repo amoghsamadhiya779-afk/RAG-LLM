@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
@@ -7,7 +8,7 @@ export interface SourceSnippet {
   doc_type: string;
   score: number;
   text: string;
-  metadata: Record<string, unknown>;
+  metadata: any;
 }
 
 export interface Message {
@@ -70,8 +71,8 @@ interface ChatContextType {
   clearHistory: () => void;
   
   // Enterprise RAG additions
-  activeView: "chat" | "matcher";
-  setActiveView: (view: "chat" | "matcher") => void;
+  activeView: "chat" | "matcher" | "board";
+  setActiveView: (view: "chat" | "matcher" | "board") => void;
   ingestedDocs: string[];
   fetchIngestedDocs: () => Promise<void>;
   ingestDocument: (name: string, content: string) => Promise<{ chunksAdded: number; success: boolean }>;
@@ -120,7 +121,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const [abortController, setAbortController] = useState<AbortController | null>(null);
 
   // RAG States
-  const [activeView, setActiveView] = useState<"chat" | "matcher">("chat");
+  const [activeView, setActiveView] = useState<"chat" | "matcher" | "board">("chat");
   const [ingestedDocs, setIngestedDocs] = useState<string[]>([]);
   const [matchResult, setMatchResult] = useState<MatchResult | null>(null);
   const [matchLoading, setMatchLoading] = useState<boolean>(false);
@@ -203,7 +204,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
 
   const clearMatchResult = () => setMatchResult(null);
 
-  const analyzeResume = async (text: string) => {
+  const analyzeResume = async (text: string): Promise<any> => {
     const res = await fetch(`${API_URL}/analyze/resume`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -213,7 +214,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     return res.json();
   };
 
-  const matchJobs = async (profile: any) => {
+  const matchJobs = async (profile: any): Promise<any[]> => {
     const res = await fetch(`${API_URL}/analyze/match`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -223,7 +224,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     return res.json();
   };
 
-  const upgradeSkills = async (profile: any, skills: string[]) => {
+  const upgradeSkills = async (profile: any, skills: string[]): Promise<any> => {
     const res = await fetch(`${API_URL}/analyze/upgrade`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -233,7 +234,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     return res.json();
   };
 
-  const generateInterview = async (jobId: string, profile: any) => {
+  const generateInterview = async (jobId: string, profile: any): Promise<any> => {
     const res = await fetch(`${API_URL}/analyze/interview`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

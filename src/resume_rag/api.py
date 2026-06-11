@@ -55,6 +55,16 @@ def list_documents(service: ServiceDep) -> list[dict[str, str]]:
     return service.sources()
 
 
+@app.delete("/documents/{source}")
+def delete_document(source: str, service: ServiceDep) -> dict[str, str | int]:
+    deleted_count = service.delete_source(source)
+    return {
+        "status": "deleted",
+        "source": source,
+        "chunks_removed": deleted_count,
+    }
+
+
 @app.post("/query", response_model=QueryResponse)
 def query(request: QueryRequest, service: ServiceDep) -> QueryResponse:
     return service.query(request.question, top_k=request.top_k, filters=request.filters)

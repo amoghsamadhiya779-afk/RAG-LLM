@@ -98,6 +98,14 @@ class JsonVectorStore:
             seen[chunk.source] = {"source": chunk.source, "doc_type": chunk.doc_type}
         return list(seen.values())
 
+    def remove_source(self, source: str) -> int:
+        to_delete = [item_id for item_id, chunk in self._chunks.items() if chunk.source == source]
+        for item_id in to_delete:
+            del self._chunks[item_id]
+        if to_delete:
+            self.persist()
+        return len(to_delete)
+
 
 def _matches_filters(chunk: StoredChunk, filters: dict[str, str]) -> bool:
     for key, expected in filters.items():

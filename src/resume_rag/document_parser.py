@@ -1,9 +1,7 @@
 import io
-import PyPDF2
-import docx
-
 def parse_pdf(file_bytes: bytes) -> str:
     """Extracts text from a PDF file."""
+    import PyPDF2
     reader = PyPDF2.PdfReader(io.BytesIO(file_bytes))
     text = []
     for page in reader.pages:
@@ -14,6 +12,7 @@ def parse_pdf(file_bytes: bytes) -> str:
 
 def parse_docx(file_bytes: bytes) -> str:
     """Extracts text from a DOCX file."""
+    import docx
     doc = docx.Document(io.BytesIO(file_bytes))
     text = []
     for para in doc.paragraphs:

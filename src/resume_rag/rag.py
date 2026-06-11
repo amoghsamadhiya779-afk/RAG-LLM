@@ -18,7 +18,6 @@ from resume_rag.schemas import (
 )
 from resume_rag.vector_store import JsonVectorStore, SearchResult
 from resume_rag.analyzer import ResumeAnalyzer
-from duckduckgo_search import DDGS
 
 
 class ResumeRagService:
@@ -159,6 +158,7 @@ class ResumeRagService:
             
         # Live Web Search
         try:
+            from duckduckgo_search import DDGS
             live_query = f'{title} "{", ".join(skills[:3])}" job site:linkedin.com/jobs OR site:indeed.com'
             with DDGS() as ddgs:
                 results = list(ddgs.text(live_query, max_results=top_k))

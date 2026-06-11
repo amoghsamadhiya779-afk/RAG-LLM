@@ -67,11 +67,9 @@ class ResumeRagService:
             top_k=top_k,
             filters={"doc_type": "resume"},
         )
-        evidence_text = " ".join(result.chunk.text for result in results)
-        coverage = _keyword_coverage(job_description, evidence_text)
-        score = min(98, max(20, round(coverage * 100)))
-        strengths = _extract_signal(results, limit=4)
-        gaps = _extract_gaps(job_description, results)
+        score, strengths, gaps = self.answer_generator.evaluate_match(
+            role_title=role_title, job_description=job_description, contexts=results
+        )
         return MatchResponse(
             role_title=role_title,
             match_score=score,
@@ -82,6 +80,9 @@ class ResumeRagService:
 
     def sources(self) -> list[dict[str, str]]:
         return self.vector_store.list_sources()
+
+    def delete_source(self, source: str) -> int:
+        return self.vector_store.remove_source(source)
 
 
 def _to_source(result: SearchResult) -> SourceSnippet:

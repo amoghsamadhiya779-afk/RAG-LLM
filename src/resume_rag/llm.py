@@ -12,6 +12,12 @@ class AnswerGenerator(ABC):
     def answer(self, question: str, contexts: list[SearchResult]) -> str:
         raise NotImplementedError
 
+    @abstractmethod
+    def evaluate_match(
+        self, role_title: str, job_description: str, contexts: list[SearchResult]
+    ) -> tuple[int, list[str], list[str]]:
+        raise NotImplementedError
+
 
 class LocalExtractiveGenerator(AnswerGenerator):
     """Creates grounded answers without network access."""
@@ -31,6 +37,18 @@ class LocalExtractiveGenerator(AnswerGenerator):
             + "\n".join(bullets)
             + "\n\nUse the cited sources below to verify every claim."
         )
+
+    def evaluate_match(
+        self, role_title: str, job_description: str, contexts: list[SearchResult]
+    ) -> tuple[int, list[str], list[str]]:
+        from resume_rag.rag import _extract_gaps, _extract_signal, _keyword_coverage
+
+        evidence_text = " ".join(result.chunk.text for result in contexts)
+        coverage = _keyword_coverage(job_description, evidence_text)
+        score = min(98, max(20, round(coverage * 100)))
+        strengths = _extract_signal(contexts, limit=4)
+        gaps = _extract_gaps(job_description, contexts)
+        return score, strengths, gaps
 
 
 class OpenAIAnswerGenerator(AnswerGenerator):
@@ -62,6 +80,48 @@ class OpenAIAnswerGenerator(AnswerGenerator):
             ],
         )
         return response.choices[0].message.content or ""
+
+    def evaluate_match(
+        self, role_title: str, job_description: str, contexts: list[SearchResult]
+    ) -> tuple[int, list[str], list[str]]:
+        import json
+
+        context_text = "\n\n".join(
+            f"Source: {result.chunk.source}\n{result.chunk.text}" for result in contexts
+        )
+        prompt = (
+            f"You are a professional HR recruiter. Evaluate the candidate's resume credentials against the target job role:\n\n"
+            f"Role Title: {role_title}\n"
+            f"Job Description: {job_description}\n\n"
+            f"Retrieved Candidate Resume Evidence:\n{context_text}\n\n"
+            f"Analyze and output a JSON object with the following fields:\n"
+            f"- match_score: an integer from 0 to 100 representing the match confidence.\n"
+            f"- strengths: a list of up to 4 major strengths/matching qualifications.\n"
+            f"- gaps: a list of up to 4 critical missing qualifications or experience gaps.\n"
+            f"Return ONLY valid JSON (no markdown block wrappers or conversational prefix/suffix)."
+        )
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                temperature=0.2,
+                messages=[
+                    {"role": "system", "content": "You are a professional recruiting evaluator."},
+                    {"role": "user", "content": prompt},
+                ],
+            )
+            content = response.choices[0].message.content or ""
+            content = content.replace("```json", "").replace("```", "").strip()
+            data = json.loads(content)
+            return int(data["match_score"]), list(data["strengths"]), list(data["gaps"])
+        except Exception:
+            from resume_rag.rag import _extract_gaps, _extract_signal, _keyword_coverage
+
+            evidence_text = " ".join(result.chunk.text for result in contexts)
+            coverage = _keyword_coverage(job_description, evidence_text)
+            score = min(98, max(20, round(coverage * 100)))
+            strengths = _extract_signal(contexts, limit=4)
+            gaps = _extract_gaps(job_description, contexts)
+            return score, strengths, gaps
 
 
 def build_answer_generator(settings: Settings) -> AnswerGenerator:

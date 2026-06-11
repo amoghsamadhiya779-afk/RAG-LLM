@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { useChat } from "@/context/ChatContext";
-import { motion, AnimatePresence } from "framer-motion";
-import { Briefcase, Activity, Target, FileText, Code2, AlertTriangle, Lightbulb, PlayCircle, Sparkles, Navigation, Zap } from "lucide-react";
+import { motion } from "framer-motion";
+import { Activity, Target, FileText, Code2, AlertTriangle, Lightbulb, PlayCircle, Sparkles, Zap, CheckCircle } from "lucide-react";
 
 export const JobBoard = () => {
   const {
@@ -18,10 +19,10 @@ export const JobBoard = () => {
 
   const [resumeText, setResumeText] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [profileData, setProfileData] = useState<any>(null);
-  const [atsScore, setAtsScore] = useState<any>(null);
+  const [profileData, setProfileData] = useState<any | null>(null);
+  const [atsScore, setAtsScore] = useState<any | null>(null);
   const [matchedJobs, setMatchedJobs] = useState<any[]>([]);
-  const [selectedJob, setSelectedJob] = useState<any>(null);
+  const [selectedJob, setSelectedJob] = useState<any | null>(null);
   const [interviewQuestions, setInterviewQuestions] = useState<any[]>([]);
   const [isGeneratingInterview, setIsGeneratingInterview] = useState(false);
   const [activeTab, setActiveTab] = useState<"ats" | "jobs">("ats");

@@ -367,7 +367,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     setIsStreaming(false);
   };
 
-  // Real API RAG query executor with typewriter text simulation
+  // Real API RAG query executor with SSE streaming
   const executeRAGQuery = async (userMsg: string, currentMsgs: Message[]) => {
     setIsStreaming(true);
     setStreamingText("");
@@ -378,7 +378,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     let sources: SourceSnippet[] = [];
 
     try {
-      const res = await fetch(`${API_URL}/query`, {
+      const res = await fetch(`${API_URL}/query/stream`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -388,12 +388,40 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         signal: controller.signal
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        answer = data.answer;
-        sources = data.sources;
+      if (res.ok && res.body) {
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() || "";
+
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (trimmed.startsWith("data: ")) {
+              const dataStr = trimmed.substring(6);
+              try {
+                const parsed = JSON.parse(dataStr);
+                if (parsed.sources) {
+                  sources = parsed.sources;
+                } else if (parsed.token !== undefined) {
+                  answer += parsed.token;
+                  setStreamingText(answer);
+                }
+              } catch (e) {
+                console.error("Failed to parse SSE data frame:", e, dataStr);
+              }
+            }
+          }
+        }
       } else {
         answer = "Error: Failed to fetch RAG evaluation from backend API. Please make sure the FastAPI server is running.";
+        setStreamingText(answer);
       }
     } catch (e) {
       if ((e as Error).name === "AbortError") {
@@ -402,27 +430,14 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
       answer = "Network Error: Unable to connect to the local FastAPI backend. Ensure the backend is active at http://localhost:8000.";
-    }
-
-    // Split response into tokens to simulate typewriter reveal
-    const tokens = answer.split(" ");
-    let currentResponse = "";
-    
-    for (let i = 0; i < tokens.length; i++) {
-      if (controller.signal.aborted) break;
-      
-      currentResponse += (i === 0 ? "" : " ") + tokens[i];
-      setStreamingText(currentResponse);
-      
-      const delay = Math.random() * 25 + 10; 
-      await new Promise(resolve => setTimeout(resolve, delay));
+      setStreamingText(answer);
     }
 
     if (!controller.signal.aborted) {
       const assistantMsg: Message = {
         id: `msg-${Date.now()}`,
         role: "assistant",
-        content: currentResponse,
+        content: answer,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         sources: sources
       };

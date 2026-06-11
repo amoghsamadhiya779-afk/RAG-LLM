@@ -111,8 +111,8 @@ async def analyze_resume_endpoint(
     req: ResumeAnalyzeRequest,
     service: Annotated[ResumeRagService, Depends(get_service)],
 ) -> ResumeAnalyzeResponse:
-    profile, scoring = service.analyze_candidate(req.text)
-    return ResumeAnalyzeResponse(profile=profile, scoring=scoring)
+    analysis = service.analyze_resume(req.text)
+    return ResumeAnalyzeResponse(profile=analysis["profile"], scoring=analysis["scoring"])
 
 @app.post("/upload/resume")
 async def upload_resume_endpoint(file: UploadFile = File(...)):

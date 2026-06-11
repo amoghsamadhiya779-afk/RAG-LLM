@@ -1,7 +1,7 @@
 from typing import Annotated
 import json
 
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 
@@ -9,6 +9,7 @@ from resume_rag.config import Settings, get_settings
 from resume_rag.factory import get_service
 from resume_rag.rag import ResumeRagService
 from resume_rag.seeder import seed_jobs
+from resume_rag.document_parser import parse_document
 from resume_rag.schemas import (
     DocumentIn,
     IngestResponse,
@@ -106,9 +107,22 @@ def match_role(request: MatchRequest, service: ServiceDep) -> MatchResponse:
 
 
 @app.post("/analyze/resume", response_model=ResumeAnalyzeResponse)
-def analyze_resume(request: ResumeAnalyzeRequest, service: ServiceDep) -> ResumeAnalyzeResponse:
-    return service.analyze_resume(request.text, request.openai_key)
+async def analyze_resume_endpoint(
+    req: ResumeAnalyzeRequest,
+    service: Annotated[ResumeRagService, Depends(get_service)],
+) -> ResumeAnalyzeResponse:
+    profile, scoring = service.analyze_candidate(req.text)
+    return ResumeAnalyzeResponse(profile=profile, scoring=scoring)
 
+@app.post("/upload/resume")
+async def upload_resume_endpoint(file: UploadFile = File(...)):
+    """Accepts a PDF or DOCX and returns extracted text."""
+    try:
+        contents = await file.read()
+        text = parse_document(contents, file.filename)
+        return {"text": text}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/analyze/match", response_model=list[MatchedJob])
 def match_jobs(request: AtsMatchRequest, service: ServiceDep) -> list[MatchedJob]:

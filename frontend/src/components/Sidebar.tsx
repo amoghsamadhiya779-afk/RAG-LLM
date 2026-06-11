@@ -136,27 +136,6 @@ export const Sidebar = () => {
 
         {/* View Navigation */}
         <div className="space-y-1.5 mb-6">
-          <motion.button
-            whileHover={{ x: isSidebarExpanded ? 4 : 0, scale: 1.01 }}
-            whileTap={{ scale: 0.99 }}
-            onClick={() => setActiveView("chat")}
-            className={`group flex items-center justify-between rounded-xl p-2.5 text-xs font-semibold cursor-pointer transition-all duration-200 border
-              ${
-                activeView === "chat"
-                  ? isDark
-                    ? "bg-dark-elevated/85 text-white border-dark-accent/30 shadow-[0_2px_10px_rgba(0,0,0,0.15)]"
-                    : "bg-white text-light-text-primary border-light-accent/20 shadow-[0_2px_10px_rgba(31,38,135,0.02)]"
-                  : isDark
-                  ? "text-[#CBD5E1] border-transparent hover:bg-dark-elevated/40 hover:text-white"
-                  : "text-light-text-secondary border-transparent hover:bg-white/60 hover:text-light-text-primary"
-              }
-            `}
-          >
-            <div className="flex items-center gap-3 min-w-0 flex-1">
-              <MessageSquare className={`w-4 h-4 shrink-0 ${activeView === "chat" ? (isDark ? "text-dark-accent" : "text-light-accent") : "opacity-70"}`} />
-              {isSidebarExpanded && <span>Workspace</span>}
-            </div>
-          </motion.button>
 
           <motion.button
             whileHover={{ x: isSidebarExpanded ? 4 : 0, scale: 1.01 }}
@@ -201,57 +180,6 @@ export const Sidebar = () => {
               {isSidebarExpanded && <span>Role Matcher</span>}
             </div>
           </motion.button>
-        </div>
-
-        {/* Chat History List */}
-        <div className="flex-1 overflow-y-auto space-y-1.5 pr-1 -mr-2 scrollbar-thin">
-          {isSidebarExpanded && (
-            <p className={`text-[9px] font-bold tracking-wider uppercase mb-2 ml-1 ${isDark ? "text-slate-500" : "text-slate-400"}`}>
-              Conversations
-            </p>
-          )}
-
-          {sessions.map((session) => {
-            const isActive = session.id === currentSessionId;
-            return (
-              <motion.div
-                key={session.id}
-                whileHover={{ x: isSidebarExpanded ? 4 : 0, scale: 1.01 }}
-                whileTap={{ scale: 0.99 }}
-                className={`group flex items-center justify-between rounded-xl p-2.5 text-xs cursor-pointer transition-all duration-200 border
-                  ${
-                    isActive
-                      ? isDark
-                        ? "bg-dark-elevated/85 text-white border-dark-accent/30 shadow-[0_2px_10px_rgba(0,0,0,0.15)]"
-                        : "bg-white text-light-text-primary border-light-accent/20 shadow-[0_2px_10px_rgba(31,38,135,0.02)]"
-                      : isDark
-                      ? "text-[#CBD5E1] border-transparent hover:bg-dark-elevated/40 hover:text-white"
-                      : "text-light-text-secondary border-transparent hover:bg-white/60 hover:text-light-text-primary"
-                  }
-                `}
-                onClick={() => handleSessionSelect(session.id)}
-              >
-                <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <MessageSquare className="w-3.5 h-3.5 shrink-0 opacity-70" />
-                  {isSidebarExpanded && (
-                    <span className="truncate pr-2">{session.title}</span>
-                  )}
-                </div>
-
-                {isSidebarExpanded && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      deleteSession(session.id);
-                    }}
-                    className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-red-500/10 hover:text-red-500 transition-all duration-200 cursor-pointer"
-                  >
-                    <Trash2 className="w-3 h-3" />
-                  </button>
-                )}
-              </motion.div>
-            );
-          })}
         </div>
 
         {/* Bottom Menu Navigation */}

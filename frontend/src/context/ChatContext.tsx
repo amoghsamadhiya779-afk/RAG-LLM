@@ -81,6 +81,13 @@ interface ChatContextType {
   clearMatchResult: () => void;
   isBackendConnected: boolean;
   backendStats: { indexedChunks: number; environment: string } | null;
+  
+  // Board State
+  analyzeResume: (text: string) => Promise<any>;
+  matchJobs: (profile: any) => Promise<any[]>;
+  upgradeSkills: (profile: any, skills: string[]) => Promise<any>;
+  generateInterview: (jobId: string, profile: any) => Promise<any>;
+  seedJobs: () => Promise<void>;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -195,6 +202,51 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const clearMatchResult = () => setMatchResult(null);
+
+  const analyzeResume = async (text: string) => {
+    const res = await fetch(`${API_URL}/analyze/resume`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text })
+    });
+    if (!res.ok) throw new Error("Failed to analyze resume");
+    return res.json();
+  };
+
+  const matchJobs = async (profile: any) => {
+    const res = await fetch(`${API_URL}/analyze/match`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ profile, top_k: 10 })
+    });
+    if (!res.ok) throw new Error("Failed to match jobs");
+    return res.json();
+  };
+
+  const upgradeSkills = async (profile: any, skills: string[]) => {
+    const res = await fetch(`${API_URL}/analyze/upgrade`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ profile, learned_skills: skills })
+    });
+    if (!res.ok) throw new Error("Failed to evaluate skill upgrades");
+    return res.json();
+  };
+
+  const generateInterview = async (jobId: string, profile: any) => {
+    const res = await fetch(`${API_URL}/analyze/interview`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ job_id: jobId, profile })
+    });
+    if (!res.ok) throw new Error("Failed to generate interview");
+    return res.json();
+  };
+
+  const seedJobs = async () => {
+    const res = await fetch(`${API_URL}/jobs/seed`, { method: "POST" });
+    if (!res.ok) throw new Error("Failed to seed jobs");
+  };
 
   // Load from local storage
   useEffect(() => {
@@ -583,7 +635,14 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         runMatchEvaluation,
         clearMatchResult,
         isBackendConnected,
-        backendStats
+        backendStats,
+        
+        // Board API
+        analyzeResume,
+        matchJobs,
+        upgradeSkills,
+        generateInterview,
+        seedJobs
       }}
     >
       {children}

@@ -8,6 +8,7 @@ from fastapi.responses import StreamingResponse
 from resume_rag.config import Settings, get_settings
 from resume_rag.factory import get_service
 from resume_rag.rag import ResumeRagService
+from resume_rag.seeder import seed_jobs
 from resume_rag.schemas import (
     DocumentIn,
     IngestResponse,
@@ -15,6 +16,14 @@ from resume_rag.schemas import (
     MatchResponse,
     QueryRequest,
     QueryResponse,
+    ResumeAnalyzeRequest,
+    ResumeAnalyzeResponse,
+    AtsMatchRequest,
+    MatchedJob,
+    UpgradeRequest,
+    UpgradeResponse,
+    InterviewRequest,
+    InterviewResponse,
 )
 
 app = FastAPI(
@@ -94,3 +103,35 @@ def match_role(request: MatchRequest, service: ServiceDep) -> MatchResponse:
         job_description=request.job_description,
         top_k=request.top_k,
     )
+
+
+@app.post("/analyze/resume", response_model=ResumeAnalyzeResponse)
+def analyze_resume(request: ResumeAnalyzeRequest, service: ServiceDep) -> ResumeAnalyzeResponse:
+    return service.analyze_resume(request.text, request.openai_key)
+
+
+@app.post("/analyze/match", response_model=list[MatchedJob])
+def match_jobs(request: AtsMatchRequest, service: ServiceDep) -> list[MatchedJob]:
+    return service.match_jobs(request.profile.model_dump(), request.top_k or 10)
+
+
+@app.post("/analyze/upgrade", response_model=UpgradeResponse)
+def upgrade_skills(request: UpgradeRequest, service: ServiceDep) -> UpgradeResponse:
+    new_scores = service.upgrade_skills(request.profile.model_dump(), request.learned_skills)
+    return UpgradeResponse(new_scores=new_scores)
+
+
+@app.post("/analyze/interview", response_model=InterviewResponse)
+def generate_interview(request: InterviewRequest, service: ServiceDep) -> InterviewResponse:
+    questions = service.generate_interview_prep(request.job_id, request.profile.model_dump())
+    return InterviewResponse(questions=questions)
+
+
+@app.post("/jobs/seed")
+def seed_jobs_endpoint(service: ServiceDep) -> dict[str, str | int]:
+    count = seed_jobs(service.vector_store, service.embedding_model)
+    return {
+        "status": "seeded",
+        "count": count
+    }
+

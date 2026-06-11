@@ -6,15 +6,19 @@ from resume_rag.llm import LocalExtractiveGenerator
 from resume_rag.rag import ResumeRagService
 from resume_rag.schemas import DocumentIn
 from resume_rag.vector_store import JsonVectorStore
+from resume_rag.analyzer import ResumeAnalyzer
 
 
 def test_rag_service_answers_with_sources(tmp_path: Path):
     settings = Settings(index_path=tmp_path / "vectors.json", top_k=2)
+    vector_store = JsonVectorStore(settings.index_path)
+    analyzer = ResumeAnalyzer(settings=settings, vector_store=vector_store)
     service = ResumeRagService(
         settings=settings,
         embedding_model=LocalHashEmbedding(),
         answer_generator=LocalExtractiveGenerator(),
-        vector_store=JsonVectorStore(settings.index_path),
+        vector_store=vector_store,
+        analyzer=analyzer,
     )
     service.ingest(
         DocumentIn(
@@ -35,11 +39,14 @@ def test_rag_service_answers_with_sources(tmp_path: Path):
 
 def test_rag_service_query_stream(tmp_path: Path):
     settings = Settings(index_path=tmp_path / "vectors.json", top_k=2)
+    vector_store = JsonVectorStore(settings.index_path)
+    analyzer = ResumeAnalyzer(settings=settings, vector_store=vector_store)
     service = ResumeRagService(
         settings=settings,
         embedding_model=LocalHashEmbedding(),
         answer_generator=LocalExtractiveGenerator(),
-        vector_store=JsonVectorStore(settings.index_path),
+        vector_store=vector_store,
+        analyzer=analyzer,
     )
     service.ingest(
         DocumentIn(

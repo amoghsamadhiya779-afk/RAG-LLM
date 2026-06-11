@@ -11,6 +11,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Trash2,
+  Briefcase,
+  Target,
 } from "lucide-react";
 
 export const Sidebar = () => {
@@ -24,6 +26,8 @@ export const Sidebar = () => {
     deleteSession,
     setIsSettingsOpen,
     theme,
+    activeView,
+    setActiveView,
   } = useChat();
 
   const handleSessionSelect = (id: string) => {
@@ -129,6 +133,75 @@ export const Sidebar = () => {
           <Plus className="w-4 h-4 shrink-0" />
           {isSidebarExpanded && <span>New Chat</span>}
         </motion.button>
+
+        {/* View Navigation */}
+        <div className="space-y-1.5 mb-6">
+          <motion.button
+            whileHover={{ x: isSidebarExpanded ? 4 : 0, scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
+            onClick={() => setActiveView("chat")}
+            className={`group flex items-center justify-between rounded-xl p-2.5 text-xs font-semibold cursor-pointer transition-all duration-200 border
+              ${
+                activeView === "chat"
+                  ? isDark
+                    ? "bg-dark-elevated/85 text-white border-dark-accent/30 shadow-[0_2px_10px_rgba(0,0,0,0.15)]"
+                    : "bg-white text-light-text-primary border-light-accent/20 shadow-[0_2px_10px_rgba(31,38,135,0.02)]"
+                  : isDark
+                  ? "text-[#CBD5E1] border-transparent hover:bg-dark-elevated/40 hover:text-white"
+                  : "text-light-text-secondary border-transparent hover:bg-white/60 hover:text-light-text-primary"
+              }
+            `}
+          >
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <MessageSquare className={`w-4 h-4 shrink-0 ${activeView === "chat" ? (isDark ? "text-dark-accent" : "text-light-accent") : "opacity-70"}`} />
+              {isSidebarExpanded && <span>Workspace</span>}
+            </div>
+          </motion.button>
+
+          <motion.button
+            whileHover={{ x: isSidebarExpanded ? 4 : 0, scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
+            onClick={() => setActiveView("board")}
+            className={`group flex items-center justify-between rounded-xl p-2.5 text-xs font-semibold cursor-pointer transition-all duration-200 border
+              ${
+                activeView === "board"
+                  ? isDark
+                    ? "bg-dark-elevated/85 text-white border-dark-accent/30 shadow-[0_2px_10px_rgba(0,0,0,0.15)]"
+                    : "bg-white text-light-text-primary border-light-accent/20 shadow-[0_2px_10px_rgba(31,38,135,0.02)]"
+                  : isDark
+                  ? "text-[#CBD5E1] border-transparent hover:bg-dark-elevated/40 hover:text-white"
+                  : "text-light-text-secondary border-transparent hover:bg-white/60 hover:text-light-text-primary"
+              }
+            `}
+          >
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <Briefcase className={`w-4 h-4 shrink-0 ${activeView === "board" ? (isDark ? "text-dark-accent" : "text-light-accent") : "opacity-70"}`} />
+              {isSidebarExpanded && <span>Job Board</span>}
+            </div>
+          </motion.button>
+          
+          <motion.button
+            whileHover={{ x: isSidebarExpanded ? 4 : 0, scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
+            onClick={() => setActiveView("matcher")}
+            className={`group flex items-center justify-between rounded-xl p-2.5 text-xs font-semibold cursor-pointer transition-all duration-200 border
+              ${
+                activeView === "matcher"
+                  ? isDark
+                    ? "bg-dark-elevated/85 text-white border-dark-accent/30 shadow-[0_2px_10px_rgba(0,0,0,0.15)]"
+                    : "bg-white text-light-text-primary border-light-accent/20 shadow-[0_2px_10px_rgba(31,38,135,0.02)]"
+                  : isDark
+                  ? "text-[#CBD5E1] border-transparent hover:bg-dark-elevated/40 hover:text-white"
+                  : "text-light-text-secondary border-transparent hover:bg-white/60 hover:text-light-text-primary"
+              }
+            `}
+          >
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <Target className={`w-4 h-4 shrink-0 ${activeView === "matcher" ? (isDark ? "text-dark-accent" : "text-light-accent") : "opacity-70"}`} />
+              {isSidebarExpanded && <span>Role Matcher</span>}
+            </div>
+          </motion.button>
+        </div>
 
         {/* Chat History List */}
         <div className="flex-1 overflow-y-auto space-y-1.5 pr-1 -mr-2 scrollbar-thin">

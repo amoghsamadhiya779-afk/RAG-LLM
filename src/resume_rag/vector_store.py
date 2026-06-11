@@ -135,6 +135,23 @@ class JsonVectorStore:
                 );
                 """
             )
+            conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS jobs (
+                    id TEXT PRIMARY KEY,
+                    title TEXT,
+                    company TEXT,
+                    skills TEXT,
+                    responsibilities TEXT,
+                    experience_level TEXT,
+                    salary_range TEXT,
+                    location TEXT,
+                    tech_stack TEXT,
+                    culture TEXT,
+                    embedding TEXT
+                );
+                """
+            )
             conn.commit()
 
     def _load_all_chunks(self) -> None:
@@ -240,6 +257,107 @@ class JsonVectorStore:
         for chunk in self._chunks.values():
             seen[chunk.source] = {"source": chunk.source, "doc_type": chunk.doc_type}
         return list(seen.values())
+
+    def add_job(
+        self,
+        id: str,
+        title: str,
+        company: str,
+        skills: list[str],
+        responsibilities: str,
+        experience_level: str,
+        salary_range: str,
+        location: str,
+        tech_stack: list[str],
+        culture: str,
+        embedding_model: EmbeddingModel,
+    ) -> None:
+        text_to_embed = f"{title} at {company}. Experience: {experience_level}. Responsibilities: {responsibilities}. Skills: {', '.join(skills)}"
+        embedding = embedding_model.embed([text_to_embed])[0]
+        
+        with self._get_connection() as conn:
+            conn.execute(
+                """
+                INSERT OR REPLACE INTO jobs 
+                (id, title, company, skills, responsibilities, experience_level, salary_range, location, tech_stack, culture, embedding)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    id,
+                    title,
+                    company,
+                    json.dumps(skills),
+                    responsibilities,
+                    experience_level,
+                    salary_range,
+                    location,
+                    json.dumps(tech_stack),
+                    culture,
+                    json.dumps(embedding),
+                ),
+            )
+            conn.commit()
+
+    def search_jobs(
+        self,
+        query: str,
+        embedding_model: EmbeddingModel,
+        top_k: int = 10,
+    ) -> list[dict]:
+        query_embedding = embedding_model.embed([query])[0]
+        
+        with self._get_connection() as conn:
+            cursor = conn.execute(
+                "SELECT id, title, company, skills, responsibilities, experience_level, salary_range, location, tech_stack, culture, embedding FROM jobs"
+            )
+            all_jobs = []
+            for row in cursor.fetchall():
+                j_id, title, company, skills_str, responsibilities, exp_lvl, salary, loc, tech_str, culture, emb_str = row
+                emb = json.loads(emb_str)
+                score = cosine_similarity(query_embedding, emb)
+                all_jobs.append({
+                    "id": j_id,
+                    "title": title,
+                    "company": company,
+                    "skills": json.loads(skills_str),
+                    "responsibilities": responsibilities,
+                    "experience_level": exp_lvl,
+                    "salary_range": salary,
+                    "location": loc,
+                    "tech_stack": json.loads(tech_str),
+                    "culture": culture,
+                    "score": score
+                })
+        
+        all_jobs = sorted(all_jobs, key=lambda x: x["score"], reverse=True)
+        return all_jobs[:top_k]
+
+    def get_all_jobs(self) -> list[dict]:
+        with self._get_connection() as conn:
+            cursor = conn.execute(
+                "SELECT id, title, company, skills, responsibilities, experience_level, salary_range, location, tech_stack, culture FROM jobs"
+            )
+            all_jobs = []
+            for row in cursor.fetchall():
+                j_id, title, company, skills_str, responsibilities, exp_lvl, salary, loc, tech_str, culture = row
+                all_jobs.append({
+                    "id": j_id,
+                    "title": title,
+                    "company": company,
+                    "skills": json.loads(skills_str),
+                    "responsibilities": responsibilities,
+                    "experience_level": exp_lvl,
+                    "salary_range": salary,
+                    "location": loc,
+                    "tech_stack": json.loads(tech_str),
+                    "culture": culture
+                })
+        return all_jobs
+
+    def clear_jobs(self) -> None:
+        with self._get_connection() as conn:
+            conn.execute("DELETE FROM jobs;")
+            conn.commit()
 
 
 def _matches_filters(chunk: StoredChunk, filters: dict[str, str]) -> bool:

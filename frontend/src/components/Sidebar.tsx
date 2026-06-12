@@ -4,13 +4,10 @@ import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useChat } from "@/context/ChatContext";
 import { Logo } from "./Logo";
-import {
   Plus,
-  MessageSquare,
   Settings,
   ChevronLeft,
   ChevronRight,
-  Trash2,
   Briefcase,
   Target,
 } from "lucide-react";
@@ -19,20 +16,12 @@ export const Sidebar = () => {
   const {
     isSidebarExpanded,
     setIsSidebarExpanded,
-    sessions,
-    currentSessionId,
     setCurrentSessionId,
     createNewChat,
-    deleteSession,
     setIsSettingsOpen,
-    theme,
     activeView,
     setActiveView,
   } = useChat();
-
-  const handleSessionSelect = (id: string) => {
-    setCurrentSessionId(id);
-  };
 
   return (
     <>

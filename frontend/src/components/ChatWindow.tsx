@@ -11,7 +11,6 @@ export const ChatWindow = () => {
   const {
     messages,
     isStreaming,
-    isStreaming,
     streamingText,
     sendMessage,
     isSidebarExpanded,

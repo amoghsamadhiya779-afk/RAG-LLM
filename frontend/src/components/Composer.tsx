@@ -21,7 +21,6 @@ export const Composer = () => {
     stopGeneration,
     messages,
     regenerateMessage,
-    theme,
   } = useChat();
 
   const [input, setInput] = useState("");
@@ -29,8 +28,6 @@ export const Composer = () => {
   const [isCopied, setIsCopied] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const isDark = theme === "dark";
 
   // Auto-expand text area height
   useEffect(() => {
@@ -123,11 +120,7 @@ export const Composer = () => {
               disabled={isStreaming}
               className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider border transition-all duration-200 cursor-pointer
                 disabled:opacity-50 disabled:cursor-not-allowed
-                ${
-                  isDark
-                    ? "border-dark-border bg-dark-surface/60 hover:bg-dark-elevated text-slate-400 hover:text-white"
-                    : "border-light-border bg-white/60 hover:bg-[#F1F5F9] text-slate-600 hover:text-[#0f172a]"
-                }
+                border-[var(--color-border)] bg-[var(--color-surface)]/60 hover:bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]
               `}
             >
               <RefreshCw className={`w-2.5 h-2.5 ${isStreaming ? "animate-spin" : ""}`} />
@@ -139,11 +132,7 @@ export const Composer = () => {
               whileTap={{ scale: 0.97 }}
               onClick={handleCopyLastResponse}
               className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider border transition-all duration-200 cursor-pointer
-                ${
-                  isDark
-                    ? "border-dark-border bg-dark-surface/60 hover:bg-dark-elevated text-slate-400 hover:text-white"
-                    : "border-light-border bg-white/60 hover:bg-[#F1F5F9] text-slate-600 hover:text-[#0f172a]"
-                }
+                border-[var(--color-border)] bg-[var(--color-surface)]/60 hover:bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]
               `}
             >
               {isCopied ? <Check className="w-2.5 h-2.5 text-green-500" /> : <Copy className="w-2.5 h-2.5" />}
@@ -156,11 +145,7 @@ export const Composer = () => {
       {/* Main Composer Box */}
       <div
         className={`relative flex flex-col p-2.5 rounded-3xl border transition-all duration-300 shadow-[0_4px_30px_rgba(0,0,0,0.15)] glass-panel
-          ${
-            isDark
-              ? "bg-dark-surface/75 border-dark-border focus-within:border-dark-accent/40"
-              : "bg-white/75 border-light-border focus-within:border-light-accent/40"
-          }
+          bg-[var(--color-surface)]/75 border-[var(--color-border)] focus-within:border-[var(--color-accent)]/40
         `}
       >
         {/* Attachment Pill (Renders inside composer box) */}
@@ -171,7 +156,7 @@ export const Composer = () => {
             <span className="truncate max-w-[150px]">{attachment}</span>
             <button
               onClick={handleRemoveAttachment}
-              className="p-0.5 rounded-full hover:bg-indigo-500/20 text-indigo-400 hover:text-indigo-300 transition-colors duration-150 cursor-pointer"
+              className="p-0.5 rounded-full hover:bg-[var(--color-accent)]/20 text-[var(--color-accent)] transition-colors duration-150 cursor-pointer"
             >
               <X className="w-3 h-3" />
             </button>
@@ -194,11 +179,7 @@ export const Composer = () => {
             onClick={handleAttachClick}
             type="button"
             className={`p-2 rounded-xl transition-all duration-200 cursor-pointer flex items-center justify-center shrink-0
-              ${
-                isDark
-                  ? "hover:bg-white/8 text-slate-400 hover:text-white"
-                  : "hover:bg-black/5 text-slate-500 hover:text-[#0F172A]"
-              }
+              hover:bg-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]
             `}
           >
             <Paperclip className="w-4 h-4" />
@@ -220,8 +201,7 @@ export const Composer = () => {
             }
             disabled={isStreaming}
             className={`flex-1 max-h-[180px] py-1.5 px-2 bg-transparent text-sm resize-none focus:outline-none border-none outline-none leading-relaxed transition-opacity
-              placeholder-slate-500 disabled:opacity-60
-              ${isDark ? "text-white" : "text-[#0F172A]"}
+              placeholder-[var(--color-text-muted)] disabled:opacity-60 text-[var(--color-text-primary)]
             `}
             style={{ height: "24px" }}
           />
@@ -248,12 +228,8 @@ export const Composer = () => {
                 disabled:opacity-40 disabled:cursor-not-allowed
                 ${
                   input.trim() || attachment
-                    ? isDark
-                      ? "bg-dark-accent text-dark-bg hover:bg-dark-accent-hover font-semibold"
-                      : "bg-light-accent text-white hover:bg-light-accent-hover font-semibold"
-                    : isDark
-                    ? "bg-slate-800 text-slate-500"
-                    : "bg-slate-100 text-slate-400"
+                    ? "bg-[var(--color-accent)] text-[var(--color-bg)] hover:bg-[var(--color-accent-hover)] font-semibold"
+                    : "bg-[var(--color-bg)] text-[var(--color-text-muted)]"
                 }
               `}
             >

@@ -11,15 +11,14 @@ export const ChatWindow = () => {
   const {
     messages,
     isStreaming,
+    isStreaming,
     streamingText,
-    theme,
     sendMessage,
     isSidebarExpanded,
     setIsSidebarExpanded,
   } = useChat();
 
   const scrollRef = useRef<HTMLDivElement>(null);
-  const isDark = theme === "dark";
 
   // Auto scroll to bottom
   const scrollToBottom = () => {
@@ -41,12 +40,10 @@ export const ChatWindow = () => {
   return (
     <div className="flex-1 flex flex-col h-full relative overflow-hidden">
       {/* Mobile Top Header */}
-      <header className={`md:hidden p-4 flex items-center justify-between border-b shrink-0 transition-colors duration-300 z-10 glass-panel
-        ${isDark ? "bg-dark-surface/80 border-dark-border" : "bg-white/80 border-light-border"}`}>
+      <header className="md:hidden p-4 flex items-center justify-between border-b shrink-0 transition-colors duration-300 z-10 glass-panel bg-[var(--color-surface)]/80 border-[var(--color-border)]">
         <button
           onClick={() => setIsSidebarExpanded(!isSidebarExpanded)}
-          className={`p-2 rounded-xl border transition-all duration-200 cursor-pointer
-            ${isDark ? "border-dark-border hover:bg-white/5" : "border-light-border hover:bg-black/5"}`}
+          className="p-2 rounded-xl border transition-all duration-200 cursor-pointer border-[var(--color-border)] hover:bg-[var(--color-surface)]"
         >
           <Menu className="w-4 h-4" />
         </button>
@@ -66,13 +63,7 @@ export const ChatWindow = () => {
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ type: "spring", stiffness: 200, damping: 20 }}
-              className={`w-12 h-12 rounded-2xl border flex items-center justify-center mb-6 transition-all duration-300
-                ${
-                  isDark
-                    ? "bg-dark-surface/80 border-dark-border text-dark-accent shadow-[0_4px_20px_rgba(129,140,248,0.25)]"
-                    : "bg-white border-light-border text-light-accent shadow-[0_4px_20px_rgba(79,70,229,0.1)]"
-                }
-              `}
+              className="w-12 h-12 rounded-2xl border flex items-center justify-center mb-6 transition-all duration-300 bg-[var(--color-surface)]/80 border-[var(--color-border)] text-[var(--color-accent)] shadow-[0_4px_20px_var(--color-accent)]/20"
             >
               <Logo className="w-8 h-8" />
             </motion.div>
@@ -81,8 +72,7 @@ export const ChatWindow = () => {
               initial={{ y: 10, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.1, duration: 0.3 }}
-              className={`text-base font-bold tracking-wider mb-2 uppercase transition-colors duration-300
-                ${isDark ? "text-dark-text-primary" : "text-light-text-primary"}`}
+              className="text-base font-bold tracking-wider mb-2 uppercase transition-colors duration-300 text-[var(--color-text-primary)]"
             >
               AETHER RESUME INTELLIGENCE
             </motion.h1>
@@ -91,8 +81,7 @@ export const ChatWindow = () => {
               initial={{ y: 10, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2, duration: 0.3 }}
-              className={`text-xs mb-8 leading-relaxed max-w-[420px] transition-colors duration-300
-                ${isDark ? "text-dark-text-secondary" : "text-light-text-secondary"}`}
+              className="text-xs mb-8 leading-relaxed max-w-[420px] transition-colors duration-300 text-[var(--color-text-secondary)]"
             >
               An evaluation workspace for parsing candidate resumes, assessing job-role fits, and executing grounded contextual queries locally.
             </motion.p>
@@ -121,19 +110,13 @@ export const ChatWindow = () => {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => handleSuggestionClick(card.prompt)}
-                  className={`text-left p-4 rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col gap-1 glass-panel
-                    ${
-                      isDark
-                        ? "bg-dark-surface/40 border-dark-border text-dark-text-secondary hover:bg-dark-surface/90"
-                        : "bg-white/40 border-light-border text-light-text-secondary hover:bg-white/90"
-                    }
-                  `}
+                  className="text-left p-4 rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col gap-1 glass-panel bg-[var(--color-surface)]/40 border-[var(--color-border)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface)]/90"
                 >
                   <div className="flex items-center gap-2 mb-1">
-                    <card.icon className={`w-4 h-4 ${isDark ? "text-dark-accent" : "text-light-accent"}`} />
+                    <card.icon className="w-4 h-4 text-[var(--color-accent)]" />
                     <span className="text-xs font-semibold">{card.title}</span>
                   </div>
-                  <span className={`text-[10px] ${isDark ? "text-slate-500" : "text-slate-400"}`}>{card.desc}</span>
+                  <span className="text-[10px] text-[var(--color-text-muted)]">{card.desc}</span>
                 </motion.button>
               ))}
             </div>

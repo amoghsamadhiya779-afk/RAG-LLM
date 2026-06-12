@@ -13,9 +13,10 @@ class Settings(BaseSettings):
     environment: str = "local"
     data_dir: Path = Field(default=Path("data"))
     index_path: Path = Field(default=Path("data/index/vector_store.json"))
-    embedding_provider: Literal["local", "openai"] = "local"
-    llm_provider: Literal["local", "openai"] = "local"
+    embedding_provider: Literal["local", "openai", "gemini"] = "gemini"
+    llm_provider: Literal["local", "openai", "gemini"] = "gemini"
     openai_api_key: str | None = None
+    gemini_api_key: str | None = None
     openai_embedding_model: str = "text-embedding-3-small"
     openai_chat_model: str = "gpt-4.1-mini"
     chunk_size: int = 900

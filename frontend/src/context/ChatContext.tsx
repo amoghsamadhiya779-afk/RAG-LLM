@@ -40,8 +40,6 @@ export interface MatchResult {
 }
 
 interface ChatContextType {
-  theme: "dark" | "light";
-  setTheme: (theme: "dark" | "light") => void;
   activeModel: string;
   setActiveModel: (model: string) => void;
   temperature: number;
@@ -94,12 +92,9 @@ interface ChatContextType {
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://rag-llm-production-86e7.up.railway.app";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export const ChatProvider = ({ children }: { children: ReactNode }) => {
-  // Theme state
-  const [theme, setThemeState] = useState<"dark" | "light">("dark");
-
   // Model settings
   const [activeModel, setActiveModel] = useState<string>("gemini-2.5-pro");
   const [temperature, setTemperature] = useState<number>(0.7);
@@ -270,14 +265,6 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
       setIsSidebarExpanded(false);
     }
 
-    const savedTheme = localStorage.getItem("chat-ui-theme") as "dark" | "light" | null;
-    if (savedTheme) {
-      setThemeState(savedTheme);
-      document.documentElement.className = savedTheme;
-    } else {
-      document.documentElement.className = "dark";
-    }
-
     const savedSessions = localStorage.getItem("chat-ui-sessions");
     if (savedSessions) {
       try {
@@ -324,12 +311,6 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     setCurrentSessionId(defaultSession.id);
     setMessages(defaultSession.messages);
     localStorage.setItem("chat-ui-sessions", JSON.stringify([defaultSession]));
-  };
-
-  const setTheme = (newTheme: "dark" | "light") => {
-    setThemeState(newTheme);
-    localStorage.setItem("chat-ui-theme", newTheme);
-    document.documentElement.className = newTheme;
   };
 
   // Sync active session settings
@@ -609,8 +590,6 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   return (
     <ChatContext.Provider
       value={{
-        theme,
-        setTheme,
         activeModel,
         setActiveModel: updateModel,
         temperature,

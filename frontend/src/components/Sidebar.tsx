@@ -34,8 +34,6 @@ export const Sidebar = () => {
     setCurrentSessionId(id);
   };
 
-  const isDark = theme === "dark";
-
   return (
     <>
       {/* Mobile Drawer Overlay Backdrop */}
@@ -64,12 +62,7 @@ export const Sidebar = () => {
           stiffness: 260,
           damping: 28,
         }}
-        className={`fixed md:relative top-0 bottom-0 left-0 z-40 flex flex-col h-full overflow-hidden border-r transition-colors duration-300 glass-panel
-          ${
-            isDark
-              ? "bg-dark-surface/45 border-dark-border text-dark-text-primary"
-              : "bg-light-surface/45 border-light-border text-light-text-primary"
-          }
+        className={`fixed md:relative top-0 bottom-0 left-0 z-40 flex flex-col h-full overflow-hidden border-r border-[var(--color-border)] transition-colors duration-300 glass-panel bg-[var(--color-surface)]/45 text-[var(--color-text-primary)]
           ${isSidebarExpanded ? "p-6" : "p-3"}
           ${isSidebarExpanded ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
         `}
@@ -87,7 +80,7 @@ export const Sidebar = () => {
               >
                 <Logo className="w-5.5 h-5.5" />
                 <span className="font-bold">AETHER RESUME RAG</span>
-                <span className={`text-[8px] px-1.5 py-0.5 rounded font-mono font-semibold ${isDark ? "bg-[#111827]/80 text-[#818cf8]" : "bg-slate-100 text-indigo-755"}`}>v1.0</span>
+                <span className="text-[8px] px-1.5 py-0.5 rounded font-mono font-semibold bg-[var(--color-accent)]/20 text-[var(--color-accent)]">v1.0</span>
               </motion.div>
             ) : (
               <motion.div
@@ -104,13 +97,7 @@ export const Sidebar = () => {
           {/* Toggle sidebar button (Desktop only) */}
           <button
             onClick={() => setIsSidebarExpanded(!isSidebarExpanded)}
-            className={`hidden md:flex items-center justify-center p-1.5 rounded-lg border transition-all duration-200 cursor-pointer
-              ${
-                isDark
-                  ? "border-dark-border bg-white/2 hover:bg-white/8"
-                  : "border-light-border bg-black/1 hover:bg-black/5"
-              }
-            `}
+            className="hidden md:flex items-center justify-center p-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)]/20 hover:bg-[var(--color-border)] transition-all duration-200 cursor-pointer"
           >
             {isSidebarExpanded ? <ChevronLeft className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
           </button>
@@ -122,11 +109,7 @@ export const Sidebar = () => {
           whileTap={{ scale: 0.98 }}
           onClick={createNewChat}
           className={`flex items-center gap-3 w-full p-3 mb-6 rounded-xl border text-xs font-semibold tracking-wide uppercase transition-all duration-200 cursor-pointer justify-center
-            ${
-              isDark
-                ? "bg-dark-accent hover:bg-dark-accent-hover border-dark-accent text-dark-bg shadow-[0_4px_14px_rgba(129,140,248,0.25)]"
-                : "bg-light-accent hover:bg-light-accent-hover border-light-accent text-white shadow-[0_4px_14px_rgba(79,70,229,0.2)]"
-            }
+            bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] border-[var(--color-accent)] text-[var(--color-bg)] shadow-[0_4px_14px_var(--color-accent)]/20
             ${!isSidebarExpanded && "p-2.5"}
           `}
         >
@@ -144,17 +127,13 @@ export const Sidebar = () => {
             className={`group flex items-center justify-between rounded-xl p-2.5 text-xs font-semibold cursor-pointer transition-all duration-200 border
               ${
                 activeView === "board"
-                  ? isDark
-                    ? "bg-dark-elevated/85 text-white border-dark-accent/30 shadow-[0_2px_10px_rgba(0,0,0,0.15)]"
-                    : "bg-white text-light-text-primary border-light-accent/20 shadow-[0_2px_10px_rgba(31,38,135,0.02)]"
-                  : isDark
-                  ? "text-[#CBD5E1] border-transparent hover:bg-dark-elevated/40 hover:text-white"
-                  : "text-light-text-secondary border-transparent hover:bg-white/60 hover:text-light-text-primary"
+                  ? "bg-[var(--color-surface)] text-[var(--color-text-primary)] border-[var(--color-accent)]/30 shadow-[0_2px_10px_rgba(0,0,0,0.15)]"
+                  : "text-[var(--color-text-secondary)] border-transparent hover:bg-[var(--color-surface)]/60 hover:text-[var(--color-text-primary)]"
               }
             `}
           >
             <div className="flex items-center gap-3 min-w-0 flex-1">
-              <Briefcase className={`w-4 h-4 shrink-0 ${activeView === "board" ? (isDark ? "text-dark-accent" : "text-light-accent") : "opacity-70"}`} />
+              <Briefcase className={`w-4 h-4 shrink-0 ${activeView === "board" ? "text-[var(--color-accent)]" : "opacity-70"}`} />
               {isSidebarExpanded && <span>Job Board</span>}
             </div>
           </motion.button>
@@ -166,31 +145,27 @@ export const Sidebar = () => {
             className={`group flex items-center justify-between rounded-xl p-2.5 text-xs font-semibold cursor-pointer transition-all duration-200 border
               ${
                 activeView === "matcher"
-                  ? isDark
-                    ? "bg-dark-elevated/85 text-white border-dark-accent/30 shadow-[0_2px_10px_rgba(0,0,0,0.15)]"
-                    : "bg-white text-light-text-primary border-light-accent/20 shadow-[0_2px_10px_rgba(31,38,135,0.02)]"
-                  : isDark
-                  ? "text-[#CBD5E1] border-transparent hover:bg-dark-elevated/40 hover:text-white"
-                  : "text-light-text-secondary border-transparent hover:bg-white/60 hover:text-light-text-primary"
+                  ? "bg-[var(--color-surface)] text-[var(--color-text-primary)] border-[var(--color-accent)]/30 shadow-[0_2px_10px_rgba(0,0,0,0.15)]"
+                  : "text-[var(--color-text-secondary)] border-transparent hover:bg-[var(--color-surface)]/60 hover:text-[var(--color-text-primary)]"
               }
             `}
           >
             <div className="flex items-center gap-3 min-w-0 flex-1">
-              <Target className={`w-4 h-4 shrink-0 ${activeView === "matcher" ? (isDark ? "text-dark-accent" : "text-light-accent") : "opacity-70"}`} />
+              <Target className={`w-4 h-4 shrink-0 ${activeView === "matcher" ? "text-[var(--color-accent)]" : "opacity-70"}`} />
               {isSidebarExpanded && <span>Role Matcher</span>}
             </div>
           </motion.button>
         </div>
 
         {/* Bottom Menu Navigation */}
-        <div className={`mt-auto pt-4 border-t space-y-1.5 ${isDark ? "border-dark-border" : "border-light-border"}`}>
+        <div className="mt-auto pt-4 border-t border-[var(--color-border)] space-y-1.5">
           {/* Settings */}
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setIsSettingsOpen(true)}
             className={`flex items-center gap-3 w-full p-2.5 rounded-xl text-xs transition-all duration-200 cursor-pointer
-              ${isDark ? "hover:bg-dark-elevated/40 text-dark-text-secondary hover:text-white" : "hover:bg-white/60 text-light-text-secondary hover:text-light-text-primary"}
+              hover:bg-[var(--color-surface)]/60 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]
               ${!isSidebarExpanded && "justify-center"}
             `}
           >

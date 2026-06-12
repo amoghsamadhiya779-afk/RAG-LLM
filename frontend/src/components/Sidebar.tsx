@@ -4,6 +4,7 @@ import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useChat } from "@/context/ChatContext";
 import { Logo } from "./Logo";
+import {
   Plus,
   Settings,
   ChevronLeft,

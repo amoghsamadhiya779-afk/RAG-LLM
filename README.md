@@ -6,7 +6,7 @@ Powered by the **Gemini API** (`gemini-flash-latest` and `gemini-embedding-2`), 
 
 ---
 
-## 🌟 Key Features
+## Key Features
 
 1. **Job Intelligence Board**: A dedicated career UI to paste your resume and instantly receive an ATS compatibility score, a skill graph breakdown, and semantic job matching against an indexed job database.
 2. **Interactive Keyword Refiner**: Dynamically add, remove, and refine skills. The system instantly suggests missing keywords extracted from top matched jobs. Click to add them and watch your ATS score update live!

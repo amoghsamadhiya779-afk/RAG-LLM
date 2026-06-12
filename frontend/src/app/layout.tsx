@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { ChatProvider } from "@/context/ChatContext";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import "./globals.css";
 
 const inter = Inter({
@@ -21,11 +21,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={`${inter.variable} font-sans antialiased bg-[#050816] text-[#F8FAFC] transition-colors duration-300 w-screen h-screen overflow-hidden select-none`}
+        className={`${inter.variable} antialiased w-screen h-screen overflow-hidden select-none`}
       >
-        <ChatProvider>{children}</ChatProvider>
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );

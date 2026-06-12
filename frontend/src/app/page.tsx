@@ -10,13 +10,11 @@ import { ResumeMatcher } from "@/components/ResumeMatcher";
 import { JobBoard } from "@/components/JobBoard";
 
 export default function Home() {
-  const { theme, activeView } = useChat();
-  const isDark = theme === "dark";
+  const { activeView } = useChat();
 
   return (
     <main
-      className={`relative flex w-screen h-screen overflow-hidden transition-colors duration-300 select-none
-        ${isDark ? "bg-dark-bg text-dark-text-primary" : "bg-light-bg text-light-text-primary"}`}
+      className="relative flex w-screen h-screen overflow-hidden transition-colors duration-300 select-none bg-[var(--color-bg)] text-[var(--color-text-primary)]"
     >
       {/* Cinematic Starfield Canvas Layer */}
       <ParticleBackground />

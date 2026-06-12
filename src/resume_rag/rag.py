@@ -55,15 +55,32 @@ class ResumeRagService:
         top_k: int | None = None,
         filters: dict[str, str] | None = None,
     ) -> QueryResponse:
-        results = self.vector_store.search(
-            question,
-            self.embedding_model,
-            top_k=top_k or self.settings.top_k,
-            filters=filters,
-        )
+        # 1. Routing
+        route = self.answer_generator.route_query(question)
+        if route == "general":
+            return QueryResponse(answer="I am a Resume Intelligence Assistant. Please ask me about candidate skills, experience, or job matching.", sources=[])
+            
+        # 2. Query Translation (Multi-Query)
+        queries = self.answer_generator.generate_queries(question)
+        all_results = []
+        for q in queries:
+            results = self.vector_store.search(
+                q,
+                self.embedding_model,
+                top_k=top_k or self.settings.top_k,
+                filters=filters,
+            )
+            all_results.append(results)
+            
+        # 3. Retrieval Ranking (RAG-Fusion)
+        fused_results = self._reciprocal_rank_fusion(all_results, top_n=top_k or self.settings.top_k)
+        
+        # 4. Refinement (CRAG / Document Grading)
+        graded_results = self.answer_generator.grade_documents(question, fused_results)
+
         return QueryResponse(
-            answer=self.answer_generator.answer(question, results),
-            sources=[_to_source(result) for result in results],
+            answer=self.answer_generator.answer(question, graded_results),
+            sources=[_to_source(result) for result in graded_results],
         )
 
     def query_stream(
@@ -72,14 +89,33 @@ class ResumeRagService:
         top_k: int | None = None,
         filters: dict[str, str] | None = None,
     ) -> tuple[list[SourceSnippet], Iterator[str]]:
-        results = self.vector_store.search(
-            question,
-            self.embedding_model,
-            top_k=top_k or self.settings.top_k,
-            filters=filters,
-        )
-        sources = [_to_source(result) for result in results]
-        token_stream = self.answer_generator.answer_stream(question, results)
+        # 1. Routing
+        route = self.answer_generator.route_query(question)
+        if route == "general":
+            def gen():
+                yield "I am a Resume Intelligence Assistant. Please ask me about candidate skills, experience, or job matching."
+            return [], gen()
+            
+        # 2. Query Translation (Multi-Query)
+        queries = self.answer_generator.generate_queries(question)
+        all_results = []
+        for q in queries:
+            results = self.vector_store.search(
+                q,
+                self.embedding_model,
+                top_k=top_k or self.settings.top_k,
+                filters=filters,
+            )
+            all_results.append(results)
+            
+        # 3. Retrieval Ranking (RAG-Fusion)
+        fused_results = self._reciprocal_rank_fusion(all_results, top_n=top_k or self.settings.top_k)
+        
+        # 4. Refinement (CRAG / Document Grading)
+        graded_results = self.answer_generator.grade_documents(question, fused_results)
+
+        sources = [_to_source(result) for result in graded_results]
+        token_stream = self.answer_generator.answer_stream(question, graded_results)
         return sources, token_stream
 
     def match_role(self, role_title: str, job_description: str, top_k: int) -> MatchResponse:
@@ -279,8 +315,25 @@ class ResumeRagService:
             }
         ]
 
-
-
+    def _reciprocal_rank_fusion(self, results_list: list[list[SearchResult]], k: int = 60, top_n: int = 4) -> list[SearchResult]:
+        fused_scores = {}
+        chunk_map = {}
+        for results in results_list:
+            for rank, result in enumerate(results):
+                chunk_id = result.chunk.id
+                if chunk_id not in chunk_map:
+                    chunk_map[chunk_id] = result
+                if chunk_id not in fused_scores:
+                    fused_scores[chunk_id] = 0.0
+                fused_scores[chunk_id] += 1 / (rank + k)
+                
+        sorted_chunks = sorted(fused_scores.items(), key=lambda x: x[1], reverse=True)
+        
+        fused_results = []
+        for chunk_id, score in sorted_chunks[:top_n]:
+            fused_results.append(chunk_map[chunk_id])
+            
+        return fused_results
 
 def _to_source(result: SearchResult) -> SourceSnippet:
     return SourceSnippet(

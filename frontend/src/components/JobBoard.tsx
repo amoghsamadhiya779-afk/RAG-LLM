@@ -28,6 +28,7 @@ export const JobBoard = () => {
   const [interviewQuestions, setInterviewQuestions] = useState<any[]>([]);
   const [isGeneratingInterview, setIsGeneratingInterview] = useState(false);
   const [activeTab, setActiveTab] = useState<"ats" | "jobs">("ats");
+  const [newSkill, setNewSkill] = useState("");
 
   useEffect(() => {
     seedJobs().catch(() => {});
@@ -231,13 +232,65 @@ export const JobBoard = () => {
           </div>
           <div className="lg:col-span-8 space-y-6">
             <div className={`p-6 rounded-2xl border glass-panel ${isDark ? "bg-dark-surface/50 border-dark-border" : "bg-white/50 border-light-border"}`}>
-              <h4 className="text-xs font-semibold uppercase tracking-wider mb-4 flex items-center gap-2"><Code2 className="w-4 h-4" /> Extracted Skill Graph</h4>
-              <div className="flex flex-wrap gap-2">
+              <h4 className="text-xs font-semibold uppercase tracking-wider mb-4 flex items-center gap-2"><Code2 className="w-4 h-4" /> Keyword Refiner</h4>
+              <div className="flex flex-wrap gap-2 mb-4">
                 {profileData.skills.map((skill: string, idx: number) => (
-                  <span key={idx} className={`px-2.5 py-1 text-[10px] font-mono font-semibold rounded-lg border ${isDark ? "bg-white/5 border-white/10 text-slate-300" : "bg-black/5 border-black/10 text-slate-700"}`}>
+                  <span key={idx} className={`group flex items-center gap-1 px-2.5 py-1 text-[10px] font-mono font-semibold rounded-lg border transition-all ${isDark ? "bg-white/5 border-white/10 text-slate-300" : "bg-black/5 border-black/10 text-slate-700"}`}>
                     {skill}
+                    <button onClick={() => {
+                      const updated = { ...profileData, skills: profileData.skills.filter((s: string) => s !== skill) };
+                      setProfileData(updated);
+                      matchJobs(updated).then(setMatchedJobs).catch(console.error);
+                    }} className="opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-500">×</button>
                   </span>
                 ))}
+              </div>
+              <div className="flex gap-2 mb-4">
+                <input
+                  type="text"
+                  placeholder="Add a skill..."
+                  value={newSkill}
+                  onChange={(e) => setNewSkill(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && newSkill.trim()) {
+                      const skill = newSkill.trim();
+                      if (!profileData.skills.includes(skill)) {
+                        const updated = { ...profileData, skills: [...profileData.skills, skill] };
+                        setProfileData(updated);
+                        matchJobs(updated).then(setMatchedJobs).catch(console.error);
+                      }
+                      setNewSkill("");
+                    }
+                  }}
+                  className={`flex-1 px-3 py-1.5 text-xs rounded-lg border focus:outline-none ${isDark ? "bg-dark-bg border-dark-border text-white" : "bg-light-bg border-light-border text-black"}`}
+                />
+                <button onClick={() => {
+                  if (newSkill.trim()) {
+                    const skill = newSkill.trim();
+                    if (!profileData.skills.includes(skill)) {
+                      const updated = { ...profileData, skills: [...profileData.skills, skill] };
+                      setProfileData(updated);
+                      matchJobs(updated).then(setMatchedJobs).catch(console.error);
+                    }
+                    setNewSkill("");
+                  }
+                }} className={`px-3 py-1.5 text-xs font-semibold uppercase tracking-wider rounded-lg border ${isDark ? "bg-dark-elevated border-dark-border hover:bg-dark-accent/20" : "bg-light-bg border-light-border hover:bg-light-accent/10"}`}>Add</button>
+              </div>
+              <div className="pt-3 border-t border-white/5">
+                <h5 className="text-[10px] font-semibold uppercase tracking-wider mb-2 text-slate-500">Suggested Missing Keywords</h5>
+                <div className="flex flex-wrap gap-1.5">
+                  {Array.from(new Set(matchedJobs.flatMap(j => j.missing_skills))).slice(0, 8).map((ms: string, i: number) => (
+                    <button key={i} onClick={() => {
+                      if (!profileData.skills.includes(ms)) {
+                        const updated = { ...profileData, skills: [...profileData.skills, ms] };
+                        setProfileData(updated);
+                        matchJobs(updated).then(setMatchedJobs).catch(console.error);
+                      }
+                    }} className={`text-[9px] px-2 py-0.5 rounded border transition-colors ${isDark ? "bg-indigo-500/10 border-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30" : "bg-indigo-50 border-indigo-200 text-indigo-600 hover:bg-indigo-100"}`}>
+                      + {ms}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
             <div className={`p-6 rounded-2xl border glass-panel ${isDark ? "bg-dark-surface/50 border-dark-border" : "bg-white/50 border-light-border"}`}>

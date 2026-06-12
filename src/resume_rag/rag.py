@@ -3,8 +3,9 @@ from __future__ import annotations
 import json
 import os
 import re
-from typing import Iterator
+from collections.abc import Iterator
 
+from resume_rag.analyzer import ResumeAnalyzer
 from resume_rag.chunking import chunk_document
 from resume_rag.config import Settings
 from resume_rag.embeddings import EmbeddingModel
@@ -17,7 +18,6 @@ from resume_rag.schemas import (
     SourceSnippet,
 )
 from resume_rag.vector_store import JsonVectorStore, SearchResult
-from resume_rag.analyzer import ResumeAnalyzer
 
 
 class ResumeRagService:
@@ -285,12 +285,12 @@ class ResumeRagService:
             },
             {
                 "type": "technical",
-                "question": f"How do you handle database migrations and ensure zero-downtime when working with databases like PostgreSQL/Redis?",
+                "question": "How do you handle database migrations and ensure zero-downtime when working with databases like PostgreSQL/Redis?",
                 "answer_guide": "Assess migration tooling, locking issues, rollback strategies, and cache invalidation patterns."
             },
             {
                 "type": "technical",
-                "question": f"Describe how you package services using Docker and manage container health/logs in staging or production.",
+                "question": "Describe how you package services using Docker and manage container health/logs in staging or production.",
                 "answer_guide": "Evaluate Dockerfile optimizations, multi-stage builds, monitoring metrics, and resource limits."
             },
             {
@@ -330,7 +330,7 @@ class ResumeRagService:
         sorted_chunks = sorted(fused_scores.items(), key=lambda x: x[1], reverse=True)
         
         fused_results = []
-        for chunk_id, score in sorted_chunks[:top_n]:
+        for chunk_id, _score in sorted_chunks[:top_n]:
             fused_results.append(chunk_map[chunk_id])
             
         return fused_results

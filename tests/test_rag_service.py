@@ -1,12 +1,12 @@
 from pathlib import Path
 
+from resume_rag.analyzer import ResumeAnalyzer
 from resume_rag.config import Settings
 from resume_rag.embeddings import LocalHashEmbedding
 from resume_rag.llm import LocalExtractiveGenerator
 from resume_rag.rag import ResumeRagService
 from resume_rag.schemas import DocumentIn
 from resume_rag.vector_store import JsonVectorStore
-from resume_rag.analyzer import ResumeAnalyzer
 
 
 def test_rag_service_answers_with_sources(tmp_path: Path):

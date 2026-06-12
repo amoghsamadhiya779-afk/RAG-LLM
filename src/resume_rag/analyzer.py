@@ -1,6 +1,7 @@
-import re
 import json
 import os
+import re
+
 from resume_rag.config import Settings
 from resume_rag.embeddings import EmbeddingModel
 from resume_rag.vector_store import JsonVectorStore

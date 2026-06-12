@@ -1,11 +1,11 @@
 from functools import lru_cache
 
+from resume_rag.analyzer import ResumeAnalyzer
 from resume_rag.config import get_settings
 from resume_rag.embeddings import build_embedding_model
 from resume_rag.llm import build_answer_generator
 from resume_rag.rag import ResumeRagService
 from resume_rag.vector_store import JsonVectorStore
-from resume_rag.analyzer import ResumeAnalyzer
 
 
 @lru_cache

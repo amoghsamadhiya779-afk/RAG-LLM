@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 from abc import ABC, abstractmethod
-from typing import Iterator
+from collections.abc import Iterator
 
 from resume_rag.config import Settings
 from resume_rag.vector_store import SearchResult

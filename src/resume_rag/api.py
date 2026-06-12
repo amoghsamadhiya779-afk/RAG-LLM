@@ -1,31 +1,31 @@
-from typing import Annotated
 import json
+from typing import Annotated
 
-from fastapi import Depends, FastAPI, File, UploadFile, HTTPException
+from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 
 from resume_rag.config import Settings, get_settings
+from resume_rag.document_parser import parse_document
 from resume_rag.factory import get_service
 from resume_rag.rag import ResumeRagService
-from resume_rag.seeder import seed_jobs
-from resume_rag.document_parser import parse_document
 from resume_rag.schemas import (
+    AtsMatchRequest,
     DocumentIn,
     IngestResponse,
+    InterviewRequest,
+    InterviewResponse,
+    MatchedJob,
     MatchRequest,
     MatchResponse,
     QueryRequest,
     QueryResponse,
     ResumeAnalyzeRequest,
     ResumeAnalyzeResponse,
-    AtsMatchRequest,
-    MatchedJob,
     UpgradeRequest,
     UpgradeResponse,
-    InterviewRequest,
-    InterviewResponse,
 )
+from resume_rag.seeder import seed_jobs
 
 app = FastAPI(
     title="Resume RAG Command Center",
@@ -109,20 +109,20 @@ def match_role(request: MatchRequest, service: ServiceDep) -> MatchResponse:
 @app.post("/analyze/resume", response_model=ResumeAnalyzeResponse)
 async def analyze_resume_endpoint(
     req: ResumeAnalyzeRequest,
-    service: Annotated[ResumeRagService, Depends(get_service)],
+    service: ServiceDep,
 ) -> ResumeAnalyzeResponse:
     analysis = service.analyze_resume(req.text)
     return ResumeAnalyzeResponse(profile=analysis["profile"], scoring=analysis["scoring"])
 
 @app.post("/upload/resume")
-async def upload_resume_endpoint(file: UploadFile = File(...)):
+async def upload_resume_endpoint(file: UploadFile = File(...)): # noqa: B008
     """Accepts a PDF or DOCX and returns extracted text."""
     try:
-        contents = await file.read()
-        text = parse_document(contents, file.filename)
+        content = await file.read()
+        text = parse_document(content, file.filename)
         return {"text": text}
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 @app.post("/analyze/match", response_model=list[MatchedJob])
 def match_jobs(request: AtsMatchRequest, service: ServiceDep) -> list[MatchedJob]:

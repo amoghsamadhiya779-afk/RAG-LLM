@@ -1,6 +1,7 @@
 import json
-from resume_rag.vector_store import JsonVectorStore
+
 from resume_rag.embeddings import EmbeddingModel
+from resume_rag.vector_store import JsonVectorStore
 
 JOBS_DATA = [
     {

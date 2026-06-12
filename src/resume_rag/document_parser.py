@@ -1,4 +1,6 @@
 import io
+
+
 def parse_pdf(file_bytes: bytes) -> str:
     """Extracts text from a PDF file."""
     import PyPDF2

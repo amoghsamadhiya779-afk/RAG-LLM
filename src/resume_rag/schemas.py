@@ -56,12 +56,12 @@ class ResumeAnalyzeRequest(BaseModel):
 
 
 class CandidateProfile(BaseModel):
-    skills: list[str]
-    experience_years: int
-    current_title: str
-    education: str
-    projects: list[str]
-    achievements: list[str]
+    skills: list[str] = Field(default_factory=list)
+    experience_years: int = Field(default=0)
+    current_title: str = Field(default="Candidate")
+    education: str = Field(default="Not specified")
+    projects: list[str] = Field(default_factory=list)
+    achievements: list[str] = Field(default_factory=list)
 
 
 class ScoreBreakdown(BaseModel):

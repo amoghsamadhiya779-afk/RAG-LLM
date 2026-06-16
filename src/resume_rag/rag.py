@@ -41,6 +41,8 @@ class ResumeRagService:
             chunk_size=self.settings.chunk_size,
             overlap=self.settings.chunk_overlap,
         )
+        if not chunks:
+            raise ValueError("No chunks generated from the document. The text might be empty.")
         added = self.vector_store.add(chunks, self.embedding_model)
         document_id = document.metadata.get("document_id", document.source)
         return IngestResponse(
@@ -118,12 +120,16 @@ class ResumeRagService:
         token_stream = self.answer_generator.answer_stream(question, graded_results)
         return sources, token_stream
 
-    def match_role(self, role_title: str, job_description: str, top_k: int) -> MatchResponse:
+    def match_role(self, role_title: str, job_description: str, top_k: int, source_doc: str | None = None) -> MatchResponse:
+        filters = {"doc_type": "resume"}
+        if source_doc:
+            filters["source"] = source_doc
+            
         results = self.vector_store.search(
             job_description,
             self.embedding_model,
             top_k=top_k,
-            filters={"doc_type": "resume"},
+            filters=filters,
         )
         score, strengths, gaps = self.answer_generator.evaluate_match(
             role_title=role_title, job_description=job_description, contexts=results

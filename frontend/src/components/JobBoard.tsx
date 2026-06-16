@@ -213,7 +213,7 @@ export const JobBoard = () => {
                     <div className="absolute left-0 right-0 h-1 bg-[var(--color-primary-500)] animate-scan shadow-[0_0_20px_var(--accent)]" />
                   </div>
                 )}
-                <div className={`relative z-10 whitespace-pre-wrap ${isAnalyzing ? "text-gray-900 animate-pulse-subtle" : "text-gray-600"}`}>
+                <div className={`relative z-10 whitespace-pre-wrap ${isAnalyzing ? "text-white animate-pulse-subtle" : "text-gray-400"}`}>
                   {resumeText || (resumeFile ? `Scanning file: ${resumeFile.name}...` : "")}
                 </div>
               </div>
@@ -221,7 +221,6 @@ export const JobBoard = () => {
           </div>
         </motion.div>
 
-        {/* RIGHT PANE: Analysis / Output */}
         <div className="relative flex flex-col h-full min-h-[600px]">
           {isAnalyzing ? (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col items-center justify-center">
@@ -230,13 +229,13 @@ export const JobBoard = () => {
                 <div className="absolute inset-2 rounded-full border-r-2 border-[var(--color-primary-500)] animate-spin opacity-40 animation-delay-200"></div>
                 <Sparkles className="w-6 h-6 text-[var(--color-primary-600)] animate-pulse-subtle" />
               </div>
-              <p className="mt-6 text-sm font-semibold text-gray-600">Analyzing Resume Data...</p>
+              <p className="mt-6 text-sm font-semibold text-gray-400">Analyzing Resume Data...</p>
             </motion.div>
           ) : profileData && activeTab === "ats" ? (
              <motion.div variants={containerVariants} initial="hidden" animate="show" className="flex-1 space-y-6 overflow-y-auto pr-2 scrollbar-thin">
                
                <div className="clay-card p-8 flex flex-col items-center justify-center relative overflow-hidden">
-                 <h3 className="text-sm font-semibold text-gray-600 mb-6 z-10">Overall ATS Score</h3>
+                 <h3 className="text-sm font-semibold text-gray-400 mb-6 z-10">Overall ATS Score</h3>
                  <div className="relative w-48 h-48 flex items-center justify-center z-10">
                    <svg className="w-full h-full transform -rotate-90">
                      <circle cx="96" cy="96" r="88" stroke="var(--border)" strokeWidth="8" fill="none" />
@@ -252,7 +251,8 @@ export const JobBoard = () => {
                      />
                    </svg>
                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                     <span className="text-5xl font-bold text-gray-900">{atsScore?.total_score || 0}</span>
+                     <span className="text-4xl font-bold text-white">{atsScore?.total_score || 0}</span>
+                     <span className="text-xs font-semibold text-gray-500 tracking-widest mt-1">OUT OF 100</span>
                    </div>
                  </div>
                </div>
@@ -265,11 +265,11 @@ export const JobBoard = () => {
                        className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-transparent transition-colors"
                      >
                        <div className="flex items-center gap-4 w-full">
-                         <div className="w-10 h-10 rounded-lg bg-transparent border border-white/40 flex items-center justify-center text-sm font-bold text-gray-900">
-                           {acc.score}
+                         <div className="flex items-center gap-3">
+                           <span className="text-sm font-bold text-white">{acc.label}</span>
                          </div>
-                         <div className="flex-1">
-                           <h4 className="font-semibold text-gray-900">{acc.label}</h4>
+                         <div className="flex items-center gap-4">
+                           <span className="text-xs font-semibold text-gray-400">{acc.score}/{acc.max} pts</span>
                            <div className="w-full bg-[var(--border)] h-1.5 mt-2 rounded-full overflow-hidden relative">
                              <motion.div
                                initial={{ width: 0 }}
@@ -290,7 +290,7 @@ export const JobBoard = () => {
                            exit={{ height: 0, opacity: 0 }}
                            className="overflow-hidden"
                          >
-                           <div className="px-6 pb-6 pt-2 text-sm text-gray-600 leading-relaxed">
+                           <div className="px-6 pb-6 pt-2 text-sm text-gray-400 leading-relaxed">
                              {acc.tip}
                            </div>
                          </motion.div>
@@ -304,92 +304,78 @@ export const JobBoard = () => {
           ) : profileData && activeTab === "jobs" ? (
              <motion.div variants={containerVariants} initial="hidden" animate="show" className="flex-1 overflow-y-auto space-y-6 pr-2 scrollbar-thin">
                {matchedJobs.length === 0 ? (
-                 <div className="text-center py-20 text-sm font-medium text-gray-500">No jobs found matching your profile.</div>
+                 <div className="text-center py-20 text-sm font-medium text-gray-400">No jobs found matching your profile.</div>
+               ) : selectedJob ? (
+                 <div className="clay-card p-8 relative overflow-hidden flex flex-col">
+                 <div className="flex items-center justify-between mb-8">
+                   <div>
+                     <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                       <BookOpen className="w-5 h-5 text-[var(--color-primary-500)]" /> Technical Interview Prep
+                     </h3>
+                     <p className="text-sm text-gray-400 mt-1 font-medium">Custom tailored to {selectedJob.title} at {selectedJob.company}</p>
+                   </div>
+                   <button onClick={() => setSelectedJob(null)} className="px-4 py-2 text-sm font-bold text-gray-500 hover:text-white bg-white/40 hover:bg-white/60 backdrop-blur-md rounded-lg transition-colors border border-white/40">
+                     Back to Matches
+                   </button>
+                 </div>
+                 {isGeneratingInterview ? (
+                   <div className="flex-1 flex flex-col items-center justify-center py-12">
+                     <div className="w-16 h-16 rounded-full border-4 border-[var(--color-primary-100)] border-t-[var(--color-primary-500)] animate-spin mb-4"></div>
+                     <p className="text-sm font-bold text-gray-400">Synthesizing interview questions...</p>
+                   </div>
+                 ) : (
+                    <div className="space-y-4">
+                      {interviewQuestions.map((iq, idx) => (
+                        <div key={idx} className="p-4 rounded-xl border border-white/40 bg-transparent">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="px-2 py-0.5 text-[10px] font-bold rounded uppercase tracking-wider bg-[var(--color-primary-100)] text-[var(--color-primary-600)] border border-[var(--color-primary-500)]/20">
+                              {iq.type}
+                            </span>
+                          </div>
+                          <p className="font-semibold text-sm mb-2 text-white">{iq.question}</p>
+                          <p className="text-sm text-gray-400 leading-relaxed border-l-2 border-white/40 pl-3 py-1">
+                            {iq.answer_guide}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                 )}
+                 </div>
                ) : (
                  matchedJobs.map((job, idx) => (
-                   <motion.div
-                     variants={itemVariants}
-                     key={job.id}
-                     className="p-6 rounded-2xl clay-card bg-white/60 backdrop-blur-md hover:bg-transparent transition-all group border-white/40"
-                   >
-                     <div className="flex justify-between items-start mb-4 border-b border-white/40 pb-4">
+                   <div key={job.id} className="clay-card p-6 flex flex-col gap-4 relative overflow-hidden group">
+                     <div className="flex justify-between items-start">
                        <div>
-                         <h3 className="font-semibold text-lg text-gray-900 group-hover:text-[var(--color-primary-600)] transition-colors">{job.title}</h3>
-                         <div className="text-xs mt-1.5 text-gray-600 font-medium flex items-center gap-2">
-                           <span className="text-gray-900">{job.company}</span> • {job.location || "Remote"} • {job.salary_range || "N/A"}
-                         </div>
+                         <h3 className="text-lg font-bold text-white group-hover:text-[var(--color-primary-600)] transition-colors">{job.title}</h3>
+                         <p className="text-sm font-semibold text-gray-400 mt-1 flex items-center gap-2">
+                           {job.company} <span className="w-1 h-1 rounded-full bg-gray-300"></span> {job.location}
+                         </p>
                        </div>
                        <div className="flex flex-col items-end gap-2">
-                         <span className={`px-2.5 py-1 text-[10px] font-bold rounded uppercase tracking-wider border ${getConfidenceColor(job.application_confidence)}`}>
-                           {job.application_confidence} MATCH
+                         <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-emerald-400 to-emerald-600">
+                           {job.match_score}%
                          </span>
-                         <span className="text-xs font-semibold text-gray-600">
-                           Similarity: <span className="text-gray-900">{job.match_score}%</span>
+                         <span className={`text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider ${getConfidenceColor(job.application_confidence)}`}>
+                           {job.application_confidence}
                          </span>
                        </div>
                      </div>
-                     
-                     <div className="mb-6">
-                       <div className="text-xs font-semibold mb-2 text-gray-500">Missing Skills</div>
-                       <div className="flex flex-wrap gap-2">
-                         {job.missing_skills?.length > 0 ? job.missing_skills.map((ms: string, i: number) => (
-                           <span key={i} className="px-2.5 py-1 text-[11px] font-medium rounded-md bg-transparent border border-white/40 text-gray-600">
-                             {ms}
-                           </span>
-                         )) : (
-                           <span className="text-xs text-emerald-500 font-medium">100% Match</span>
-                         )}
-                       </div>
-                     </div>
-                     <div className="flex gap-3">
-                       {job.href ? (
-                         <a href={job.href} target="_blank" rel="noreferrer" className="flex-1 py-2.5 rounded-lg text-xs font-semibold text-center transition-all bg-transparent hover:bg-[var(--border)] text-gray-900 border border-white/40">
-                           View Application
-                         </a>
-                       ) : null}
-                       <button
-                         onClick={() => handlePrepInterview(job)}
-                         className={`flex-1 py-2.5 rounded-lg text-xs font-semibold transition-all
-                           ${isGeneratingInterview && selectedJob?.id === job.id ? "bg-transparent text-gray-500 cursor-wait" : "bg-[var(--color-primary-100)] text-[var(--color-primary-600)] hover:bg-[var(--color-primary-500)] hover:text-white"}`}
-                       >
-                         {isGeneratingInterview && selectedJob?.id === job.id ? "Generating..." : "Generate Interview"}
+                     <p className="text-sm text-gray-400 leading-relaxed line-clamp-2">
+                       {job.culture || job.description}
+                     </p>
+                     <div className="flex items-center gap-4 mt-2 border-t border-white/20 pt-4">
+                       <button onClick={() => window.open(job.href || "#", "_blank")} className="flex-1 py-2.5 rounded-lg bg-[var(--color-primary-50)] hover:bg-[var(--color-primary-100)] text-[var(--color-primary-700)] text-sm font-bold transition-colors">
+                         View Details
+                       </button>
+                       <button onClick={() => handlePrepInterview(job)} className="flex-1 py-2.5 rounded-lg bg-[var(--color-primary-500)] hover:bg-[var(--color-primary-600)] text-white text-sm font-bold transition-colors shadow-sm">
+                         Prep Interview
                        </button>
                      </div>
-                   </motion.div>
+                   </div>
                  ))
                )}
-
-               <AnimatePresence>
-                 {interviewQuestions.length > 0 && (
-                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
-                     <div className="p-6 rounded-2xl clay-card bg-white/60 backdrop-blur-md border-white/40 mt-6">
-                       <div className="flex items-center justify-between mb-6 border-b border-white/40 pb-4">
-                         <h4 className="text-sm font-semibold flex items-center gap-2 text-gray-900">
-                           <PlayCircle className="w-4 h-4 text-[var(--color-primary-600)]" /> Interview Prep Generated
-                         </h4>
-                         <button onClick={() => setInterviewQuestions([])} className="text-xs text-gray-500 hover:text-red-500 transition-colors">Close</button>
-                       </div>
-                       <div className="space-y-4">
-                         {interviewQuestions.map((iq, idx) => (
-                           <div key={idx} className="p-4 rounded-xl border border-white/40 bg-transparent">
-                             <div className="flex items-center gap-2 mb-2">
-                               <span className="px-2 py-0.5 text-[10px] font-bold rounded uppercase tracking-wider bg-[var(--color-primary-100)] text-[var(--color-primary-600)] border border-[var(--color-primary-500)]/20">
-                                 {iq.type}
-                               </span>
-                             </div>
-                             <p className="font-semibold text-sm mb-2 text-gray-900">{iq.question}</p>
-                             <p className="text-xs text-gray-600 leading-relaxed border-l-2 border-white/40 pl-3 py-1">
-                               {iq.answer_guide}
-                             </p>
-                           </div>
-                         ))}
-                       </div>
-                     </div>
-                   </motion.div>
-                 )}
-               </AnimatePresence>
-             </motion.div>
-          ) : null}
+              </motion.div>
+           ) : null}
         </div>
       </motion.div>
     </div>

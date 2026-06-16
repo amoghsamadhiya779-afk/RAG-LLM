@@ -44,11 +44,11 @@ export const SettingsPanel = () => {
             exit={{ x: "100%", opacity: 0.8 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
             className={`fixed top-4 right-4 bottom-4 w-[calc(100vw-32px)] sm:w-[380px] z-50 rounded-2xl flex flex-col overflow-hidden pointer-events-auto
-              glass-panel shadow-[0_20px_50px_rgba(0,0,0,0.4)] transition-colors duration-300
+              glass-card shadow-[0_20px_50px_rgba(0,0,0,0.4)] transition-colors duration-300
             `}
           >
             {/* Header */}
-            <div className={`p-5 flex items-center justify-between border-b border-[var(--border)]`}>
+            <div className={`p-5 flex items-center justify-between border-b border-white/40`}>
               <div className="flex items-center gap-2">
                 <Settings2 className="w-4.5 h-4.5 text-[var(--color-accent)]" />
                 <h2 className="font-semibold text-sm uppercase tracking-wider text-[var(--color-text-primary)]">Playground Options</h2>
@@ -57,7 +57,7 @@ export const SettingsPanel = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsSettingsOpen(false)}
-                className={`p-1.5 rounded-lg border border-[var(--border)] hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]`}
+                className={`p-1.5 rounded-lg border border-white/40 hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]`}
               >
                 <X className="w-3.5 h-3.5" />
               </motion.button>
@@ -75,7 +75,7 @@ export const SettingsPanel = () => {
                   placeholder="sk-..."
                   value={openaiKey}
                   onChange={(e) => setOpenaiKey(e.target.value)}
-                  className="w-full p-2 text-xs rounded-xl border border-[var(--border)] bg-[var(--color-bg)]/50 text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-accent)]/50 transition-all shadow-[inset_0_0_10px_rgba(0,0,0,0.1)] font-mono"
+                  className="w-full p-2 text-xs rounded-xl border border-white/40 bg-[var(--color-bg)]/50 text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-accent)]/50 transition-all shadow-[inset_0_0_10px_rgba(0,0,0,0.1)] font-mono"
                 />
               </div>
 
@@ -84,13 +84,13 @@ export const SettingsPanel = () => {
                 <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
                   Interface Appearance
                 </label>
-                <div className="flex p-1 rounded-xl border border-[var(--border)] bg-[var(--color-bg)]/50">
+                <div className="flex p-1 rounded-xl border border-white/40 bg-[var(--color-bg)]/50">
                   <button
                     onClick={() => setBaseTheme("dark")}
                     className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-semibold rounded-lg cursor-pointer transition-all duration-200
                       ${
                         isDark
-                          ? "bg-[var(--color-surface)] text-[var(--color-text-primary)] shadow-sm border border-[var(--border)]"
+                          ? "bg-[var(--color-surface)] text-[var(--color-text-primary)] shadow-sm border border-white/40"
                           : "text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
                       }
                     `}
@@ -103,7 +103,7 @@ export const SettingsPanel = () => {
                     className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-semibold rounded-lg cursor-pointer transition-all duration-200
                       ${
                         !isDark
-                          ? "bg-[var(--color-surface)] text-[var(--color-text-primary)] shadow-sm border border-[var(--border)]"
+                          ? "bg-[var(--color-surface)] text-[var(--color-text-primary)] shadow-sm border border-white/40"
                           : "text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
                       }
                     `}
@@ -182,7 +182,7 @@ export const SettingsPanel = () => {
                           ${
                             isSelected
                               ? "bg-[var(--color-accent)]/20 border-[var(--color-accent)] text-[var(--color-text-primary)]"
-                              : "bg-[var(--color-bg)] border-[var(--border)] text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
+                              : "bg-[var(--color-bg)] border-white/40 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
                           }
                         `}
                       >
@@ -211,7 +211,7 @@ export const SettingsPanel = () => {
                           ${
                             isSelected
                               ? "bg-[var(--color-accent)]/20 border-[var(--color-accent)] text-[var(--color-text-primary)]"
-                              : "bg-[var(--color-bg)] border-[var(--border)] text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
+                              : "bg-[var(--color-bg)] border-white/40 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
                           }
                         `}
                       >
@@ -240,7 +240,7 @@ export const SettingsPanel = () => {
                           ${
                             isSelected
                               ? "bg-[var(--color-accent)]/20 border-[var(--color-accent)] text-[var(--color-text-primary)]"
-                              : "bg-[var(--color-bg)] border-[var(--border)] text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
+                              : "bg-[var(--color-bg)] border-white/40 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
                           }
                         `}
                       >
@@ -269,7 +269,7 @@ export const SettingsPanel = () => {
                           ${
                             isSelected
                               ? "bg-[var(--color-accent)]/20 border-[var(--color-accent)] text-[var(--color-text-primary)]"
-                              : "bg-[var(--color-bg)] border-[var(--border)] text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
+                              : "bg-[var(--color-bg)] border-white/40 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
                           }
                         `}
                       >
@@ -282,7 +282,7 @@ export const SettingsPanel = () => {
             </div>
 
             {/* Footer Summary */}
-            <div className="p-5 mt-auto border-t border-[var(--border)] text-[10px] font-mono flex items-center gap-2 text-[var(--color-text-muted)]">
+            <div className="p-5 mt-auto border-t border-white/40 text-[10px] font-mono flex items-center gap-2 text-[var(--color-text-muted)]">
               <Sliders className="w-3.5 h-3.5" />
               <span>Context metrics loaded instantly</span>
             </div>

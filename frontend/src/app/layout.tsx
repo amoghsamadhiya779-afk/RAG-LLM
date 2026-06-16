@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter, Space_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { Navbar } from "@/components/shared/Navbar";
+import { BlobBackdrop } from "@/components/animations/BlobBackdrop";
 import "./globals.css";
 
 const inter = Inter({
@@ -18,8 +20,8 @@ const spaceMono = Space_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CryptOwl RAG - Crypto Strategy Through Time",
-  description: "Next-generation large language model playground and workspace.",
+  title: "Drew - Shape your digital presence",
+  description: "Next-generation career intelligence playground and workspace.",
 };
 
 export default function RootLayout({
@@ -30,9 +32,13 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${inter.variable} ${spaceMono.variable} antialiased w-screen h-screen overflow-hidden select-none`}
+        className={`${inter.variable} ${spaceMono.variable} antialiased w-screen min-h-screen overflow-x-hidden`}
       >
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <BlobBackdrop />
+          <Navbar />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -48,6 +48,10 @@ SettingsDep = Annotated[Settings, Depends(get_settings)]
 ServiceDep = Annotated[ResumeRagService, Depends(get_service)]
 
 
+@app.get("/")
+def root():
+    return {"status": "Resume RAG API is running"}
+
 @app.get("/health")
 def health(settings: SettingsDep, service: ServiceDep) -> dict[str, str | int]:
     return {

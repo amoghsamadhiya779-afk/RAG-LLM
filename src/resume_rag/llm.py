@@ -218,13 +218,75 @@ class OpenAIAnswerGenerator(AnswerGenerator):
             return score, strengths, gaps
 
     def generate_queries(self, question: str) -> list[str]:
-        return [question]
+        prompt = (
+            f"You are an AI language model assistant. Your task is to generate 3 different "
+            f"versions of the given user question to retrieve relevant documents from a vector database. "
+            f"By generating multiple perspectives on the user question, your goal is to help the user "
+            f"overcome some of the limitations of distance-based similarity search. "
+            f"Provide these alternative questions separated by newlines.\n\n"
+            f"Original question: {question}"
+        )
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                temperature=0.2,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            content = response.choices[0].message.content or ""
+            queries = [q.strip() for q in content.split("\n") if q.strip()]
+            return [question] + queries[:3]
+        except Exception:
+            return [question]
 
     def route_query(self, question: str) -> str:
-        return "resume_search"
+        prompt = (
+            f"You are an expert router. Given a user question, route it to either 'resume_search' "
+            f"or 'general'. Use 'general' for greetings or generic AI questions. Use 'resume_search' "
+            f"for questions related to candidates, skills, experience, or jobs.\n\n"
+            f"Question: {question}\n\n"
+            f"Output ONLY one word: 'resume_search' or 'general'."
+        )
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                temperature=0.0,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            content = response.choices[0].message.content or ""
+            if "general" in content.lower():
+                return "general"
+            return "resume_search"
+        except Exception:
+            return "resume_search"
 
     def grade_documents(self, question: str, contexts: list[SearchResult]) -> list[SearchResult]:
-        return contexts
+        if not contexts:
+            return []
+            
+        filtered_contexts = []
+        for result in contexts:
+            prompt = (
+                f"You are a grader assessing relevance of a retrieved document to a user question.\n"
+                f"Here is the retrieved document:\n\n{result.chunk.text}\n\n"
+                f"Here is the user question: {question}\n\n"
+                f"If the document contains keyword(s) or semantic meaning related to the user question, "
+                f"grade it as relevant. Give a binary score 'yes' or 'no' score to indicate whether the document is relevant to the question. "
+                f"Output ONLY 'yes' or 'no'."
+            )
+            try:
+                response = self.client.chat.completions.create(
+                    model=self.model,
+                    temperature=0.0,
+                    messages=[{"role": "user", "content": prompt}],
+                )
+                content = response.choices[0].message.content or ""
+                if "yes" in content.lower():
+                    filtered_contexts.append(result)
+            except Exception:
+                # On error, default to keeping it
+                filtered_contexts.append(result)
+                
+        return filtered_contexts if filtered_contexts else contexts
 
 
 class GeminiAnswerGenerator(AnswerGenerator):

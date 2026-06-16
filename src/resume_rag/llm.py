@@ -406,12 +406,16 @@ class GeminiAnswerGenerator(AnswerGenerator):
 def build_answer_generator(settings: Settings) -> AnswerGenerator:
     if settings.llm_provider == "gemini":
         api_key = settings.gemini_api_key or os.environ.get("GEMINI_API_KEY")
-        if not api_key:
-            raise ValueError("GEMINI_API_KEY is required for Gemini generation.")
-        return GeminiAnswerGenerator(api_key)
+        if api_key:
+            return GeminiAnswerGenerator(api_key)
+        else:
+            print("Warning: GEMINI_API_KEY is not set. Falling back to LocalExtractiveGenerator.")
+    
     if settings.llm_provider == "openai":
         api_key = settings.openai_api_key or os.environ.get("OPENAI_API_KEY")
-        if not api_key:
-            raise ValueError("RESUME_RAG_OPENAI_API_KEY or OPENAI_API_KEY is required for OpenAI generation.")
-        return OpenAIAnswerGenerator(api_key, settings.openai_chat_model)
+        if api_key:
+            return OpenAIAnswerGenerator(api_key, settings.openai_chat_model)
+        else:
+            print("Warning: OPENAI_API_KEY is not set. Falling back to LocalExtractiveGenerator.")
+            
     return LocalExtractiveGenerator()

@@ -357,7 +357,14 @@ class GeminiAnswerGenerator(AnswerGenerator):
             data = json.loads(content)
             return int(data["match_score"]), list(data["strengths"]), list(data["gaps"])
         except Exception:
-            return 50, ["Error parsing response"], ["Error parsing response"]
+            from resume_rag.rag import _extract_gaps, _extract_signal, _keyword_coverage
+
+            evidence_text = " ".join(result.chunk.text for result in contexts)
+            coverage = _keyword_coverage(job_description, evidence_text)
+            score = min(98, max(20, round(coverage * 100)))
+            strengths = _extract_signal(contexts, limit=4)
+            gaps = _extract_gaps(job_description, contexts)
+            return score, strengths, gaps
 
     def generate_queries(self, question: str) -> list[str]:
         prompt = (

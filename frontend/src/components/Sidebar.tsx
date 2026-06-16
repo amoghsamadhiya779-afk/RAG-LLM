@@ -68,9 +68,9 @@ export const Sidebar = () => {
                 transition={{ duration: 0.2 }}
                 className="flex items-center gap-2.5 font-bold text-sm tracking-tight select-none shrink-0"
               >
-                <Logo className="w-5.5 h-5.5" />
-                <span className="font-bold">AETHER RESUME RAG</span>
-                <span className="text-[8px] px-1.5 py-0.5 rounded font-mono font-semibold bg-[var(--color-accent)]/20 text-[var(--color-accent)]">v1.0</span>
+                <div className="w-6 h-6 rounded-md bg-[var(--color-accent)] text-white flex items-center justify-center font-bold">R</div>
+                <span className="font-bold text-[var(--color-text-primary)]">RagAI SaaS</span>
+                <span className="text-[9px] px-1.5 py-0.5 rounded-full font-semibold bg-[var(--color-accent-subtle)] text-[var(--color-accent)]">PRO</span>
               </motion.div>
             ) : (
               <motion.div
@@ -79,7 +79,7 @@ export const Sidebar = () => {
                 exit={{ opacity: 0 }}
                 className="mx-auto"
               >
-                <Logo className="w-6 h-6" />
+                <div className="w-6 h-6 rounded-md bg-[var(--color-accent)] text-white flex items-center justify-center font-bold">R</div>
               </motion.div>
             )}
           </AnimatePresence>

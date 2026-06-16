@@ -9,37 +9,39 @@
   --color-text-muted: var(--text-muted);
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
+  --color-accent-subtle: var(--accent-subtle);
   --color-success: #10b981;
   --color-warning: #f59e0b;
   --color-error: #ef4444;
   --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
-  --font-mono: var(--font-space-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
 :root {
-  /* CryptOwl Dark Aesthetic */
-  --bg: #07090d;
-  --surface: #11131a;
-  --border: rgba(255, 255, 255, 0.08);
-  --text-primary: #FAFAFA;
-  --text-secondary: #A1A1AA;
-  --text-muted: #4e5569;
+  /* Premium Dark SaaS Aesthetic */
+  --bg: #030712; /* Gray 950 */
+  --surface: #111827; /* Gray 900 */
+  --border: rgba(255, 255, 255, 0.05);
+  --text-primary: #F9FAFB; /* Gray 50 */
+  --text-secondary: #9CA3AF; /* Gray 400 */
+  --text-muted: #4B5563; /* Gray 600 */
   
-  /* CryptOwl Accents */
-  --accent: #2DE2E6; /* Neon Cyan */
-  --accent-hover: #03a9f4;
+  /* SaaS Accents (Indigo/Violet) */
+  --accent: #6366F1; /* Indigo 500 */
+  --accent-hover: #4F46E5; /* Indigo 600 */
+  --accent-subtle: rgba(99, 102, 241, 0.1);
 }
 
-/* Light mode support for the workspace, though CryptOwl is primarily dark */
 .light {
-  --bg: #f4f5f7;
-  --surface: #ffffff;
-  --border: rgba(0, 0, 0, 0.08);
-  --text-primary: #09090b;
-  --text-secondary: #52525b;
-  --text-muted: #a1a1aa;
-  --accent: #2563eb;
-  --accent-hover: #1d4ed8;
+  --bg: #FAFAFA;
+  --surface: #FFFFFF;
+  --border: rgba(0, 0, 0, 0.06);
+  --text-primary: #111827;
+  --text-secondary: #4B5563;
+  --text-muted: #9CA3AF;
+  
+  --accent: #4F46E5;
+  --accent-hover: #4338CA;
+  --accent-subtle: rgba(79, 70, 229, 0.08);
 }
 
 @layer base {
@@ -56,34 +58,27 @@
 .glass-panel {
   background: var(--surface);
   border: 1px solid var(--border);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border-radius: 1rem;
 }
 
-/* CryptOwl Glowing Panel */
+/* Polished Premium Panel */
 .glass-panel-premium {
-  background: rgba(17, 19, 26, 0.6);
-  border: 1px solid rgba(45, 226, 230, 0.15);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(45, 226, 230, 0.05);
-  backdrop-filter: blur(16px);
-  border-radius: 1.5rem;
-  transition: all 0.3s ease;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(12px);
+  border-radius: 1.25rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-panel-premium:hover {
-  border-color: rgba(45, 226, 230, 0.3);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(45, 226, 230, 0.1), 0 0 15px rgba(45, 226, 230, 0.15);
-}
-
-.neon-glow {
-  box-shadow: 0 0 10px var(--accent), 0 0 20px var(--accent), inset 0 0 10px var(--accent);
-}
-
-.neon-text {
-  text-shadow: 0 0 8px var(--accent);
+  border-color: rgba(99, 102, 241, 0.3);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(99, 102, 241, 0.1);
 }
 
 /* Custom Scrollbar */
-::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
   background: var(--border);
@@ -94,6 +89,14 @@
 }
 
 /* Animations */
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+.animate-pulse-subtle {
+  animation: pulse-subtle 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
 @keyframes scan {
   0% { top: -10%; }
   100% { top: 110%; }
@@ -107,10 +110,10 @@
   100% { transform: translateX(-50%); }
 }
 .animate-marquee {
-  animation: marquee 30s linear infinite;
+  animation: marquee 40s linear infinite;
 }
 
-/* CryptOwl Hero Background Gradients */
+/* Hero Background Gradients */
 .hero-bg-glow {
-  background: radial-gradient(circle at 50% 0%, rgba(45, 226, 230, 0.15), transparent 60%);
+  background: radial-gradient(circle at 50% 0%, var(--accent-subtle), transparent 70%);
 }

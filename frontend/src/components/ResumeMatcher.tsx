@@ -14,7 +14,6 @@ export const ResumeMatcher = () => {
     clearMatchResult,
     ingestDocument,
     uploadResume,
-    theme,
   } = useChat();
 
   const [selectedDoc, setSelectedDoc] = useState("");
@@ -24,7 +23,6 @@ export const ResumeMatcher = () => {
 
   const [isUploading, setIsUploading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const isDark = theme === "dark";
 
   const handleFileUpload = async (file: File) => {
     setIsUploading(true);
@@ -60,57 +58,51 @@ export const ResumeMatcher = () => {
   const strokeDashoffset = circumference - (score / 100) * circumference;
 
   return (
-    <div className="flex-1 flex flex-col h-full overflow-y-auto px-4 py-6 sm:px-6 w-full max-w-[1280px] mx-auto select-text scrollbar-thin">
+    <div className="flex-1 flex flex-col h-full overflow-y-auto px-4 py-8 sm:px-12 w-full max-w-[1400px] mx-auto select-text scrollbar-thin">
       
       {/* Page Header */}
-      <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div>
-          <h1 className={`text-xl font-bold tracking-tight uppercase transition-colors duration-300
-            ${isDark ? "text-dark-text-primary" : "text-light-text-primary"}`}>
-            RAG Profile Evaluator
+          <h1 className="text-3xl font-bold tracking-tight text-[var(--text-primary)] font-sans">
+            Profile Evaluator
           </h1>
-          <p className={`text-xs ${isDark ? "text-dark-text-secondary" : "text-light-text-secondary"}`}>
+          <p className="text-sm mt-2 text-[var(--text-secondary)] font-medium">
             Cross-evaluate candidate credentials against role requirements using semantic search embeddings.
           </p>
         </div>
         {matchResult && (
           <motion.button
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={clearMatchResult}
-            className={`px-3 py-1.5 rounded-lg border text-xs font-semibold uppercase tracking-wider transition-all duration-200 cursor-pointer
-              ${isDark ? "border-dark-border hover:bg-white/5" : "border-light-border hover:bg-black/5"}`}
+            className="px-5 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--text-primary)] text-sm font-semibold transition-all shadow-sm hover:bg-[var(--bg)]"
           >
             Reset Analysis
           </motion.button>
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
         
         {/* Left Form Panel */}
         <div className="lg:col-span-5">
-          <div className={`p-5 rounded-2xl border glass-panel transition-colors duration-300
-            ${isDark ? "bg-dark-surface/50 border-dark-border" : "bg-white/50 border-light-border"}`}>
+          <div className="p-8 rounded-2xl glass-panel-premium">
             
-            <div className="flex items-center gap-2 mb-4">
-              <FileText className={`w-4 h-4 ${isDark ? "text-dark-accent" : "text-light-accent"}`} />
-              <h2 className="text-sm font-semibold uppercase tracking-wider">Evaluation Specs</h2>
+            <div className="flex items-center gap-2 mb-6">
+              <FileText className="w-5 h-5 text-[var(--accent)]" />
+              <h2 className="text-lg font-semibold text-[var(--text-primary)]">Evaluation Specs</h2>
             </div>
 
-            <form onSubmit={handleEvaluate} className="space-y-4">
+            <form onSubmit={handleEvaluate} className="space-y-6">
               {/* Select Resume Document */}
               <div className="space-y-2">
-                <label className={`text-[10px] font-bold uppercase tracking-wider ${isDark ? "text-slate-500" : "text-slate-400"}`}>
+                <label className="text-xs font-semibold text-[var(--text-secondary)]">
                   Candidate Profile Index
                 </label>
                 <select
                   value={selectedDoc}
                   onChange={(e) => setSelectedDoc(e.target.value)}
-                  className={`w-full p-2.5 text-xs rounded-xl border focus:outline-none transition-all duration-200 cursor-pointer mb-3
-                    ${isDark 
-                      ? "bg-dark-bg border-dark-border text-white focus:border-dark-accent/40" 
-                      : "bg-light-bg border-light-border text-light-text-primary focus:border-light-accent/40"}`}
+                  className="w-full p-3 text-sm rounded-xl border border-[var(--border)] bg-[var(--bg)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] transition-all cursor-pointer shadow-sm"
                 >
                   <option value="">Select Ingested Document...</option>
                   {ingestedDocs.map((doc, idx) => (
@@ -118,16 +110,16 @@ export const ResumeMatcher = () => {
                   ))}
                 </select>
 
-                <div className="flex items-center gap-4 mb-3">
-                  <div className={`flex-1 h-px ${isDark ? "bg-white/10" : "bg-black/10"}`}></div>
-                  <span className={`text-[10px] font-bold uppercase tracking-widest ${isDark ? "text-slate-500" : "text-slate-400"}`}>OR UPLOAD NEW</span>
-                  <div className={`flex-1 h-px ${isDark ? "bg-white/10" : "bg-black/10"}`}></div>
+                <div className="flex items-center gap-4 py-4">
+                  <div className="flex-1 h-px bg-[var(--border)]"></div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">OR UPLOAD NEW</span>
+                  <div className="flex-1 h-px bg-[var(--border)]"></div>
                 </div>
 
-                <label className={`w-full flex flex-col items-center justify-center p-4 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-200 ${isDark ? "border-dark-border hover:border-dark-accent/50 bg-dark-bg/50" : "border-light-border hover:border-light-accent/50 bg-light-bg/50"}`}>
+                <label className="w-full flex flex-col items-center justify-center p-6 border-2 border-dashed border-[var(--border)] rounded-xl cursor-pointer transition-all hover:bg-[var(--accent-subtle)] hover:border-[var(--accent)] bg-[var(--bg)]">
                   <div className="flex flex-col items-center justify-center text-center">
-                    <FileText className={`w-5 h-5 mb-2 ${isDark ? "text-slate-400" : "text-slate-500"}`} />
-                    <p className={`mb-1 text-xs font-semibold ${isDark ? "text-slate-300" : "text-slate-700"}`}>
+                    <FileText className="w-6 h-6 mb-3 text-[var(--text-secondary)]" />
+                    <p className="mb-1 text-sm font-semibold text-[var(--text-primary)]">
                       {isUploading ? "Uploading & Ingesting..." : "Upload Resume (PDF, DOCX)"}
                     </p>
                   </div>
@@ -141,7 +133,7 @@ export const ResumeMatcher = () => {
 
               {/* Target Role Title */}
               <div className="space-y-2">
-                <label className={`text-[10px] font-bold uppercase tracking-wider ${isDark ? "text-slate-500" : "text-slate-400"}`}>
+                <label className="text-xs font-semibold text-[var(--text-secondary)]">
                   Target Role Title
                 </label>
                 <input
@@ -150,30 +142,30 @@ export const ResumeMatcher = () => {
                   placeholder="e.g. Senior Frontend Engineer"
                   value={roleTitle}
                   onChange={(e) => setRoleTitle(e.target.value)}
-                  className={`w-full p-2.5 text-xs rounded-xl border focus:outline-none transition-all duration-200
-                    ${isDark 
-                      ? "bg-dark-bg border-dark-border text-white focus:border-dark-accent/40" 
-                      : "bg-light-bg border-light-border text-light-text-primary focus:border-light-accent/40"}`}
+                  className="w-full p-3 text-sm rounded-xl border border-[var(--border)] bg-[var(--bg)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] transition-all shadow-sm"
                 />
               </div>
 
               {/* Job Description */}
               <div className="space-y-2">
-                <label className={`text-[10px] font-bold uppercase tracking-wider ${isDark ? "text-slate-500" : "text-slate-400"}`}>
+                <label className="text-xs font-semibold text-[var(--text-secondary)]">
                   Job Description / Role Specs (Min 50 chars)
                 </label>
                 <textarea
                   required
-                  rows={6}
+                  rows={5}
                   placeholder="Paste details of target qualifications, stack preferences, and role parameters..."
                   value={jobDescription}
                   onChange={(e) => setJobDescription(e.target.value)}
-                  className={`w-full p-2.5 text-xs rounded-xl border focus:outline-none transition-all duration-200 resize-none leading-relaxed
-                    ${isDark 
-                      ? "bg-dark-bg border-dark-border text-white focus:border-dark-accent/40" 
-                      : "bg-light-bg border-light-border text-light-text-primary focus:border-light-accent/40"}`}
+                  className="w-full p-3 text-sm rounded-xl border border-[var(--border)] bg-[var(--bg)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] transition-all resize-none shadow-sm"
                 />
               </div>
+
+              {errorMsg && (
+                <div className="p-3 border border-red-500/20 bg-red-500/10 rounded-xl text-red-500 text-sm text-center">
+                  {errorMsg}
+                </div>
+              )}
 
               {/* Run Button */}
               <motion.button
@@ -181,19 +173,17 @@ export const ResumeMatcher = () => {
                 whileTap={{ scale: 0.98 }}
                 type="submit"
                 disabled={matchLoading || !roleTitle.trim() || jobDescription.trim().length < 50}
-                className={`w-full p-3 rounded-xl border text-xs font-semibold uppercase tracking-wider transition-all duration-200 cursor-pointer justify-center flex items-center gap-2
+                className={`w-full p-3.5 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 shadow-md
                   ${
                     matchLoading || !roleTitle.trim() || jobDescription.trim().length < 50
-                      ? "bg-slate-800 text-slate-500 border-transparent cursor-not-allowed opacity-50"
-                      : isDark
-                      ? "bg-dark-accent border-dark-accent text-dark-bg hover:bg-dark-accent-hover shadow-[0_4px_14px_rgba(129,140,248,0.2)]"
-                      : "bg-light-accent border-light-accent text-white hover:bg-light-accent-hover shadow-[0_4px_14px_rgba(79,70,229,0.15)]"
+                      ? "bg-[var(--surface)] text-[var(--text-muted)] border border-[var(--border)] cursor-not-allowed"
+                      : "bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)]"
                   }
                 `}
               >
                 {matchLoading ? (
                   <>
-                    <svg className="animate-spin h-4 w-4 text-current" fill="none" viewBox="0 0 24 24">
+                    <svg className="animate-spin h-5 w-5 text-current" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                     </svg>
@@ -201,7 +191,7 @@ export const ResumeMatcher = () => {
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-3.5 h-3.5" />
+                    <Sparkles className="w-5 h-5" />
                     <span>Run Match Analysis</span>
                   </>
                 )}
@@ -220,19 +210,18 @@ export const ResumeMatcher = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className={`flex flex-col items-center justify-center p-12 rounded-2xl border min-h-[350px] glass-panel transition-colors duration-300
-                  ${isDark ? "bg-dark-surface/30 border-dark-border" : "bg-white/30 border-light-border"}`}
+                className="flex flex-col items-center justify-center p-12 rounded-2xl glass-panel-premium min-h-[500px]"
               >
-                <div className="relative w-16 h-16 mb-4">
+                <div className="relative w-20 h-20 mb-6">
                   <motion.div
-                    className={`absolute inset-0 rounded-full border-t-2 border-r-2 ${isDark ? "border-dark-accent" : "border-light-accent"}`}
+                    className="absolute inset-0 rounded-full border-t-2 border-r-2 border-[var(--accent)]"
                     animate={{ rotate: 360 }}
                     transition={{ repeat: Infinity, duration: 1.2, ease: "linear" }}
                   />
-                  <Layers className={`absolute inset-0 m-auto w-6 h-6 animate-pulse ${isDark ? "text-dark-accent" : "text-light-accent"}`} />
+                  <Layers className="absolute inset-0 m-auto w-8 h-8 animate-pulse-subtle text-[var(--accent)]" />
                 </div>
-                <h3 className="text-xs font-semibold uppercase tracking-wider mb-1">Vector Index Retrieval</h3>
-                <p className={`text-[10px] max-w-[240px] text-center ${isDark ? "text-slate-500" : "text-slate-400"}`}>
+                <h3 className="text-base font-semibold text-[var(--text-primary)] mb-2">Vector Index Retrieval</h3>
+                <p className="text-sm max-w-[300px] text-center text-[var(--text-secondary)]">
                   Retrieving grounded chunks and evaluating semantic matching coefficients...
                 </p>
               </motion.div>
@@ -244,29 +233,26 @@ export const ResumeMatcher = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 15 }}
                 transition={{ type: "spring", stiffness: 220, damping: 22 }}
-                className={`p-5 rounded-2xl border glass-panel transition-colors duration-300 flex flex-col gap-6
-                  ${isDark ? "bg-dark-surface/50 border-dark-border" : "bg-white/50 border-light-border"}`}
+                className="p-8 rounded-2xl glass-panel-premium flex flex-col gap-8 min-h-[500px]"
               >
                 {/* Score & Radial Dial */}
-                <div className="flex flex-col sm:flex-row items-center gap-6 pb-4 border-b border-white/5">
+                <div className="flex flex-col sm:flex-row items-center gap-8 pb-6 border-b border-[var(--border)]">
                   {/* SVG radial progress dial */}
-                  <div className="relative w-28 h-28 shrink-0 select-none">
+                  <div className="relative w-32 h-32 shrink-0 select-none">
                     <svg className="w-full h-full transform -rotate-90" viewBox="0 0 120 120">
-                      {/* Gray track circle */}
                       <circle
                         cx="60"
                         cy="60"
                         r={radius}
-                        stroke={isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)"}
+                        stroke="var(--border)"
                         strokeWidth={strokeWidth}
                         fill="transparent"
                       />
-                      {/* Active progress circle */}
                       <motion.circle
                         cx="60"
                         cy="60"
                         r={radius}
-                        stroke={isDark ? "url(#logo-grad-dark)" : "url(#logo-grad-light)"}
+                        stroke="var(--accent)"
                         strokeWidth={strokeWidth}
                         fill="transparent"
                         strokeDasharray={circumference}
@@ -276,42 +262,41 @@ export const ResumeMatcher = () => {
                         strokeLinecap="round"
                       />
                     </svg>
-                    {/* Inner score label */}
-                    <div className="absolute inset-0 flex flex-col items-center justify-center font-mono">
-                      <span className="text-xl font-bold">{score}%</span>
-                      <span className={`text-[8px] uppercase font-sans tracking-wider ${isDark ? "text-slate-500" : "text-slate-400"}`}>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <span className="text-3xl font-bold text-[var(--text-primary)]">{score}%</span>
+                      <span className="text-[10px] uppercase font-semibold text-[var(--text-secondary)] tracking-wider">
                         Match
                       </span>
                     </div>
                   </div>
 
                   {/* Summary Details */}
-                  <div className="flex-1 text-center sm:text-left space-y-1">
-                    <h3 className="text-sm font-semibold uppercase tracking-wider">{matchResult.role_title}</h3>
-                    <p className={`text-[10px] ${isDark ? "text-slate-400" : "text-slate-600"}`}>
+                  <div className="flex-1 text-center sm:text-left space-y-2">
+                    <h3 className="text-lg font-bold text-[var(--text-primary)]">{matchResult.role_title}</h3>
+                    <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
                       Semantically verified. The candidate profile matches the target specifications with a coefficient score of {score}/100.
                     </p>
-                    <div className="pt-2 flex flex-wrap gap-2 justify-center sm:justify-start">
-                      <span className={`text-[9px] font-semibold px-2 py-0.5 rounded-full border
+                    <div className="pt-4 flex flex-wrap gap-3 justify-center sm:justify-start">
+                      <span className={`text-xs font-semibold px-3 py-1 rounded-full border
                         ${score >= 80 
-                          ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" 
+                          ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500" 
                           : score >= 50 
-                          ? "bg-amber-500/10 border-amber-500/20 text-amber-400" 
-                          : "bg-red-500/10 border-red-500/20 text-red-400"}`}>
+                          ? "bg-amber-500/10 border-amber-500/20 text-amber-500" 
+                          : "bg-red-500/10 border-red-500/20 text-red-500"}`}>
                         {score >= 80 ? "High Fit" : score >= 50 ? "Moderate Fit" : "Low Fit"}
                       </span>
-                      <span className={`text-[9px] font-mono px-2 py-0.5 rounded-full border ${isDark ? "bg-white/2 border-white/5 text-slate-500" : "bg-black/2 border-black/5 text-slate-400"}`}>
-                        {matchResult.evidence.length} context nodes retrieved
+                      <span className="text-xs font-medium px-3 py-1 rounded-full border bg-[var(--surface)] border-[var(--border)] text-[var(--text-secondary)]">
+                        {matchResult.evidence.length} chunks retrieved
                       </span>
                     </div>
                   </div>
                 </div>
 
                 {/* Tabs Selector */}
-                <div className="flex border-b border-white/5 p-0.5 rounded-xl bg-black/10 self-start">
+                <div className="flex border-b border-[var(--border)] p-1 rounded-xl bg-[var(--surface)] self-start shadow-sm">
                   {[
                     { id: "strengths", name: "Strengths", count: matchResult.strengths.length },
-                    { id: "gaps", name: "Gaps & Gaps", count: matchResult.gaps.length },
+                    { id: "gaps", name: "Gaps", count: matchResult.gaps.length },
                     { id: "evidence", name: "RAG Evidence", count: matchResult.evidence.length },
                   ].map((tab) => {
                     const isSelected = activeTab === tab.id;
@@ -319,20 +304,16 @@ export const ResumeMatcher = () => {
                       <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id as "strengths" | "gaps" | "evidence")}
-                        className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-all duration-200 cursor-pointer flex items-center gap-1.5
+                        className={`text-sm font-semibold px-5 py-2 rounded-lg transition-all duration-200 cursor-pointer flex items-center gap-2
                           ${
                             isSelected
-                              ? isDark
-                                ? "bg-dark-elevated text-white border border-white/5"
-                                : "bg-white text-light-accent shadow-sm border border-light-border"
-                              : isDark
-                              ? "text-slate-400 hover:text-white"
-                              : "text-slate-550 hover:text-black"
+                              ? "bg-[var(--bg)] text-[var(--text-primary)] shadow-sm"
+                              : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                           }
                         `}
                       >
-                        <span>{tab.id === "gaps" ? "Gaps" : tab.name}</span>
-                        <span className={`text-[9px] px-1 py-0.2 rounded font-mono ${isSelected ? (isDark ? "bg-dark-accent/20 text-dark-accent" : "bg-light-accent/10 text-light-accent") : "bg-white/5 text-slate-500"}`}>
+                        <span>{tab.name}</span>
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${isSelected ? "bg-[var(--accent-subtle)] text-[var(--accent)]" : "bg-[var(--border)] text-[var(--text-muted)]"}`}>
                           {tab.count}
                         </span>
                       </button>
@@ -341,7 +322,7 @@ export const ResumeMatcher = () => {
                 </div>
 
                 {/* Tab Content Panels */}
-                <div className="flex-1 min-h-[220px]">
+                <div className="flex-1 min-h-[250px]">
                   <AnimatePresence mode="wait">
                     {activeTab === "strengths" && (
                       <motion.div
@@ -349,17 +330,16 @@ export const ResumeMatcher = () => {
                         initial={{ opacity: 0, x: -8 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -8 }}
-                        className="space-y-2"
+                        className="space-y-3"
                       >
                         {matchResult.strengths.map((str, idx) => (
-                          <div key={idx} className={`flex items-start gap-3 p-3 rounded-xl border text-xs leading-relaxed
-                            ${isDark ? "bg-white/1 border-white/5" : "bg-black/1 border-black/5"}`}>
-                            <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400 mt-0.5" />
+                          <div key={idx} className="flex items-start gap-4 p-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-sm leading-relaxed text-[var(--text-primary)] shadow-sm">
+                            <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-500 mt-0.5" />
                             <span>{str}</span>
                           </div>
                         ))}
                         {matchResult.strengths.length === 0 && (
-                          <p className="text-xs text-slate-500 text-center py-6">No specific semantic strengths evaluated.</p>
+                          <p className="text-sm text-[var(--text-muted)] text-center py-10">No specific semantic strengths evaluated.</p>
                         )}
                       </motion.div>
                     )}
@@ -370,17 +350,16 @@ export const ResumeMatcher = () => {
                         initial={{ opacity: 0, x: 8 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 8 }}
-                        className="space-y-2"
+                        className="space-y-3"
                       >
                         {matchResult.gaps.map((gap, idx) => (
-                          <div key={idx} className={`flex items-start gap-3 p-3 rounded-xl border text-xs leading-relaxed
-                            ${isDark ? "bg-white/1 border-white/5" : "bg-black/1 border-black/5"}`}>
-                            <AlertTriangle className="w-4 h-4 shrink-0 text-amber-500 mt-0.5" />
+                          <div key={idx} className="flex items-start gap-4 p-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-sm leading-relaxed text-[var(--text-primary)] shadow-sm">
+                            <AlertTriangle className="w-5 h-5 shrink-0 text-amber-500 mt-0.5" />
                             <span>{gap}</span>
                           </div>
                         ))}
                         {matchResult.gaps.length === 0 && (
-                          <p className="text-xs text-slate-500 text-center py-6">No critical candidate profile gaps detected!</p>
+                          <p className="text-sm text-[var(--text-muted)] text-center py-10">No critical candidate profile gaps detected!</p>
                         )}
                       </motion.div>
                     )}
@@ -391,22 +370,21 @@ export const ResumeMatcher = () => {
                         initial={{ opacity: 0, y: 8 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 8 }}
-                        className="space-y-3"
+                        className="space-y-4"
                       >
                         {matchResult.evidence.map((snippet, idx) => (
-                          <div key={idx} className={`p-4 rounded-xl border flex flex-col gap-2
-                            ${isDark ? "bg-dark-bg/60 border-dark-border" : "bg-light-bg border-light-border"}`}>
-                            <div className="flex items-center justify-between text-[9px] font-mono text-slate-500">
-                              <span className="flex items-center gap-1">
-                                <BookOpen className="w-3 h-3" />
+                          <div key={idx} className="p-5 rounded-xl border border-[var(--border)] bg-[var(--surface)] flex flex-col gap-3 shadow-sm">
+                            <div className="flex items-center justify-between text-xs font-semibold text-[var(--text-secondary)]">
+                              <span className="flex items-center gap-2">
+                                <BookOpen className="w-4 h-4 text-[var(--text-muted)]" />
                                 <span>{snippet.source}</span>
                               </span>
-                              <span className={`font-semibold ${isDark ? "text-dark-accent" : "text-light-accent"}`}>
+                              <span className="text-[var(--accent)] bg-[var(--accent-subtle)] px-2.5 py-1 rounded-full">
                                 Similarity: {Math.round(snippet.score * 100)}%
                               </span>
                             </div>
-                            <p className={`text-[11px] leading-relaxed italic ${isDark ? "text-slate-355" : "text-slate-700"}`}>
-                              &quot;{snippet.text}&quot;
+                            <p className="text-sm leading-relaxed italic text-[var(--text-primary)] opacity-90 border-l-2 border-[var(--border)] pl-4">
+                              "{snippet.text}"
                             </p>
                           </div>
                         ))}
@@ -422,12 +400,11 @@ export const ResumeMatcher = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className={`flex flex-col items-center justify-center p-8 rounded-2xl border border-dashed min-h-[350px] transition-colors duration-300
-                  ${isDark ? "border-dark-border text-slate-500" : "border-light-border text-slate-400"}`}
+                className="flex flex-col items-center justify-center p-12 rounded-2xl border-2 border-dashed border-[var(--border)] bg-[var(--bg)] min-h-[500px]"
               >
-                <Layers className="w-8 h-8 mb-4 stroke-1 opacity-50" />
-                <h3 className="text-xs font-semibold uppercase tracking-wider mb-1">Awaiting spec analysis</h3>
-                <p className="text-[10px] max-w-[200px] text-center opacity-60">
+                <Layers className="w-12 h-12 mb-6 text-[var(--text-muted)]" />
+                <h3 className="text-lg font-bold text-[var(--text-primary)] mb-2">Awaiting Analysis</h3>
+                <p className="text-sm max-w-[300px] text-center text-[var(--text-secondary)] leading-relaxed">
                   Select a candidate resume and enter target job requirements to generate a role fit report.
                 </p>
               </motion.div>

@@ -10,81 +10,99 @@ import { useChat } from "@/context/ChatContext";
 import { GlassCard } from "@/components/shared/GlassCard";
 import { motion, AnimatePresence } from "framer-motion";
 import { Settings } from "lucide-react";
+import { StartupSequence } from "@/components/animations/StartupSequence";
+import { BackdropEngine } from "@/components/canvas/BackdropEngine";
 
 export default function Home() {
   const { activeView, setActiveView } = useChat();
   const [showSettings, setShowSettings] = useState(false);
+  const [booted, setBooted] = useState(false);
 
   return (
-    <main className="relative flex flex-col w-full min-h-screen text-gray-800 font-sans">
+    <main className="relative flex flex-col w-full min-h-screen font-sans">
+      {!booted && <StartupSequence onComplete={() => setBooted(true)} />}
       
-      {/* Hero Landing Section */}
-      <Hero />
+      {booted && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1 }}
+          className="relative w-full flex flex-col items-center"
+        >
+          <BackdropEngine />
 
-      {/* Workspace Section */}
-      <section id="workspace" className="relative z-10 w-full max-w-7xl mx-auto px-4 pb-24">
-        
-        {/* Navigation Tabs & Settings Toggle */}
-        <GlassCard className="flex items-center justify-between mb-8 p-4" variant="glass">
-          <div className="flex space-x-2">
-            <button
-              onClick={() => setActiveView("matcher")}
-              className={`px-6 py-2 rounded-full transition-all font-semibold ${
-                activeView === "matcher" 
-                  ? "bg-gradient-to-r from-[var(--color-primary-500)] to-[#f5576c] text-white shadow-md" 
-                  : "hover:bg-white/50 text-gray-600"
-              }`}
-            >
-              Resume Insights
-            </button>
-            <button
-              onClick={() => setActiveView("board")}
-              className={`px-6 py-2 rounded-full transition-all font-semibold ${
-                activeView === "board" 
-                  ? "bg-gradient-to-r from-[var(--color-primary-500)] to-[#f5576c] text-white shadow-md" 
-                  : "hover:bg-white/50 text-gray-600"
-              }`}
-            >
-              Job Matching
-            </button>
-          </div>
+          {/* Content overlay */}
+          <div className="relative z-10 w-full flex flex-col">
+            {/* Hero Landing Section */}
+            <Hero />
 
-          <button
-            onClick={() => setShowSettings(!showSettings)}
-            className="p-2 rounded-full hover:bg-white/50 text-gray-600 transition-colors"
-            title="API Settings"
-          >
-            <Settings className="w-6 h-6" />
-          </button>
-        </GlassCard>
+            {/* Workspace Section */}
+            <section id="workspace" className="relative z-10 w-full max-w-7xl mx-auto px-4 pb-24">
+              
+              {/* Navigation Tabs & Settings Toggle */}
+              <GlassCard className="flex items-center justify-between mb-8 p-4 clay-glass" variant="glass">
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => setActiveView("matcher")}
+                    className={`px-6 py-2 rounded-full transition-all font-semibold ${
+                      activeView === "matcher" 
+                        ? "bg-gradient-to-r from-purple-400 to-indigo-500 text-white shadow-[0_0_20px_rgba(168,85,247,0.4)]" 
+                        : "hover:bg-white/10 text-gray-400"
+                    }`}
+                  >
+                    Resume Insights
+                  </button>
+                  <button
+                    onClick={() => setActiveView("board")}
+                    className={`px-6 py-2 rounded-full transition-all font-semibold ${
+                      activeView === "board" 
+                        ? "bg-gradient-to-r from-purple-400 to-indigo-500 text-white shadow-[0_0_20px_rgba(168,85,247,0.4)]" 
+                        : "hover:bg-white/10 text-gray-400"
+                    }`}
+                  >
+                    Job Matching
+                  </button>
+                </div>
 
-        {/* Settings Modal/Expand */}
-        <AnimatePresence>
-          {showSettings && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="mb-8 overflow-hidden"
-            >
-              <GlassCard variant="clay">
-                <SettingsPanel />
+                <button
+                  onClick={() => setShowSettings(!showSettings)}
+                  className="p-2 rounded-full hover:bg-white/10 text-gray-400 transition-colors"
+                  title="API Settings"
+                >
+                  <Settings className="w-6 h-6" />
+                </button>
               </GlassCard>
-            </motion.div>
-          )}
-        </AnimatePresence>
 
-        {/* Main Content Area */}
-        <div id="insights" className="relative z-10 w-full rounded-3xl overflow-hidden min-h-[600px]">
-          {activeView === "matcher" && <ResumeMatcher />}
-          {activeView === "board" && <JobBoard />}
-        </div>
-      </section>
+              {/* Settings Modal/Expand */}
+              <AnimatePresence>
+                {showSettings && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="mb-8 overflow-hidden"
+                  >
+                    <GlassCard variant="clay" className="clay-glass p-6">
+                      <SettingsPanel />
+                    </GlassCard>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
-      {/* Marquee Footer */}
-      <section className="w-full relative z-0 py-10 opacity-60 pointer-events-none">
-        <CompanyMarquee />
-      </section>
+              {/* Main Content Area */}
+              <div id="insights" className="relative z-10 w-full rounded-3xl overflow-hidden min-h-[600px] clay-glass p-6">
+                {activeView === "matcher" && <ResumeMatcher />}
+                {activeView === "board" && <JobBoard />}
+              </div>
+            </section>
+
+            {/* Marquee Footer */}
+            <section className="w-full relative z-0 py-10 opacity-60 pointer-events-none">
+              <CompanyMarquee />
+            </section>
+          </div>
+        </motion.div>
+      )}
     </main>
   );
 }

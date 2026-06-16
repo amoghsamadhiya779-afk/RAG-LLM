@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter, Space_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Navbar } from "@/components/shared/Navbar";
-import { BlobBackdrop } from "@/components/animations/BlobBackdrop";
 import "./globals.css";
 
 const inter = Inter({
@@ -24,6 +23,8 @@ export const metadata: Metadata = {
   description: "Next-generation career intelligence playground and workspace.",
 };
 
+import { LenisProvider } from "@/components/dom/LenisProvider";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -35,9 +36,10 @@ export default function RootLayout({
         className={`${inter.variable} ${spaceMono.variable} antialiased w-screen min-h-screen overflow-x-hidden`}
       >
         <ThemeProvider>
-          <BlobBackdrop />
-          <Navbar />
-          {children}
+          <LenisProvider>
+            <Navbar />
+            {children}
+          </LenisProvider>
         </ThemeProvider>
       </body>
     </html>

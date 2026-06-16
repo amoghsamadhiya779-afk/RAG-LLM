@@ -364,6 +364,8 @@ def _matches_filters(chunk: StoredChunk, filters: dict[str, str]) -> bool:
     for key, expected in filters.items():
         if key == "doc_type" and chunk.doc_type != expected:
             return False
-        if key != "doc_type" and chunk.metadata.get(key) != expected:
+        elif key == "source" and chunk.source != expected:
+            return False
+        elif key not in ("doc_type", "source") and chunk.metadata.get(key) != expected:
             return False
     return True

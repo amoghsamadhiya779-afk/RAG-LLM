@@ -292,8 +292,8 @@ class OpenAIAnswerGenerator(AnswerGenerator):
 class GeminiAnswerGenerator(AnswerGenerator):
     def __init__(self, api_key: str):
         self.api_key = api_key
-        # Use gemini-flash-latest as the latest standard for fast tasks
-        self.url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent"
+        # Use gemini-1.5-flash as the latest standard for fast tasks
+        self.url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
         self.headers = {
             "Content-Type": "application/json",
             "X-goog-api-key": self.api_key
@@ -304,12 +304,16 @@ class GeminiAnswerGenerator(AnswerGenerator):
         payload = {
             "contents": [{"parts": [{"text": prompt}]}]
         }
-        resp = requests.post(self.url, headers=self.headers, json=payload)
-        resp.raise_for_status()
-        data = resp.json()
         try:
+            resp = requests.post(self.url, headers=self.headers, json=payload)
+            resp.raise_for_status()
+            data = resp.json()
             return data["candidates"][0]["content"]["parts"][0]["text"]
-        except (KeyError, IndexError):
+        except requests.exceptions.HTTPError as e:
+            print(f"Gemini API Error: {e.response.text}")
+            return ""
+        except (KeyError, IndexError, Exception) as e:
+            print(f"Gemini Exception: {e}")
             return ""
 
     def answer(self, question: str, contexts: list[SearchResult]) -> str:

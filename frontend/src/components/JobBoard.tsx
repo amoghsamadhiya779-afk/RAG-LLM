@@ -147,7 +147,7 @@ export const JobBoard = () => {
                   <div className="w-16 h-16 rounded-full flex items-center justify-center mb-6 transition-transform duration-500 group-hover:scale-125 group-hover:rotate-12 bg-[var(--accent)]/10 shadow-[0_0_20px_rgba(45,226,230,0.2)]">
                     <Sparkles className="w-8 h-8 text-[var(--accent)]" />
                   </div>
-                  <p className="mb-3 text-lg font-bold text-center text-white font-mono uppercase tracking-widest">
+                  <p className="mb-3 text-lg font-bold text-center text-white font-mono uppercase tracking-widest truncate w-full px-4" title={resumeFile ? resumeFile.name : ""}>
                     {resumeFile ? resumeFile.name : "DROP DATA FILE"}
                   </p>
                   <p className="text-xs text-center px-4 text-white/40 font-mono">

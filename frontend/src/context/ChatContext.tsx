@@ -94,7 +94,8 @@ interface ChatContextType {
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_URL_RAW = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_URL = API_URL_RAW.replace(/\/+$/, "");
 
 export const ChatProvider = ({ children }: { children: ReactNode }) => {
   // Model settings

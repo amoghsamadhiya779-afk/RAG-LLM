@@ -65,6 +65,20 @@ export const SettingsPanel = () => {
 
             {/* Scrollable Content */}
             <div className="flex-1 overflow-y-auto p-5 space-y-6 scrollbar-thin">
+              {/* OpenAI API Key Input */}
+              <div className="space-y-2.5">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
+                  OpenAI API Key (Required for AI Features)
+                </label>
+                <input
+                  type="password"
+                  placeholder="sk-..."
+                  value={openaiKey}
+                  onChange={(e) => setOpenaiKey(e.target.value)}
+                  className="w-full p-2 text-xs rounded-xl border border-border/50 bg-[var(--color-bg)]/50 text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-accent)]/50 transition-all shadow-[inset_0_0_10px_rgba(0,0,0,0.1)] font-mono"
+                />
+              </div>
+
               {/* Theme Settings Toggle Group */}
               <div className="space-y-2.5">
                 <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)]">

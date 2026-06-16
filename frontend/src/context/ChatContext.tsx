@@ -54,6 +54,8 @@ interface ChatContextType {
   setIsSidebarExpanded: (expanded: boolean) => void;
   isSettingsOpen: boolean;
   setIsSettingsOpen: (open: boolean) => void;
+  openaiKey: string;
+  setOpenaiKey: (key: string) => void;
   sessions: ChatSession[];
   currentSessionId: string | null;
   setCurrentSessionId: (id: string | null) => void;
@@ -105,6 +107,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   // Layout states
   const [isSidebarExpanded, setIsSidebarExpanded] = useState<boolean>(true);
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
+  const [openaiKey, setOpenaiKey] = useState<string>("");
 
   // Chat sessions states
   const [sessions, setSessions] = useState<ChatSession[]>([]);
@@ -145,7 +148,9 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchIngestedDocs = async () => {
     try {
-      const res = await fetch(`${API_URL}/documents`);
+      const res = await fetch(`${API_URL}/documents`, {
+        headers: getHeaders()
+      });
       if (res.ok) {
         const data = await res.json();
         // Extract unique source names
@@ -159,7 +164,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     try {
       const res = await fetch(`${API_URL}/documents`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getHeaders(),
         body: JSON.stringify({
           text: content,
           source: name,
@@ -183,29 +188,47 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     try {
       const res = await fetch(`${API_URL}/match`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getHeaders(),
         body: JSON.stringify({
           role_title: roleTitle,
           job_description: jobDescription,
           top_k: 8
         })
       });
-      if (res.ok) {
-        const data = await res.json();
-        setMatchResult(data);
-      }
-    } catch {}
+      if (!res.ok) throw new Error("Failed to run match evaluation");
+      const data = await res.json();
+      setMatchResult(data);
+    } catch (e) {
+      setMatchLoading(false);
+      throw e;
+    }
     setMatchLoading(false);
   };
 
   const clearMatchResult = () => setMatchResult(null);
 
+  const getHeaders = () => {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    if (openaiKey) {
+      headers["X-OpenAI-Key"] = openaiKey;
+    }
+    return headers;
+  };
+
   const uploadResume = async (file: File): Promise<string> => {
     const formData = new FormData();
     formData.append("file", file);
     
+    const headers: Record<string, string> = {};
+    if (openaiKey) {
+      headers["X-OpenAI-Key"] = openaiKey;
+    }
+
     const res = await fetch(`${API_URL}/upload/resume`, {
       method: "POST",
+      headers,
       body: formData
     });
     if (!res.ok) throw new Error("Failed to upload resume file");
@@ -216,8 +239,8 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const analyzeResume = async (text: string): Promise<Record<string, unknown>> => {
     const res = await fetch(`${API_URL}/analyze/resume`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text })
+      headers: getHeaders(),
+      body: JSON.stringify({ text, openai_key: openaiKey || undefined })
     });
     if (!res.ok) throw new Error("Failed to analyze resume");
     return res.json();
@@ -226,7 +249,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const matchJobs = async (profile: any): Promise<any[]> => {
     const res = await fetch(`${API_URL}/analyze/match`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: getHeaders(),
       body: JSON.stringify({ profile, top_k: 10 })
     });
     if (!res.ok) throw new Error("Failed to match jobs");
@@ -236,7 +259,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const upgradeSkills = async (profile: any, skills: string[]): Promise<any> => {
     const res = await fetch(`${API_URL}/analyze/upgrade`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: getHeaders(),
       body: JSON.stringify({ profile, learned_skills: skills })
     });
     if (!res.ok) throw new Error("Failed to evaluate skill upgrades");
@@ -246,7 +269,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const generateInterview = async (jobId: string, profile: any): Promise<any> => {
     const res = await fetch(`${API_URL}/analyze/interview`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: getHeaders(),
       body: JSON.stringify({ job_id: jobId, profile })
     });
     if (!res.ok) throw new Error("Failed to generate interview");
@@ -264,6 +287,9 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     if (typeof window !== "undefined" && window.innerWidth < 768) {
       setIsSidebarExpanded(false);
     }
+
+    const savedKey = localStorage.getItem("chat-ui-openai-key");
+    if (savedKey) setOpenaiKey(savedKey);
 
     const savedSessions = localStorage.getItem("chat-ui-sessions");
     if (savedSessions) {
@@ -604,6 +630,11 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         setIsSidebarExpanded,
         isSettingsOpen,
         setIsSettingsOpen,
+        openaiKey,
+        setOpenaiKey: (key: string) => {
+          setOpenaiKey(key);
+          localStorage.setItem("chat-ui-openai-key", key);
+        },
         sessions,
         currentSessionId,
         setCurrentSessionId,

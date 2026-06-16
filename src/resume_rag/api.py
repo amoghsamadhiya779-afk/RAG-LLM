@@ -1,7 +1,7 @@
 import json
 from typing import Annotated
 
-from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, Header, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 
@@ -107,11 +107,16 @@ def match_role(request: MatchRequest, service: ServiceDep) -> MatchResponse:
 
 
 @app.post("/analyze/resume", response_model=ResumeAnalyzeResponse)
-async def analyze_resume_endpoint(
-    req: ResumeAnalyzeRequest,
+def analyze_resume(
+    request: ResumeAnalyzeRequest,
     service: ServiceDep,
+    x_openai_key: str | None = Header(default=None),
 ) -> ResumeAnalyzeResponse:
-    analysis = service.analyze_resume(req.text)
+    # 1. Use openai_key from body if provided (legacy), else use Header
+    api_key = request.openai_key or x_openai_key
+    
+    # 2. Extract profile (uses LLM or falls back to regex)
+    analysis = service.analyze_resume(request.text, api_key)
     return ResumeAnalyzeResponse(profile=analysis["profile"], scoring=analysis["scoring"])
 
 @app.post("/upload/resume")
@@ -136,8 +141,16 @@ def upgrade_skills(request: UpgradeRequest, service: ServiceDep) -> UpgradeRespo
 
 
 @app.post("/analyze/interview", response_model=InterviewResponse)
-def generate_interview(request: InterviewRequest, service: ServiceDep) -> InterviewResponse:
-    questions = service.generate_interview_prep(request.job_id, request.profile.model_dump())
+def generate_interview(
+    request: InterviewRequest,
+    service: ServiceDep,
+    x_openai_key: str | None = Header(default=None),
+) -> InterviewResponse:
+    questions = service.generate_interview_prep(
+        request.job_id,
+        request.profile.model_dump(),
+        x_openai_key,
+    )
     return InterviewResponse(questions=questions)
 
 

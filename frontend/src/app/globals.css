@@ -13,57 +13,33 @@
   --color-warning: #f59e0b;
   --color-error: #ef4444;
   --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-space-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
 :root {
-  /* Default Generic Light Theme */
-  --bg: #FAFAFA;
-  --surface: #FFFFFF;
-  --border: rgba(9, 9, 11, 0.08);
-  --text-primary: #09090B;
-  --text-secondary: #52525B;
-  --text-muted: #A1A1AA;
-}
-
-.dark {
-  /* Default Generic Dark Theme */
-  --bg: #09090B;
-  --surface: #18181B;
+  /* CryptOwl Dark Aesthetic */
+  --bg: #07090d;
+  --surface: #11131a;
   --border: rgba(255, 255, 255, 0.08);
   --text-primary: #FAFAFA;
   --text-secondary: #A1A1AA;
-  --text-muted: #71717A;
+  --text-muted: #4e5569;
+  
+  /* CryptOwl Accents */
+  --accent: #2DE2E6; /* Neon Cyan */
+  --accent-hover: #03a9f4;
 }
 
-/* --- Accent Colors --- */
-/* Green (Emerald) */
-.theme-green {
-  --accent: #10B981;
-  --accent-hover: #059669;
-}
-
-/* Red (Crimson) */
-.theme-red {
-  --accent: #EF4444;
-  --accent-hover: #DC2626;
-}
-
-/* Blue (Sapphire) */
-.theme-blue {
-  --accent: #3B82F6;
-  --accent-hover: #2563EB;
-}
-
-/* Orange (Amber) */
-.theme-orange {
-  --accent: #F59E0B;
-  --accent-hover: #D97706;
-}
-
-/* Grey (Slate) */
-.theme-grey {
-  --accent: #64748B;
-  --accent-hover: #475569;
+/* Light mode support for the workspace, though CryptOwl is primarily dark */
+.light {
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --border: rgba(0, 0, 0, 0.08);
+  --text-primary: #09090b;
+  --text-secondary: #52525b;
+  --text-muted: #a1a1aa;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
 }
 
 @layer base {
@@ -80,23 +56,44 @@
 .glass-panel {
   background: var(--surface);
   border: 1px solid var(--border);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-.dark .glass-panel {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
+/* CryptOwl Glowing Panel */
+.glass-panel-premium {
+  background: rgba(17, 19, 26, 0.6);
+  border: 1px solid rgba(45, 226, 230, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(45, 226, 230, 0.05);
+  backdrop-filter: blur(16px);
+  border-radius: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.glass-panel-premium:hover {
+  border-color: rgba(45, 226, 230, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(45, 226, 230, 0.1), 0 0 15px rgba(45, 226, 230, 0.15);
+}
+
+.neon-glow {
+  box-shadow: 0 0 10px var(--accent), 0 0 20px var(--accent), inset 0 0 10px var(--accent);
+}
+
+.neon-text {
+  text-shadow: 0 0 8px var(--accent);
+}
+
 /* Custom Scrollbar */
-::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
   background: var(--border);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
+  background: var(--accent);
 }
+
+/* Animations */
 @keyframes scan {
   0% { top: -10%; }
   100% { top: 110%; }
@@ -104,14 +101,16 @@
 .animate-scan {
   animation: scan 2s linear infinite;
 }
-.glass-panel-premium {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-  backdrop-filter: blur(12px);
-  border-radius: 1.5rem;
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
-.dark .glass-panel-premium {
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-  border-color: rgba(255, 255, 255, 0.1);
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+
+/* CryptOwl Hero Background Gradients */
+.hero-bg-glow {
+  background: radial-gradient(circle at 50% 0%, rgba(45, 226, 230, 0.15), transparent 60%);
 }

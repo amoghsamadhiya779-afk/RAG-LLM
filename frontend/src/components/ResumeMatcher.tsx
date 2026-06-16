@@ -23,16 +23,19 @@ export const ResumeMatcher = () => {
   const [activeTab, setActiveTab] = useState<"strengths" | "gaps" | "evidence">("strengths");
 
   const [isUploading, setIsUploading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const isDark = theme === "dark";
 
   const handleFileUpload = async (file: File) => {
     setIsUploading(true);
+    setErrorMsg(null);
     try {
       const text = await uploadResume(file);
       await ingestDocument(file.name, text);
       setSelectedDoc(file.name);
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
+      setErrorMsg(e.message || "Failed to upload document.");
     }
     setIsUploading(false);
   };
@@ -40,7 +43,13 @@ export const ResumeMatcher = () => {
   const handleEvaluate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!roleTitle.trim() || !jobDescription.trim()) return;
-    await runMatchEvaluation(roleTitle, jobDescription);
+    setErrorMsg(null);
+    try {
+      await runMatchEvaluation(roleTitle, jobDescription);
+    } catch (e: any) {
+      console.error(e);
+      setErrorMsg(e.message || "Failed to run match evaluation.");
+    }
   };
 
   // SVG parameters for the radial match score dial

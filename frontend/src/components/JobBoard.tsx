@@ -32,6 +32,7 @@ export const JobBoard = () => {
   const [isGeneratingInterview, setIsGeneratingInterview] = useState(false);
   const [activeTab, setActiveTab] = useState<"ats" | "jobs">("ats");
   const [newSkill, setNewSkill] = useState("");
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const [expandedAccordion, setExpandedAccordion] = useState<string | null>("formatting");
 
@@ -42,6 +43,7 @@ export const JobBoard = () => {
   const handleAnalyze = async () => {
     if (!resumeText.trim() && !resumeFile) return;
     setIsAnalyzing(true);
+    setErrorMsg(null);
     try {
       let textToAnalyze = resumeText;
       if (resumeFile) {
@@ -54,8 +56,9 @@ export const JobBoard = () => {
       const jobs = await matchJobs(data.profile);
       setMatchedJobs(jobs);
       setActiveTab("ats");
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
+      setErrorMsg(e.message || "Network Error: Unable to connect to the backend API.");
     }
     setIsAnalyzing(false);
   };
@@ -185,6 +188,12 @@ export const JobBoard = () => {
                 >
                   <PlayCircle className="w-5 h-5" /> Execute Scan
                 </motion.button>
+                
+                {errorMsg && (
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-6 p-4 border border-red-500/50 bg-red-500/10 rounded-xl text-red-400 font-mono text-sm max-w-md w-full text-center">
+                    {errorMsg}
+                  </motion.div>
+                )}
               </div>
             ) : (
               <div className="h-full w-full font-mono text-sm leading-loose">

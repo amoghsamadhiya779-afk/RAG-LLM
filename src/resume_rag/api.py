@@ -107,6 +107,7 @@ def match_role(request: MatchRequest, service: ServiceDep) -> MatchResponse:
         role_title=request.role_title,
         job_description=request.job_description,
         top_k=request.top_k,
+        source_doc=request.source_doc,
     )
 
 
@@ -129,6 +130,8 @@ async def upload_resume_endpoint(file: UploadFile = File(...)): # noqa: B008
     try:
         content = await file.read()
         text = parse_document(content, file.filename)
+        if not text.strip():
+            raise ValueError("No extractable text found. If this is an image-based PDF, please try a text-based document.")
         return {"text": text}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e

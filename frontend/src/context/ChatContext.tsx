@@ -231,7 +231,16 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
       headers,
       body: formData
     });
-    if (!res.ok) throw new Error("Failed to upload resume file");
+    if (!res.ok) {
+      let errTxt = "Unknown error";
+      try {
+        const errObj = await res.json();
+        errTxt = errObj.detail || JSON.stringify(errObj);
+      } catch {
+        errTxt = res.statusText;
+      }
+      throw new Error(`Upload Failed (${res.status}): ${errTxt}`);
+    }
     const data = await res.json();
     return data.text;
   };

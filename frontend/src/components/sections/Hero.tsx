@@ -35,8 +35,8 @@ export function Hero() {
       >
         {/* Badge */}
         <motion.div variants={itemVariants}>
-          <GlassCard className="inline-block mb-8 px-6 py-2 rounded-full" variant="glass">
-            <p className="text-sm font-semibold text-gray-700 tracking-wide">
+          <GlassCard className="inline-block mb-8 px-6 py-2 rounded-full clay-glass" variant="glass">
+            <p className="text-sm font-semibold text-gray-300 tracking-wide">
               ✨ Experience Next-Gen Career Intelligence
             </p>
           </GlassCard>
@@ -44,19 +44,19 @@ export function Hero() {
 
         {/* Heading */}
         <motion.h1
-          className="text-6xl md:text-7xl font-extrabold mb-6 leading-tight tracking-tight text-gray-900"
+          className="text-6xl md:text-7xl font-extrabold mb-6 leading-tight tracking-tight text-white drop-shadow-2xl"
           variants={itemVariants}
         >
           Shape Your Digital
           <br/>
-          <span className="bg-gradient-to-r from-[var(--color-primary-600)] via-[#f5576c] to-orange-400 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-purple-400 via-pink-500 to-red-400 bg-clip-text text-transparent">
             Professional Presence
           </span>
         </motion.h1>
 
         {/* Subheading */}
         <motion.p
-          className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto font-medium"
+          className="text-xl text-gray-400 mb-12 max-w-2xl mx-auto font-medium"
           variants={itemVariants}
         >
           Experience the future of resume analysis with clay morphism and fluid glass effects. 
@@ -70,7 +70,7 @@ export function Hero() {
         >
           <motion.a
             href="#workspace"
-            className="flex items-center justify-center w-14 h-14 rounded-full clay-button"
+            className="flex items-center justify-center w-14 h-14 rounded-full clay-glass text-white shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)] transition-shadow"
             animate={{
               y: [0, 10, 0],
             }}
@@ -80,7 +80,7 @@ export function Hero() {
               ease: "easeInOut",
             }}
           >
-            <ArrowDown className="text-gray-600 w-6 h-6" />
+            <ArrowDown className="w-6 h-6" />
           </motion.a>
         </motion.div>
       </motion.div>

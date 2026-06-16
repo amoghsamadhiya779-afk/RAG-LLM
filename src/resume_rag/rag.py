@@ -194,17 +194,16 @@ class ResumeRagService:
             
         # Live Web Search
         try:
-            from duckduckgo_search import DDGS
+            from googlesearch import search
             live_query = f'{title} "{", ".join(skills[:3])}" job site:linkedin.com/jobs OR site:indeed.com'
-            with DDGS() as ddgs:
-                results = list(ddgs.text(live_query, max_results=top_k))
-                
-            for idx, r in enumerate(results):
+            
+            search_results = search(live_query, num_results=top_k, advanced=True)
+            for idx, r in enumerate(search_results):
                 match_score = max(50, 95 - (idx * 3))
                 confidence = "HIGH" if match_score >= 75 else "MEDIUM"
                 matched_jobs.append({
                     "id": f"live-{idx}",
-                    "title": r.get("title", "Live Job Role")[:60] + "...",
+                    "title": r.title[:60] + "..." if hasattr(r, 'title') and r.title else "Live Job Role",
                     "company": "Live Web Result",
                     "match_score": match_score,
                     "skills": [],
@@ -213,11 +212,12 @@ class ResumeRagService:
                     "salary_range": "N/A",
                     "location": "Remote / See Link",
                     "tech_stack": [],
-                    "culture": r.get("body", "")[:120] + "...",
+                    "culture": r.description[:120] + "..." if hasattr(r, 'description') and r.description else "",
                     "experience_level": "N/A",
                     "application_confidence": confidence,
-                    "href": r.get("href", "")
+                    "href": r.url if hasattr(r, 'url') else ""
                 })
+
         except Exception as e:
             print(f"Live search failed: {e}")
             

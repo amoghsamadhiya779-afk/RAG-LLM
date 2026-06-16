@@ -11,13 +11,13 @@ export function Navbar() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <div className="mx-auto max-w-7xl relative h-16 flex items-center justify-between px-6 rounded-2xl bg-white/40 backdrop-blur-xl border border-white/60 shadow-sm">
+      <div className="mx-auto max-w-7xl relative h-16 flex items-center justify-between px-6 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 shadow-lg">
         
         {/* Logo */}
         <motion.div className="relative z-10 flex-shrink-0">
           <Link
             href="/"
-            className="text-2xl font-bold bg-gradient-to-r from-[var(--color-primary-600)] to-[#f5576c] bg-clip-text text-transparent"
+            className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent drop-shadow-md"
           >
             Drew.
           </Link>
@@ -27,14 +27,14 @@ export function Navbar() {
         <div className="relative z-10 hidden md:flex gap-8">
           <motion.a
             href="#workspace"
-            className="text-gray-600 hover:text-gray-900 transition-colors font-medium relative group"
+            className="text-gray-300 hover:text-white transition-colors font-medium relative group"
             whileHover={{ scale: 1.05 }}
           >
             Workspace
           </motion.a>
           <motion.a
             href="#insights"
-            className="text-gray-600 hover:text-gray-900 transition-colors font-medium relative group"
+            className="text-gray-300 hover:text-white transition-colors font-medium relative group"
             whileHover={{ scale: 1.05 }}
           >
             Insights
@@ -43,7 +43,7 @@ export function Navbar() {
 
         {/* CTA Button */}
         <motion.button
-          className="relative z-10 px-6 py-2 rounded-full bg-gradient-to-r from-[var(--color-primary-500)] to-[#f5576c] text-white font-semibold shadow-lg hover:shadow-xl transition-all border border-white/20"
+          className="relative z-10 px-6 py-2 rounded-full bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-semibold shadow-lg hover:shadow-purple-500/50 transition-all border border-white/20"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => {

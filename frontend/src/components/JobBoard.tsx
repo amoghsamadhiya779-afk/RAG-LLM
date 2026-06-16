@@ -80,7 +80,7 @@ export const JobBoard = () => {
     switch (conf) {
       case "HIGH": return "text-emerald-500 bg-emerald-500/10 border-emerald-500/20";
       case "MEDIUM": return "text-amber-500 bg-amber-500/10 border-amber-500/20";
-      case "STRETCH": return "text-[var(--accent)] bg-[var(--accent)]/10 border-[var(--accent)]/20";
+      case "STRETCH": return "text-[var(--color-primary-600)] bg-[var(--color-primary-500)]/10 border-[var(--color-primary-500)]/20";
       default: return "text-red-500 bg-red-500/10 border-red-500/20";
     }
   };
@@ -98,25 +98,25 @@ export const JobBoard = () => {
     <div className="flex-1 flex flex-col h-full overflow-y-auto px-4 py-8 sm:px-12 w-full mx-auto select-text scrollbar-thin">
       <motion.div variants={containerVariants} initial="hidden" animate="show" className="mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6 max-w-[1400px] mx-auto w-full">
         <motion.div variants={itemVariants}>
-          <h1 className="text-3xl font-bold tracking-tight text-[var(--text-primary)] font-sans">
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900 font-sans">
             Job Board Analytics
           </h1>
-          <p className="text-sm mt-2 text-[var(--text-secondary)] font-medium">
+          <p className="text-sm mt-2 text-gray-600 font-medium">
             Upload your resume to discover matching opportunities and analyze your ATS score.
           </p>
         </motion.div>
         
         {profileData && (
-          <motion.div variants={itemVariants} className="flex bg-[var(--surface)] p-1.5 rounded-lg border border-[var(--border)] shadow-sm">
+          <motion.div variants={itemVariants} className="flex bg-white/60 backdrop-blur-md p-1.5 rounded-lg border border-white/40 shadow-sm">
             <button
               onClick={() => setActiveTab("ats")}
-              className={`px-6 py-2 rounded-md text-sm font-semibold transition-all duration-300 ${activeTab === "ats" ? "bg-[var(--bg)] text-[var(--text-primary)] shadow-sm" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
+              className={`px-6 py-2 rounded-md text-sm font-semibold transition-all duration-300 ${activeTab === "ats" ? "bg-transparent text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}
             >
               Analytics
             </button>
             <button
               onClick={() => setActiveTab("jobs")}
-              className={`px-6 py-2 rounded-md text-sm font-semibold transition-all duration-300 ${activeTab === "jobs" ? "bg-[var(--bg)] text-[var(--text-primary)] shadow-sm" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
+              className={`px-6 py-2 rounded-md text-sm font-semibold transition-all duration-300 ${activeTab === "jobs" ? "bg-transparent text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}
             >
               Job Matches
             </button>
@@ -127,10 +127,10 @@ export const JobBoard = () => {
       <motion.div variants={containerVariants} initial="hidden" animate="show" className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-10 max-w-[1400px] mx-auto w-full">
         
         {/* LEFT PANE: Upload Panel */}
-        <motion.div variants={itemVariants} className="relative glass-panel-premium overflow-hidden flex flex-col min-h-[600px]">
-          <div className="px-6 py-4 border-b border-[var(--border)] bg-[var(--bg)] flex items-center justify-between">
-            <h2 className="text-sm font-semibold flex items-center gap-2 text-[var(--text-primary)]">
-              <FileText className="w-4 h-4 text-[var(--text-secondary)]" /> Resume Document
+        <motion.div variants={itemVariants} className="relative clay-card overflow-hidden flex flex-col min-h-[600px]">
+          <div className="px-6 py-4 border-b border-white/40 bg-transparent flex items-center justify-between">
+            <h2 className="text-sm font-semibold flex items-center gap-2 text-gray-900">
+              <FileText className="w-4 h-4 text-gray-600" /> Resume Document
             </h2>
             {profileData && (
               <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 flex items-center">
@@ -142,14 +142,14 @@ export const JobBoard = () => {
           <div className="flex-1 p-8 relative overflow-y-auto scrollbar-thin">
             {!profileData && !isAnalyzing ? (
               <div className="h-full flex flex-col justify-center items-center">
-                <label className="w-full max-w-md flex flex-col items-center justify-center p-10 border-2 border-dashed border-[var(--border)] rounded-xl cursor-pointer transition-all duration-300 hover:bg-[var(--accent-subtle)] hover:border-[var(--accent)] group bg-[var(--bg)]">
-                  <div className="w-14 h-14 rounded-full flex items-center justify-center mb-5 transition-transform duration-500 group-hover:scale-110 bg-[var(--surface)] border border-[var(--border)] shadow-sm">
-                    <Sparkles className="w-6 h-6 text-[var(--accent)]" />
+                <label className="w-full max-w-md flex flex-col items-center justify-center p-10 border-2 border-dashed border-white/40 rounded-xl cursor-pointer transition-all duration-300 hover:bg-[var(--color-primary-100)] hover:border-[var(--color-primary-500)] group bg-transparent">
+                  <div className="w-14 h-14 rounded-full flex items-center justify-center mb-5 transition-transform duration-500 group-hover:scale-110 bg-white/60 backdrop-blur-md border border-white/40 shadow-sm">
+                    <Sparkles className="w-6 h-6 text-[var(--color-primary-600)]" />
                   </div>
-                  <p className="mb-2 text-base font-semibold text-center text-[var(--text-primary)] truncate w-full px-4" title={resumeFile ? resumeFile.name : ""}>
+                  <p className="mb-2 text-base font-semibold text-center text-gray-900 truncate w-full px-4" title={resumeFile ? resumeFile.name : ""}>
                     {resumeFile ? resumeFile.name : "Upload Resume File"}
                   </p>
-                  <p className="text-xs text-center px-4 text-[var(--text-secondary)]">
+                  <p className="text-xs text-center px-4 text-gray-600">
                     Supports .pdf, .docx, .txt up to 10MB
                   </p>
                   <input type="file" className="hidden" accept=".pdf,.docx,.txt" onChange={(e) => {
@@ -162,7 +162,7 @@ export const JobBoard = () => {
                 
                 <div className="flex items-center gap-4 w-full max-w-md my-8">
                   <div className="flex-1 h-px bg-[var(--border)]"></div>
-                  <span className="text-xs font-medium text-[var(--text-muted)]">OR PASTE TEXT</span>
+                  <span className="text-xs font-medium text-gray-500">OR PASTE TEXT</span>
                   <div className="flex-1 h-px bg-[var(--border)]"></div>
                 </div>
 
@@ -174,7 +174,7 @@ export const JobBoard = () => {
                     setResumeText(e.target.value);
                     setResumeFile(null);
                   }}
-                  className="w-full max-w-md p-4 text-sm leading-relaxed rounded-xl border border-[var(--border)] bg-[var(--bg)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] transition-all resize-none shadow-sm"
+                  className="w-full max-w-md p-4 text-sm leading-relaxed rounded-xl border border-white/40 bg-transparent text-gray-900 focus:outline-none focus:border-[var(--color-primary-500)] focus:ring-1 focus:ring-[var(--accent)] transition-all resize-none shadow-sm"
                 />
 
                 <motion.button
@@ -183,7 +183,7 @@ export const JobBoard = () => {
                   onClick={handleAnalyze}
                   disabled={!resumeText.trim() && !resumeFile}
                   className={`mt-8 w-full max-w-md py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2
-                    ${(!resumeText.trim() && !resumeFile) ? "bg-[var(--border)] text-[var(--text-muted)] cursor-not-allowed" : "bg-[var(--accent)] text-white shadow-md hover:bg-[var(--accent-hover)]"}`}
+                    ${(!resumeText.trim() && !resumeFile) ? "bg-[var(--border)] text-gray-500 cursor-not-allowed" : "bg-[var(--color-primary-500)] text-white shadow-md hover:bg-[var(--color-primary-600)]"}`}
                 >
                   <PlayCircle className="w-5 h-5" /> Analyze Resume
                 </motion.button>
@@ -198,10 +198,10 @@ export const JobBoard = () => {
               <div className="h-full w-full text-sm leading-loose">
                 {isAnalyzing && (
                   <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-10">
-                    <div className="absolute left-0 right-0 h-1 bg-[var(--accent)] animate-scan shadow-[0_0_20px_var(--accent)]" />
+                    <div className="absolute left-0 right-0 h-1 bg-[var(--color-primary-500)] animate-scan shadow-[0_0_20px_var(--accent)]" />
                   </div>
                 )}
-                <div className={`relative z-10 whitespace-pre-wrap ${isAnalyzing ? "text-[var(--text-primary)] animate-pulse-subtle" : "text-[var(--text-secondary)]"}`}>
+                <div className={`relative z-10 whitespace-pre-wrap ${isAnalyzing ? "text-gray-900 animate-pulse-subtle" : "text-gray-600"}`}>
                   {resumeText || (resumeFile ? `Scanning file: ${resumeFile.name}...` : "")}
                 </div>
               </div>
@@ -214,17 +214,17 @@ export const JobBoard = () => {
           {isAnalyzing ? (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col items-center justify-center">
               <div className="relative w-24 h-24 flex items-center justify-center">
-                <div className="absolute inset-0 rounded-full border-t-2 border-[var(--accent)] animate-spin opacity-80"></div>
-                <div className="absolute inset-2 rounded-full border-r-2 border-[var(--accent)] animate-spin opacity-40 animation-delay-200"></div>
-                <Sparkles className="w-6 h-6 text-[var(--accent)] animate-pulse-subtle" />
+                <div className="absolute inset-0 rounded-full border-t-2 border-[var(--color-primary-500)] animate-spin opacity-80"></div>
+                <div className="absolute inset-2 rounded-full border-r-2 border-[var(--color-primary-500)] animate-spin opacity-40 animation-delay-200"></div>
+                <Sparkles className="w-6 h-6 text-[var(--color-primary-600)] animate-pulse-subtle" />
               </div>
-              <p className="mt-6 text-sm font-semibold text-[var(--text-secondary)]">Analyzing Resume Data...</p>
+              <p className="mt-6 text-sm font-semibold text-gray-600">Analyzing Resume Data...</p>
             </motion.div>
           ) : profileData && activeTab === "ats" ? (
              <motion.div variants={containerVariants} initial="hidden" animate="show" className="flex-1 space-y-6 overflow-y-auto pr-2 scrollbar-thin">
                
-               <div className="glass-panel-premium p-8 flex flex-col items-center justify-center relative overflow-hidden">
-                 <h3 className="text-sm font-semibold text-[var(--text-secondary)] mb-6 z-10">Overall ATS Score</h3>
+               <div className="clay-card p-8 flex flex-col items-center justify-center relative overflow-hidden">
+                 <h3 className="text-sm font-semibold text-gray-600 mb-6 z-10">Overall ATS Score</h3>
                  <div className="relative w-48 h-48 flex items-center justify-center z-10">
                    <svg className="w-full h-full transform -rotate-90">
                      <circle cx="96" cy="96" r="88" stroke="var(--border)" strokeWidth="8" fill="none" />
@@ -240,34 +240,34 @@ export const JobBoard = () => {
                      />
                    </svg>
                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                     <span className="text-5xl font-bold text-[var(--text-primary)]">{atsScore?.total_score || 0}</span>
+                     <span className="text-5xl font-bold text-gray-900">{atsScore?.total_score || 0}</span>
                    </div>
                  </div>
                </div>
 
                <div className="space-y-4">
                  {accordions.map((acc, i) => (
-                   <motion.div variants={itemVariants} key={acc.id} className="glass-panel-premium border-[var(--border)] rounded-xl overflow-hidden bg-[var(--surface)]">
+                   <motion.div variants={itemVariants} key={acc.id} className="clay-card border-white/40 rounded-xl overflow-hidden bg-white/60 backdrop-blur-md">
                      <button
                        onClick={() => toggleAccordion(acc.id)}
-                       className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-[var(--bg)] transition-colors"
+                       className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-transparent transition-colors"
                      >
                        <div className="flex items-center gap-4 w-full">
-                         <div className="w-10 h-10 rounded-lg bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center text-sm font-bold text-[var(--text-primary)]">
+                         <div className="w-10 h-10 rounded-lg bg-transparent border border-white/40 flex items-center justify-center text-sm font-bold text-gray-900">
                            {acc.score}
                          </div>
                          <div className="flex-1">
-                           <h4 className="font-semibold text-[var(--text-primary)]">{acc.label}</h4>
+                           <h4 className="font-semibold text-gray-900">{acc.label}</h4>
                            <div className="w-full bg-[var(--border)] h-1.5 mt-2 rounded-full overflow-hidden relative">
                              <motion.div
                                initial={{ width: 0 }}
                                animate={{ width: `${(acc.score / acc.max) * 100}%` }}
                                transition={{ duration: 1, delay: 0.2 }}
-                               className="h-full bg-[var(--accent)]"
+                               className="h-full bg-[var(--color-primary-500)]"
                              />
                            </div>
                          </div>
-                         {expandedAccordion === acc.id ? <ChevronUp className="w-5 h-5 text-[var(--text-muted)]" /> : <ChevronDown className="w-5 h-5 text-[var(--text-muted)]" />}
+                         {expandedAccordion === acc.id ? <ChevronUp className="w-5 h-5 text-gray-500" /> : <ChevronDown className="w-5 h-5 text-gray-500" />}
                        </div>
                      </button>
                      <AnimatePresence>
@@ -278,7 +278,7 @@ export const JobBoard = () => {
                            exit={{ height: 0, opacity: 0 }}
                            className="overflow-hidden"
                          >
-                           <div className="px-6 pb-6 pt-2 text-sm text-[var(--text-secondary)] leading-relaxed">
+                           <div className="px-6 pb-6 pt-2 text-sm text-gray-600 leading-relaxed">
                              {acc.tip}
                            </div>
                          </motion.div>
@@ -292,36 +292,36 @@ export const JobBoard = () => {
           ) : profileData && activeTab === "jobs" ? (
              <motion.div variants={containerVariants} initial="hidden" animate="show" className="flex-1 overflow-y-auto space-y-6 pr-2 scrollbar-thin">
                {matchedJobs.length === 0 ? (
-                 <div className="text-center py-20 text-sm font-medium text-[var(--text-muted)]">No jobs found matching your profile.</div>
+                 <div className="text-center py-20 text-sm font-medium text-gray-500">No jobs found matching your profile.</div>
                ) : (
                  matchedJobs.map((job, idx) => (
                    <motion.div
                      variants={itemVariants}
                      key={job.id}
-                     className="p-6 rounded-2xl glass-panel-premium bg-[var(--surface)] hover:bg-[var(--bg)] transition-all group border-[var(--border)]"
+                     className="p-6 rounded-2xl clay-card bg-white/60 backdrop-blur-md hover:bg-transparent transition-all group border-white/40"
                    >
-                     <div className="flex justify-between items-start mb-4 border-b border-[var(--border)] pb-4">
+                     <div className="flex justify-between items-start mb-4 border-b border-white/40 pb-4">
                        <div>
-                         <h3 className="font-semibold text-lg text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors">{job.title}</h3>
-                         <div className="text-xs mt-1.5 text-[var(--text-secondary)] font-medium flex items-center gap-2">
-                           <span className="text-[var(--text-primary)]">{job.company}</span> • {job.location || "Remote"} • {job.salary_range || "N/A"}
+                         <h3 className="font-semibold text-lg text-gray-900 group-hover:text-[var(--color-primary-600)] transition-colors">{job.title}</h3>
+                         <div className="text-xs mt-1.5 text-gray-600 font-medium flex items-center gap-2">
+                           <span className="text-gray-900">{job.company}</span> • {job.location || "Remote"} • {job.salary_range || "N/A"}
                          </div>
                        </div>
                        <div className="flex flex-col items-end gap-2">
                          <span className={`px-2.5 py-1 text-[10px] font-bold rounded uppercase tracking-wider border ${getConfidenceColor(job.application_confidence)}`}>
                            {job.application_confidence} MATCH
                          </span>
-                         <span className="text-xs font-semibold text-[var(--text-secondary)]">
-                           Similarity: <span className="text-[var(--text-primary)]">{job.match_score}%</span>
+                         <span className="text-xs font-semibold text-gray-600">
+                           Similarity: <span className="text-gray-900">{job.match_score}%</span>
                          </span>
                        </div>
                      </div>
                      
                      <div className="mb-6">
-                       <div className="text-xs font-semibold mb-2 text-[var(--text-muted)]">Missing Skills</div>
+                       <div className="text-xs font-semibold mb-2 text-gray-500">Missing Skills</div>
                        <div className="flex flex-wrap gap-2">
                          {job.missing_skills?.length > 0 ? job.missing_skills.map((ms: string, i: number) => (
-                           <span key={i} className="px-2.5 py-1 text-[11px] font-medium rounded-md bg-[var(--bg)] border border-[var(--border)] text-[var(--text-secondary)]">
+                           <span key={i} className="px-2.5 py-1 text-[11px] font-medium rounded-md bg-transparent border border-white/40 text-gray-600">
                              {ms}
                            </span>
                          )) : (
@@ -331,14 +331,14 @@ export const JobBoard = () => {
                      </div>
                      <div className="flex gap-3">
                        {job.href ? (
-                         <a href={job.href} target="_blank" rel="noreferrer" className="flex-1 py-2.5 rounded-lg text-xs font-semibold text-center transition-all bg-[var(--bg)] hover:bg-[var(--border)] text-[var(--text-primary)] border border-[var(--border)]">
+                         <a href={job.href} target="_blank" rel="noreferrer" className="flex-1 py-2.5 rounded-lg text-xs font-semibold text-center transition-all bg-transparent hover:bg-[var(--border)] text-gray-900 border border-white/40">
                            View Application
                          </a>
                        ) : null}
                        <button
                          onClick={() => handlePrepInterview(job)}
                          className={`flex-1 py-2.5 rounded-lg text-xs font-semibold transition-all
-                           ${isGeneratingInterview && selectedJob?.id === job.id ? "bg-[var(--bg)] text-[var(--text-muted)] cursor-wait" : "bg-[var(--accent-subtle)] text-[var(--accent)] hover:bg-[var(--accent)] hover:text-white"}`}
+                           ${isGeneratingInterview && selectedJob?.id === job.id ? "bg-transparent text-gray-500 cursor-wait" : "bg-[var(--color-primary-100)] text-[var(--color-primary-600)] hover:bg-[var(--color-primary-500)] hover:text-white"}`}
                        >
                          {isGeneratingInterview && selectedJob?.id === job.id ? "Generating..." : "Generate Interview"}
                        </button>
@@ -350,23 +350,23 @@ export const JobBoard = () => {
                <AnimatePresence>
                  {interviewQuestions.length > 0 && (
                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
-                     <div className="p-6 rounded-2xl glass-panel-premium bg-[var(--surface)] border-[var(--border)] mt-6">
-                       <div className="flex items-center justify-between mb-6 border-b border-[var(--border)] pb-4">
-                         <h4 className="text-sm font-semibold flex items-center gap-2 text-[var(--text-primary)]">
-                           <PlayCircle className="w-4 h-4 text-[var(--accent)]" /> Interview Prep Generated
+                     <div className="p-6 rounded-2xl clay-card bg-white/60 backdrop-blur-md border-white/40 mt-6">
+                       <div className="flex items-center justify-between mb-6 border-b border-white/40 pb-4">
+                         <h4 className="text-sm font-semibold flex items-center gap-2 text-gray-900">
+                           <PlayCircle className="w-4 h-4 text-[var(--color-primary-600)]" /> Interview Prep Generated
                          </h4>
-                         <button onClick={() => setInterviewQuestions([])} className="text-xs text-[var(--text-muted)] hover:text-red-500 transition-colors">Close</button>
+                         <button onClick={() => setInterviewQuestions([])} className="text-xs text-gray-500 hover:text-red-500 transition-colors">Close</button>
                        </div>
                        <div className="space-y-4">
                          {interviewQuestions.map((iq, idx) => (
-                           <div key={idx} className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg)]">
+                           <div key={idx} className="p-4 rounded-xl border border-white/40 bg-transparent">
                              <div className="flex items-center gap-2 mb-2">
-                               <span className="px-2 py-0.5 text-[10px] font-bold rounded uppercase tracking-wider bg-[var(--accent-subtle)] text-[var(--accent)] border border-[var(--accent)]/20">
+                               <span className="px-2 py-0.5 text-[10px] font-bold rounded uppercase tracking-wider bg-[var(--color-primary-100)] text-[var(--color-primary-600)] border border-[var(--color-primary-500)]/20">
                                  {iq.type}
                                </span>
                              </div>
-                             <p className="font-semibold text-sm mb-2 text-[var(--text-primary)]">{iq.question}</p>
-                             <p className="text-xs text-[var(--text-secondary)] leading-relaxed border-l-2 border-[var(--border)] pl-3 py-1">
+                             <p className="font-semibold text-sm mb-2 text-gray-900">{iq.question}</p>
+                             <p className="text-xs text-gray-600 leading-relaxed border-l-2 border-white/40 pl-3 py-1">
                                {iq.answer_guide}
                              </p>
                            </div>

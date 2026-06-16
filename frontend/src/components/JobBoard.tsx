@@ -19,7 +19,7 @@ const itemVariants = {
 };
 
 export const JobBoard = () => {
-  const { uploadResume, analyzeResume, matchJobs, seedJobs, generateInterview } = useChat();
+  const { uploadResume, analyzeResume, matchJobs, seedJobs, generateInterview, ingestDocument } = useChat();
 
   const [resumeText, setResumeText] = useState("");
   const [resumeFile, setResumeFile] = useState<File | null>(null);
@@ -49,6 +49,18 @@ export const JobBoard = () => {
       if (resumeFile) {
         textToAnalyze = await uploadResume(resumeFile);
         if (!resumeText) setResumeText("Processing document...\n\nExtracting text content...\n\nInitializing analysis...");
+        
+        try {
+          await ingestDocument(resumeFile.name, textToAnalyze);
+        } catch (e) {
+          console.error("Failed to ingest globally:", e);
+        }
+      } else if (resumeText.trim()) {
+        try {
+          await ingestDocument("pasted-resume.txt", textToAnalyze);
+        } catch (e) {
+          console.error("Failed to ingest globally:", e);
+        }
       }
       const data = await analyzeResume(textToAnalyze);
       setProfileData(data.profile);
@@ -98,10 +110,10 @@ export const JobBoard = () => {
     <div className="flex-1 flex flex-col h-full overflow-y-auto px-4 py-8 sm:px-12 w-full mx-auto select-text scrollbar-thin">
       <motion.div variants={containerVariants} initial="hidden" animate="show" className="mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6 max-w-[1400px] mx-auto w-full">
         <motion.div variants={itemVariants}>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900 font-sans">
+          <h1 className="text-3xl font-bold tracking-tight text-white font-sans">
             Job Board Analytics
           </h1>
-          <p className="text-sm mt-2 text-gray-600 font-medium">
+          <p className="text-sm mt-2 text-gray-400 font-medium">
             Upload your resume to discover matching opportunities and analyze your ATS score.
           </p>
         </motion.div>
@@ -110,13 +122,13 @@ export const JobBoard = () => {
           <motion.div variants={itemVariants} className="flex bg-white/60 backdrop-blur-md p-1.5 rounded-lg border border-white/40 shadow-sm">
             <button
               onClick={() => setActiveTab("ats")}
-              className={`px-6 py-2 rounded-md text-sm font-semibold transition-all duration-300 ${activeTab === "ats" ? "bg-transparent text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}
+              className={`px-6 py-2 rounded-md text-sm font-semibold transition-all duration-300 ${activeTab === "ats" ? "bg-white/10 text-white shadow-sm" : "text-gray-400 hover:text-white"}`}
             >
               Analytics
             </button>
             <button
               onClick={() => setActiveTab("jobs")}
-              className={`px-6 py-2 rounded-md text-sm font-semibold transition-all duration-300 ${activeTab === "jobs" ? "bg-transparent text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}
+              className={`px-6 py-2 rounded-md text-sm font-semibold transition-all duration-300 ${activeTab === "jobs" ? "bg-white/10 text-white shadow-sm" : "text-gray-400 hover:text-white"}`}
             >
               Job Matches
             </button>
@@ -129,8 +141,8 @@ export const JobBoard = () => {
         {/* LEFT PANE: Upload Panel */}
         <motion.div variants={itemVariants} className="relative clay-card overflow-hidden flex flex-col min-h-[600px]">
           <div className="px-6 py-4 border-b border-white/40 bg-transparent flex items-center justify-between">
-            <h2 className="text-sm font-semibold flex items-center gap-2 text-gray-900">
-              <FileText className="w-4 h-4 text-gray-600" /> Resume Document
+            <h2 className="text-sm font-semibold flex items-center gap-2 text-white">
+              <FileText className="w-4 h-4 text-gray-400" /> Resume Document
             </h2>
             {profileData && (
               <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 flex items-center">
@@ -146,10 +158,10 @@ export const JobBoard = () => {
                   <div className="w-14 h-14 rounded-full flex items-center justify-center mb-5 transition-transform duration-500 group-hover:scale-110 bg-white/60 backdrop-blur-md border border-white/40 shadow-sm">
                     <Sparkles className="w-6 h-6 text-[var(--color-primary-600)]" />
                   </div>
-                  <p className="mb-2 text-base font-semibold text-center text-gray-900 truncate w-full px-4" title={resumeFile ? resumeFile.name : ""}>
+                  <p className="mb-2 text-base font-semibold text-center text-white truncate w-full px-4" title={resumeFile ? resumeFile.name : ""}>
                     {resumeFile ? resumeFile.name : "Upload Resume File"}
                   </p>
-                  <p className="text-xs text-center px-4 text-gray-600">
+                  <p className="text-xs text-center px-4 text-gray-400">
                     Supports .pdf, .docx, .txt up to 10MB
                   </p>
                   <input type="file" className="hidden" accept=".pdf,.docx,.txt" onChange={(e) => {
@@ -162,7 +174,7 @@ export const JobBoard = () => {
                 
                 <div className="flex items-center gap-4 w-full max-w-md my-8">
                   <div className="flex-1 h-px bg-[var(--border)]"></div>
-                  <span className="text-xs font-medium text-gray-500">OR PASTE TEXT</span>
+                  <span className="text-xs font-medium text-gray-400">OR PASTE TEXT</span>
                   <div className="flex-1 h-px bg-[var(--border)]"></div>
                 </div>
 
@@ -174,7 +186,7 @@ export const JobBoard = () => {
                     setResumeText(e.target.value);
                     setResumeFile(null);
                   }}
-                  className="w-full max-w-md p-4 text-sm leading-relaxed rounded-xl border border-white/40 bg-transparent text-gray-900 focus:outline-none focus:border-[var(--color-primary-500)] focus:ring-1 focus:ring-[var(--accent)] transition-all resize-none shadow-sm"
+                  className="w-full max-w-md p-4 text-sm leading-relaxed rounded-xl border border-white/40 bg-transparent text-white focus:outline-none focus:border-[var(--color-primary-500)] focus:ring-1 focus:ring-[var(--accent)] transition-all resize-none shadow-sm placeholder:text-gray-500"
                 />
 
                 <motion.button

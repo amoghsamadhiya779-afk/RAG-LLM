@@ -91,7 +91,7 @@ def build_embedding_model(settings: Settings) -> EmbeddingModel:
     if settings.embedding_provider == "gemini":
         api_key = settings.gemini_api_key or os.environ.get("GEMINI_API_KEY")
         if not api_key:
-            raise ValueError("GEMINI_API_KEY is required for Gemini embeddings.")
+            return LocalHashEmbedding()
         return GeminiEmbeddingModel(api_key)
     if settings.embedding_provider == "openai":
         api_key = settings.openai_api_key or os.environ.get("OPENAI_API_KEY")

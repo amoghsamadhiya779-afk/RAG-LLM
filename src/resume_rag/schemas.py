@@ -37,8 +37,9 @@ class QueryResponse(BaseModel):
 
 class MatchRequest(BaseModel):
     role_title: str
-    job_description: str = Field(..., min_length=50)
+    job_description: str = Field(..., min_length=10)
     top_k: int = Field(default=8, ge=1, le=15)
+    source_doc: str | None = None
 
 
 class MatchResponse(BaseModel):

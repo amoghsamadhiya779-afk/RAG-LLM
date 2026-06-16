@@ -226,8 +226,8 @@ export const ResumeMatcher = () => {
                   />
                   <Layers className="absolute inset-0 m-auto w-8 h-8 animate-pulse-subtle text-[var(--color-primary-600)]" />
                 </div>
-                <h3 className="text-base font-semibold text-gray-900 mb-2">Vector Index Retrieval</h3>
-                <p className="text-sm max-w-[300px] text-center text-gray-600">
+                <h3 className="text-base font-semibold text-white mb-2">Vector Index Retrieval</h3>
+                <p className="text-sm max-w-[300px] text-center text-gray-400">
                   Retrieving grounded chunks and evaluating semantic matching coefficients...
                 </p>
               </motion.div>
@@ -269,8 +269,8 @@ export const ResumeMatcher = () => {
                       />
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-3xl font-bold text-gray-900">{score}%</span>
-                      <span className="text-[10px] uppercase font-semibold text-gray-600 tracking-wider">
+                      <span className="text-3xl font-bold text-white">{score}%</span>
+                      <span className="text-[10px] uppercase font-semibold text-gray-400 tracking-wider">
                         Match
                       </span>
                     </div>
@@ -278,8 +278,8 @@ export const ResumeMatcher = () => {
 
                   {/* Summary Details */}
                   <div className="flex-1 text-center sm:text-left space-y-2">
-                    <h3 className="text-lg font-bold text-gray-900">{matchResult.role_title}</h3>
-                    <p className="text-sm text-gray-600 leading-relaxed">
+                    <h3 className="text-lg font-bold text-white">{matchResult.role_title}</h3>
+                    <p className="text-sm text-gray-400 leading-relaxed">
                       Semantically verified. The candidate profile matches the target specifications with a coefficient score of {score}/100.
                     </p>
                     <div className="pt-4 flex flex-wrap gap-3 justify-center sm:justify-start">
@@ -291,7 +291,7 @@ export const ResumeMatcher = () => {
                           : "bg-red-500/10 border-red-500/20 text-red-500"}`}>
                         {score >= 80 ? "High Fit" : score >= 50 ? "Moderate Fit" : "Low Fit"}
                       </span>
-                      <span className="text-xs font-medium px-3 py-1 rounded-full border bg-white/60 backdrop-blur-md border-white/40 text-gray-600">
+                      <span className="text-xs font-medium px-3 py-1 rounded-full border bg-white/60 backdrop-blur-md border-white/40 text-gray-900">
                         {matchResult.evidence.length} chunks retrieved
                       </span>
                     </div>
@@ -313,8 +313,8 @@ export const ResumeMatcher = () => {
                         className={`text-sm font-semibold px-5 py-2 rounded-lg transition-all duration-200 cursor-pointer flex items-center gap-2
                           ${
                             isSelected
-                              ? "bg-transparent text-gray-900 shadow-sm"
-                              : "text-gray-600 hover:text-gray-900"
+                              ? "bg-transparent text-white shadow-sm"
+                              : "text-gray-400 hover:text-white"
                           }
                         `}
                       >
@@ -345,7 +345,7 @@ export const ResumeMatcher = () => {
                           </div>
                         ))}
                         {matchResult.strengths.length === 0 && (
-                          <p className="text-sm text-gray-500 text-center py-10">No specific semantic strengths evaluated.</p>
+                          <p className="text-sm text-gray-400 text-center py-10">No specific semantic strengths evaluated.</p>
                         )}
                       </motion.div>
                     )}
@@ -365,7 +365,7 @@ export const ResumeMatcher = () => {
                           </div>
                         ))}
                         {matchResult.gaps.length === 0 && (
-                          <p className="text-sm text-gray-500 text-center py-10">No critical candidate profile gaps detected!</p>
+                          <p className="text-sm text-gray-400 text-center py-10">No critical candidate profile gaps detected!</p>
                         )}
                       </motion.div>
                     )}
@@ -380,9 +380,9 @@ export const ResumeMatcher = () => {
                       >
                         {matchResult.evidence.map((snippet, idx) => (
                           <div key={idx} className="p-5 rounded-xl border border-white/40 bg-white/60 backdrop-blur-md flex flex-col gap-3 shadow-sm">
-                            <div className="flex items-center justify-between text-xs font-semibold text-gray-600">
+                            <div className="flex items-center justify-between text-xs font-semibold text-gray-900">
                               <span className="flex items-center gap-2">
-                                <BookOpen className="w-4 h-4 text-gray-500" />
+                                <BookOpen className="w-4 h-4 text-[var(--color-primary-600)]" />
                                 <span>{snippet.source}</span>
                               </span>
                               <span className="text-[var(--color-primary-600)] bg-[var(--color-primary-100)] px-2.5 py-1 rounded-full">
@@ -409,8 +409,8 @@ export const ResumeMatcher = () => {
                 className="flex flex-col items-center justify-center p-12 rounded-2xl border-2 border-dashed border-white/40 bg-transparent min-h-[500px]"
               >
                 <Layers className="w-12 h-12 mb-6 text-gray-500" />
-                <h3 className="text-lg font-bold text-gray-900 mb-2">Awaiting Analysis</h3>
-                <p className="text-sm max-w-[300px] text-center text-gray-600 leading-relaxed">
+                <h3 className="text-lg font-bold text-white mb-2">Awaiting Analysis</h3>
+                <p className="text-sm max-w-[300px] text-center text-gray-400 leading-relaxed">
                   Select a candidate resume and enter target job requirements to generate a role fit report.
                 </p>
               </motion.div>

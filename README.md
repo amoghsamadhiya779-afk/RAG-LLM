@@ -1,4 +1,13 @@
 
+---
+title: Resume Intelligence
+emoji: 🚀
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+pinned: false
+---
+
 # Drew Resume Intelligence: SaaS Career RAG System
 
 Drew Resume Intelligence is a production-grade Retrieval-Augmented Generation (RAG) platform and Career Intelligence Board. It is designed for resume processing, ATS evaluation, skill gap analysis, job matching, and AI-driven interview preparation. 

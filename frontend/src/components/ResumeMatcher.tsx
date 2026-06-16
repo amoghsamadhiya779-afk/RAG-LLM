@@ -40,10 +40,13 @@ export const ResumeMatcher = () => {
 
   const handleEvaluate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!roleTitle.trim() || !jobDescription.trim()) return;
+    if (!roleTitle.trim() || !jobDescription.trim() || !selectedDoc) {
+      setErrorMsg("Please select an ingested document, role title, and job description.");
+      return;
+    }
     setErrorMsg(null);
     try {
-      await runMatchEvaluation(roleTitle, jobDescription);
+      await runMatchEvaluation(roleTitle, jobDescription, selectedDoc);
     } catch (e: any) {
       console.error(e);
       setErrorMsg(e.message || "Failed to run match evaluation.");
@@ -63,10 +66,10 @@ export const ResumeMatcher = () => {
       {/* Page Header */}
       <div className="mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900 font-sans">
+          <h1 className="text-3xl font-bold tracking-tight text-white font-sans">
             Profile Evaluator
           </h1>
-          <p className="text-sm mt-2 text-gray-600 font-medium">
+          <p className="text-sm mt-2 text-gray-400 font-medium">
             Cross-evaluate candidate credentials against role requirements using semantic search embeddings.
           </p>
         </div>
@@ -75,7 +78,7 @@ export const ResumeMatcher = () => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={clearMatchResult}
-            className="px-5 py-2.5 rounded-lg border border-white/40 bg-white/60 backdrop-blur-md text-gray-900 text-sm font-semibold transition-all shadow-sm hover:bg-transparent"
+            className="px-5 py-2.5 rounded-lg border border-white/40 bg-white/60 backdrop-blur-md text-white text-sm font-semibold transition-all shadow-sm hover:bg-transparent hover:text-white"
           >
             Reset Analysis
           </motion.button>
@@ -90,24 +93,27 @@ export const ResumeMatcher = () => {
             
             <div className="flex items-center gap-2 mb-6">
               <FileText className="w-5 h-5 text-[var(--color-primary-600)]" />
-              <h2 className="text-lg font-semibold text-gray-900">Evaluation Specs</h2>
+              <h2 className="text-lg font-semibold text-white">Evaluation Specs</h2>
             </div>
 
             <form onSubmit={handleEvaluate} className="space-y-6">
               {/* Select Resume Document */}
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-gray-600">
+                <label className="text-xs font-semibold text-gray-400">
                   Candidate Profile Index
                 </label>
                 <select
                   value={selectedDoc}
                   onChange={(e) => setSelectedDoc(e.target.value)}
-                  className="w-full p-3 text-sm rounded-xl border border-white/40 bg-transparent text-gray-900 focus:outline-none focus:border-[var(--color-primary-500)] focus:ring-1 focus:ring-[var(--accent)] transition-all cursor-pointer shadow-sm"
+                  className="w-full p-3 text-sm rounded-xl border border-white/40 bg-transparent text-white focus:outline-none focus:border-[var(--color-primary-500)] focus:ring-1 focus:ring-[var(--accent)] transition-all cursor-pointer shadow-sm"
                 >
-                  <option value="">Select Ingested Document...</option>
+                  <option value="" className="bg-gray-900 text-white">Select Ingested Document...</option>
                   {ingestedDocs.map((doc, idx) => (
-                    <option key={idx} value={doc}>{doc}</option>
+                    <option key={idx} value={doc} className="bg-gray-900 text-white">{doc}</option>
                   ))}
+                  {selectedDoc && !ingestedDocs.includes(selectedDoc) && (
+                    <option value={selectedDoc} className="bg-gray-900 text-white">{selectedDoc}</option>
+                  )}
                 </select>
 
                 <div className="flex items-center gap-4 py-4">
@@ -118,8 +124,8 @@ export const ResumeMatcher = () => {
 
                 <label className="w-full flex flex-col items-center justify-center p-6 border-2 border-dashed border-white/40 rounded-xl cursor-pointer transition-all hover:bg-[var(--color-primary-100)] hover:border-[var(--color-primary-500)] bg-transparent">
                   <div className="flex flex-col items-center justify-center text-center">
-                    <FileText className="w-6 h-6 mb-3 text-gray-600" />
-                    <p className="mb-1 text-sm font-semibold text-gray-900">
+                    <FileText className="w-6 h-6 mb-3 text-gray-400" />
+                    <p className="mb-1 text-sm font-semibold text-white">
                       {isUploading ? "Uploading & Ingesting..." : "Upload Resume (PDF, DOCX)"}
                     </p>
                   </div>
@@ -133,7 +139,7 @@ export const ResumeMatcher = () => {
 
               {/* Target Role Title */}
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-gray-600">
+                <label className="text-xs font-semibold text-gray-400">
                   Target Role Title
                 </label>
                 <input
@@ -142,22 +148,22 @@ export const ResumeMatcher = () => {
                   placeholder="e.g. Senior Frontend Engineer"
                   value={roleTitle}
                   onChange={(e) => setRoleTitle(e.target.value)}
-                  className="w-full p-3 text-sm rounded-xl border border-white/40 bg-transparent text-gray-900 focus:outline-none focus:border-[var(--color-primary-500)] focus:ring-1 focus:ring-[var(--accent)] transition-all shadow-sm"
+                  className="w-full p-3 text-sm rounded-xl border border-white/40 bg-transparent text-white focus:outline-none focus:border-[var(--color-primary-500)] focus:ring-1 focus:ring-[var(--accent)] transition-all shadow-sm placeholder:text-gray-500"
                 />
               </div>
 
               {/* Job Description */}
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-gray-600">
-                  Job Description / Role Specs (Min 50 chars)
+                <label className="text-xs font-semibold text-gray-400">
+                  Job Description
                 </label>
                 <textarea
                   required
-                  rows={5}
-                  placeholder="Paste details of target qualifications, stack preferences, and role parameters..."
+                  rows={4}
+                  placeholder="Paste the full job description here..."
                   value={jobDescription}
                   onChange={(e) => setJobDescription(e.target.value)}
-                  className="w-full p-3 text-sm rounded-xl border border-white/40 bg-transparent text-gray-900 focus:outline-none focus:border-[var(--color-primary-500)] focus:ring-1 focus:ring-[var(--accent)] transition-all resize-none shadow-sm"
+                  className="w-full p-3 text-sm rounded-xl border border-white/40 bg-transparent text-white focus:outline-none focus:border-[var(--color-primary-500)] focus:ring-1 focus:ring-[var(--accent)] transition-all resize-none shadow-sm placeholder:text-gray-500"
                 />
               </div>
 
@@ -172,10 +178,10 @@ export const ResumeMatcher = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 type="submit"
-                disabled={matchLoading || !roleTitle.trim() || jobDescription.trim().length < 50}
+                disabled={matchLoading || !roleTitle.trim() || jobDescription.trim().length < 50 || !selectedDoc}
                 className={`w-full p-3.5 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 shadow-md
                   ${
-                    matchLoading || !roleTitle.trim() || jobDescription.trim().length < 50
+                    matchLoading || !roleTitle.trim() || jobDescription.trim().length < 50 || !selectedDoc
                       ? "bg-white/60 backdrop-blur-md text-gray-500 border border-white/40 cursor-not-allowed"
                       : "bg-[var(--color-primary-500)] text-white hover:bg-[var(--color-primary-600)]"
                   }

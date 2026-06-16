@@ -50,7 +50,7 @@ export default function Home() {
                         : "hover:bg-white/10 text-gray-400"
                     }`}
                   >
-                    Resume Insights
+                    Job Matching
                   </button>
                   <button
                     onClick={() => setActiveView("board")}
@@ -60,7 +60,7 @@ export default function Home() {
                         : "hover:bg-white/10 text-gray-400"
                     }`}
                   >
-                    Job Matching
+                    Resume Insights
                   </button>
                 </div>
 

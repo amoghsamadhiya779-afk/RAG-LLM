@@ -1,9 +1,9 @@
 FROM python:3.11-slim
 
-WORKDIR /app
-
-# Create a non-root user (Hugging Face requirement for some spaces, good practice regardless)
+# Create a non-root user
 RUN useradd -m -u 1000 user
+RUN mkdir -p /app && chown user:user /app
+
 USER user
 ENV PATH="/home/user/.local/bin:$PATH"
 

@@ -76,12 +76,13 @@ export const JobBoard = () => {
   };
 
   const handlePrepInterview = async (job: Record<string, unknown>) => {
+    if (!profileData) return;
     setSelectedJob(job);
     setInterviewQuestions([]);
     setIsGeneratingInterview(true);
     try {
       const data = await generateInterview(String(job.id), profileData);
-      setInterviewQuestions(data.questions);
+      setInterviewQuestions(data.questions as Record<string, unknown>[]);
     } catch (e) {
       console.error(e);
     }

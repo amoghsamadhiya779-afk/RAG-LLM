@@ -24,14 +24,13 @@ export const JobBoard = () => {
   const [resumeText, setResumeText] = useState("");
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [profileData, setProfileData] = useState<any | null>(null);
-  const [atsScore, setAtsScore] = useState<any | null>(null);
-  const [matchedJobs, setMatchedJobs] = useState<any[]>([]);
-  const [selectedJob, setSelectedJob] = useState<any | null>(null);
-  const [interviewQuestions, setInterviewQuestions] = useState<any[]>([]);
+  const [profileData, setProfileData] = useState<Record<string, unknown> | null>(null);
+  const [atsScore, setAtsScore] = useState<Record<string, unknown> | null>(null);
+  const [matchedJobs, setMatchedJobs] = useState<Record<string, unknown>[]>([]);
+  const [selectedJob, setSelectedJob] = useState<Record<string, unknown> | null>(null);
+  const [interviewQuestions, setInterviewQuestions] = useState<Record<string, unknown>[]>([]);
   const [isGeneratingInterview, setIsGeneratingInterview] = useState(false);
   const [activeTab, setActiveTab] = useState<"ats" | "jobs">("ats");
-  const [newSkill, setNewSkill] = useState("");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const [expandedAccordion, setExpandedAccordion] = useState<string | null>("formatting");
@@ -68,19 +67,20 @@ export const JobBoard = () => {
       const jobs = await matchJobs(data.profile);
       setMatchedJobs(jobs);
       setActiveTab("ats");
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error(e);
-      setErrorMsg(e.message || "Network Error: Unable to connect to the backend API.");
+      const err = e as Error;
+      setErrorMsg(err.message || "Network Error: Unable to connect to the backend API.");
     }
     setIsAnalyzing(false);
   };
 
-  const handlePrepInterview = async (job: any) => {
+  const handlePrepInterview = async (job: Record<string, unknown>) => {
     setSelectedJob(job);
     setInterviewQuestions([]);
     setIsGeneratingInterview(true);
     try {
-      const data = await generateInterview(job.id, profileData);
+      const data = await generateInterview(String(job.id), profileData);
       setInterviewQuestions(data.questions);
     } catch (e) {
       console.error(e);
@@ -258,7 +258,7 @@ export const JobBoard = () => {
                </div>
 
                <div className="space-y-4">
-                 {accordions.map((acc, i) => (
+                  {accordions.map((acc) => (
                    <motion.div variants={itemVariants} key={acc.id} className="clay-card border-white/40 rounded-xl overflow-hidden bg-white/60 backdrop-blur-md">
                      <button
                        onClick={() => toggleAccordion(acc.id)}
@@ -342,7 +342,7 @@ export const JobBoard = () => {
                  )}
                  </div>
                ) : (
-                 matchedJobs.map((job, idx) => (
+                  matchedJobs.map((job) => (
                    <div key={job.id} className="clay-card p-6 flex flex-col gap-4 relative overflow-hidden group">
                      <div className="flex justify-between items-start">
                        <div>

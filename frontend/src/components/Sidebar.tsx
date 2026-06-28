@@ -4,7 +4,7 @@ import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useChat } from "@/context/ChatContext";
 import { useUI } from "@/context/UIContext";
-import { Logo } from "./Logo";
+
 import {
   Plus,
   Settings,
@@ -16,7 +16,6 @@ import {
 
 export const Sidebar = () => {
   const {
-    setCurrentSessionId,
     createNewChat,
   } = useChat();
 

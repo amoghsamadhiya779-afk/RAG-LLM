@@ -1,6 +1,6 @@
 "use client";
 import React, { createContext, useContext, useState, useMemo, useCallback, ReactNode, useEffect } from "react";
-import { SourceSnippet, MatchResult } from "./ChatContext";
+import { MatchResult } from "./ChatContext";
 
 interface RAGContextType {
   ingestedDocs: string[];
@@ -14,9 +14,9 @@ interface RAGContextType {
   backendStats: { indexedChunks: number; environment: string } | null;
   uploadResume: (file: File) => Promise<string>;
   analyzeResume: (text: string) => Promise<Record<string, unknown>>;
-  matchJobs: (profile: any) => Promise<any[]>;
-  upgradeSkills: (profile: any, skills: string[]) => Promise<any>;
-  generateInterview: (jobId: string, profile: any) => Promise<any>;
+  matchJobs: (profile: Record<string, unknown>) => Promise<Record<string, unknown>[]>;
+  upgradeSkills: (profile: Record<string, unknown>, skills: string[]) => Promise<Record<string, unknown>>;
+  generateInterview: (jobId: string, profile: Record<string, unknown>) => Promise<Record<string, unknown>>;
   seedJobs: () => Promise<void>;
   openaiKey: string;
   setOpenaiKey: (key: string) => void;
@@ -104,8 +104,9 @@ export const RAGProvider = ({ children }: { children: ReactNode }) => {
         return { chunksAdded: data.chunks_added, success: true };
       }
       throw new Error(`Ingest Failed (${res.status})`);
-    } catch (e: any) {
-      throw new Error(e.message || "Failed to ingest document");
+    } catch (e: unknown) {
+      const err = e as Error;
+      throw new Error(err.message || "Failed to ingest document");
     }
   }, [getHeaders, checkBackendHealth, fetchIngestedDocs]);
 
@@ -162,7 +163,7 @@ export const RAGProvider = ({ children }: { children: ReactNode }) => {
     }
     const data = await res.json();
     return data.text;
-  }, [openaiKey]);
+  }, [openaiKey, backendApiKey]);
 
   const analyzeResume = useCallback(async (text: string): Promise<Record<string, unknown>> => {
     const res = await fetch(`${API_URL}/analyze/resume`, {
@@ -174,7 +175,7 @@ export const RAGProvider = ({ children }: { children: ReactNode }) => {
     return res.json();
   }, [getHeaders, openaiKey]);
 
-  const matchJobs = useCallback(async (profile: any): Promise<any[]> => {
+  const matchJobs = useCallback(async (profile: Record<string, unknown>): Promise<Record<string, unknown>[]> => {
     const res = await fetch(`${API_URL}/analyze/match`, {
       method: "POST",
       headers: getHeaders(),
@@ -184,7 +185,7 @@ export const RAGProvider = ({ children }: { children: ReactNode }) => {
     return res.json();
   }, [getHeaders]);
 
-  const upgradeSkills = useCallback(async (profile: any, skills: string[]): Promise<any> => {
+  const upgradeSkills = useCallback(async (profile: Record<string, unknown>, skills: string[]): Promise<Record<string, unknown>> => {
     const res = await fetch(`${API_URL}/analyze/upgrade`, {
       method: "POST",
       headers: getHeaders(),
@@ -194,7 +195,7 @@ export const RAGProvider = ({ children }: { children: ReactNode }) => {
     return res.json();
   }, [getHeaders]);
 
-  const generateInterview = useCallback(async (jobId: string, profile: any): Promise<any> => {
+  const generateInterview = useCallback(async (jobId: string, profile: Record<string, unknown>): Promise<Record<string, unknown>> => {
     const res = await fetch(`${API_URL}/analyze/interview`, {
       method: "POST",
       headers: getHeaders(),

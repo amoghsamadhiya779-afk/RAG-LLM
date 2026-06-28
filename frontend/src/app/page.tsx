@@ -29,15 +29,16 @@ export default function Home() {
           transition={{ duration: 1 }}
           className="relative w-full flex flex-col items-center"
         >
-          <BackdropEngine />
+          <div className="relative min-h-screen w-full overflow-hidden">
+            <BackdropEngine />
+            <div className="relative z-10 w-full flex flex-col">
+              <Hero />
+            </div>
+          </div>
 
-          {/* Content overlay */}
-          <div className="relative z-10 w-full flex flex-col">
-            {/* Hero Landing Section */}
-            <Hero />
-
-            {/* Workspace Section */}
-            <section id="workspace" className="relative z-10 w-full max-w-7xl mx-auto px-4 pb-24">
+          {/* Workspace Section */}
+          <section id="workspace" className="relative z-10 w-full bg-[#050505] px-4 pb-24 pt-12">
+            <div className="max-w-7xl mx-auto w-full">
               
               {/* Navigation Tabs & Settings Toggle */}
               <GlassCard className="flex items-center justify-between mb-8 p-4 clay-glass" variant="glass">
@@ -46,7 +47,7 @@ export default function Home() {
                     onClick={() => setActiveView("matcher")}
                     className={`px-6 py-2 rounded-full transition-all font-semibold ${
                       activeView === "matcher" 
-                        ? "bg-gradient-to-r from-purple-400 to-indigo-500 text-white shadow-[0_0_20px_rgba(168,85,247,0.4)]" 
+                        ? "bg-white/15 text-white" 
                         : "hover:bg-white/10 text-gray-400"
                     }`}
                   >
@@ -56,7 +57,7 @@ export default function Home() {
                     onClick={() => setActiveView("board")}
                     className={`px-6 py-2 rounded-full transition-all font-semibold ${
                       activeView === "board" 
-                        ? "bg-gradient-to-r from-purple-400 to-indigo-500 text-white shadow-[0_0_20px_rgba(168,85,247,0.4)]" 
+                        ? "bg-white/15 text-white" 
                         : "hover:bg-white/10 text-gray-400"
                     }`}
                   >
@@ -94,7 +95,8 @@ export default function Home() {
                 {activeView === "matcher" && <ResumeMatcher />}
                 {activeView === "board" && <JobBoard />}
               </div>
-            </section>
+            </div>
+          </section>
 
             {/* Marquee Footer */}
             <section className="w-full relative z-0 py-10 opacity-60 pointer-events-none">

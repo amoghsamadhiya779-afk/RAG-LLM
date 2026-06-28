@@ -2,7 +2,9 @@
 
 import { motion } from "framer-motion";
 import { GlassCard } from "@/components/shared/GlassCard";
-import { ArrowDown } from "lucide-react";
+import { ArrowDown, UploadCloud, FileText } from "lucide-react";
+import { useResumeUpload } from "@/utils/useResumeUpload";
+import { useRef } from "react";
 
 export function Hero() {
   const containerVariants = {
@@ -23,6 +25,22 @@ export function Hero() {
       y: 0,
       transition: { duration: 0.8, ease: "easeOut" },
     },
+  };
+
+  const { isUploading, handleFileUpload } = useResumeUpload();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const onUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleFileUpload(file).then(() => {
+        document.getElementById('workspace')?.scrollIntoView({ behavior: 'smooth' });
+      }).catch(() => {}); // Errors handled by hook context if any, or we can just scroll
+    }
   };
 
   return (
@@ -59,9 +77,41 @@ export function Hero() {
           className="text-xl text-gray-400 mb-12 max-w-2xl mx-auto font-medium"
           variants={itemVariants}
         >
-          Experience the future of resume analysis with clay morphism and fluid glass effects. 
-          Upload your resume below to instantly reveal deep ATS insights.
+          Get an instant ATS score and a clear breakdown of how to improve it — before you apply.
         </motion.p>
+
+        {/* Upload Action */}
+        <motion.div variants={itemVariants} className="mb-12">
+          <input 
+            type="file" 
+            ref={fileInputRef}
+            className="hidden" 
+            accept=".pdf,.docx,.txt" 
+            onChange={onFileChange} 
+          />
+          <button
+            onClick={onUploadClick}
+            disabled={isUploading}
+            className="inline-flex items-center justify-center gap-3 px-8 py-4 rounded-full bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold text-lg shadow-[0_0_40px_rgba(168,85,247,0.4)] hover:shadow-[0_0_60px_rgba(168,85,247,0.6)] transition-all disabled:opacity-70"
+          >
+            {isUploading ? (
+              <span className="flex items-center gap-2">
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                >
+                  <UploadCloud className="w-6 h-6" />
+                </motion.div>
+                Uploading...
+              </span>
+            ) : (
+              <>
+                <FileText className="w-6 h-6" />
+                Upload Your Resume
+              </>
+            )}
+          </button>
+        </motion.div>
 
         {/* Scroll CTA */}
         <motion.div

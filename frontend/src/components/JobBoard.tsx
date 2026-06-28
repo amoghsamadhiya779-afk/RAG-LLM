@@ -137,7 +137,7 @@ export const JobBoard = () => {
       <motion.div variants={containerVariants} initial="hidden" animate="show" className="mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6 max-w-[1400px] mx-auto w-full">
         <motion.div variants={itemVariants}>
           <h1 className="text-3xl font-bold tracking-tight text-white font-sans">
-            Job Board Analytics
+            Resume Insights
           </h1>
           <p className="text-sm mt-2 text-gray-400 font-medium">
             Upload your resume to discover matching opportunities and analyze your ATS score.

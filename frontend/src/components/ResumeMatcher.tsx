@@ -12,37 +12,24 @@ export const ResumeMatcher = () => {
     matchLoading,
     runMatchEvaluation,
     clearMatchResult,
-    ingestDocument,
-    uploadResume,
   } = useRAG();
+
+  const { isUploading, errorMsg: uploadError, handleFileUpload, setErrorMsg: setUploadError } = useResumeUpload();
 
   const [selectedDoc, setSelectedDoc] = useState("");
   const [roleTitle, setRoleTitle] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [activeTab, setActiveTab] = useState<"strengths" | "gaps" | "evidence">("strengths");
 
-  const [isUploading, setIsUploading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const handleFileUpload = async (file: File) => {
-    setIsUploading(true);
-    setErrorMsg(null);
-    try {
-      const text = await uploadResume(file);
-      await ingestDocument(file.name, text);
-      setSelectedDoc(file.name);
-    } catch (e: unknown) {
-      console.error(e);
-      const err = e as Error;
-      setErrorMsg(err.message || "Failed to upload document.");
-    }
-    setIsUploading(false);
-  };
+  // Combine errors
+  const displayError = errorMsg || uploadError;
 
   const handleEvaluate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!roleTitle.trim() || !jobDescription.trim() || !selectedDoc) {
-      setErrorMsg("Please select an ingested document, role title, and job description.");
+      setErrorMsg("Please select a resume, role title, and job description.");
       return;
     }
     setErrorMsg(null);
@@ -69,10 +56,10 @@ export const ResumeMatcher = () => {
       <div className="mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-white font-sans">
-            Profile Evaluator
+            Job Matching
           </h1>
           <p className="text-sm mt-2 text-gray-400 font-medium">
-            Cross-evaluate candidate credentials against role requirements using semantic search embeddings.
+            See how well your resume matches the role you're applying for.
           </p>
         </div>
         {matchResult && (
@@ -87,6 +74,21 @@ export const ResumeMatcher = () => {
         )}
       </div>
 
+      {displayError && (
+          <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/50 text-red-200 text-sm animate-in fade-in slide-in-from-top-2 relative">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              <p>{displayError}</p>
+            </div>
+            <button 
+              onClick={() => { setErrorMsg(null); setUploadError(null); }}
+              className="absolute top-4 right-4 text-red-400 hover:text-red-300"
+            >
+              ×
+            </button>
+          </div>
+        )}
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
         
         {/* Left Form Panel */}
@@ -95,21 +97,21 @@ export const ResumeMatcher = () => {
             
             <div className="flex items-center gap-2 mb-6">
               <FileText className="w-5 h-5 text-[var(--color-primary-600)]" />
-              <h2 className="text-lg font-semibold text-white">Evaluation Specs</h2>
+              <h2 className="text-xl font-bold text-white flex items-center">Job Details</h2>
             </div>
 
             <form onSubmit={handleEvaluate} className="space-y-6">
               {/* Select Resume Document */}
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-gray-400">
-                  Candidate Profile Index
+                  Select Resume
                 </label>
                 <select
                   value={selectedDoc}
                   onChange={(e) => setSelectedDoc(e.target.value)}
                   className="w-full p-3 text-sm rounded-xl border border-white/40 bg-transparent text-white focus:outline-none focus:border-[var(--color-primary-500)] focus:ring-1 focus:ring-[var(--accent)] transition-all cursor-pointer shadow-sm"
                 >
-                  <option value="" className="bg-gray-900 text-white">Select Ingested Document...</option>
+                  <option value="" disabled className="bg-gray-900 text-white">Choose a resume you've uploaded...</option>
                   {ingestedDocs.map((doc, idx) => (
                     <option key={idx} value={doc} className="bg-gray-900 text-white">{doc}</option>
                   ))}
@@ -120,7 +122,7 @@ export const ResumeMatcher = () => {
 
                 <div className="flex items-center gap-4 py-4">
                   <div className="flex-1 h-px bg-[var(--border)]"></div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">OR UPLOAD NEW</span>
+                  <span className="text-xs text-gray-300 font-bold uppercase tracking-wider">OR UPLOAD NEW</span>
                   <div className="flex-1 h-px bg-[var(--border)]"></div>
                 </div>
 
@@ -128,7 +130,7 @@ export const ResumeMatcher = () => {
                   <div className="flex flex-col items-center justify-center text-center">
                     <FileText className="w-6 h-6 mb-3 text-gray-400" />
                     <p className="mb-1 text-sm font-semibold text-white">
-                      {isUploading ? "Uploading & Ingesting..." : "Upload Resume (PDF, DOCX)"}
+                      {isUploading ? "Uploading..." : "Upload Resume (PDF, DOCX)"}
                     </p>
                   </div>
                   <input type="file" className="hidden" accept=".pdf,.docx,.txt" onChange={(e) => {
@@ -168,12 +170,6 @@ export const ResumeMatcher = () => {
                   className="w-full p-3 text-sm rounded-xl border border-white/40 bg-transparent text-white focus:outline-none focus:border-[var(--color-primary-500)] focus:ring-1 focus:ring-[var(--accent)] transition-all resize-none shadow-sm placeholder:text-gray-500"
                 />
               </div>
-
-              {errorMsg && (
-                <div className="p-3 border border-red-500/20 bg-red-500/10 rounded-xl text-red-500 text-sm text-center">
-                  {errorMsg}
-                </div>
-              )}
 
               {/* Run Button */}
               <motion.button
@@ -228,9 +224,9 @@ export const ResumeMatcher = () => {
                   />
                   <Layers className="absolute inset-0 m-auto w-8 h-8 animate-pulse-subtle text-[var(--color-primary-600)]" />
                 </div>
-                <h3 className="text-base font-semibold text-white mb-2">Vector Index Retrieval</h3>
+                <h3 className="text-base font-semibold text-white mb-2">Analyzing...</h3>
                 <p className="text-sm max-w-[300px] text-center text-gray-400">
-                  Retrieving grounded chunks and evaluating semantic matching coefficients...
+                  Retrieving your information and comparing it against the job requirements...
                 </p>
               </motion.div>
             ) : matchResult ? (
@@ -280,9 +276,9 @@ export const ResumeMatcher = () => {
 
                   {/* Summary Details */}
                   <div className="flex-1 text-center sm:text-left space-y-2">
-                    <h3 className="text-lg font-bold text-white">{matchResult.role_title}</h3>
+                    <h2 className="text-xl font-bold text-white flex items-center">Your Resume</h2>
                     <p className="text-sm text-gray-400 leading-relaxed">
-                      Semantically verified. The candidate profile matches the target specifications with a coefficient score of {score}/100.
+                      Your resume matches this role at {score}/100.
                     </p>
                     <div className="pt-4 flex flex-wrap gap-3 justify-center sm:justify-start">
                       <span className={`text-xs font-semibold px-3 py-1 rounded-full border
@@ -294,7 +290,7 @@ export const ResumeMatcher = () => {
                         {score >= 80 ? "High Fit" : score >= 50 ? "Moderate Fit" : "Low Fit"}
                       </span>
                       <span className="text-xs font-medium px-3 py-1 rounded-full border bg-white/60 backdrop-blur-md border-white/40 text-gray-900">
-                        {matchResult.evidence.length} chunks retrieved
+                        {matchResult.evidence.length} points checked
                       </span>
                     </div>
                   </div>
@@ -305,7 +301,7 @@ export const ResumeMatcher = () => {
                   {[
                     { id: "strengths", name: "Strengths", count: matchResult.strengths.length },
                     { id: "gaps", name: "Gaps", count: matchResult.gaps.length },
-                    { id: "evidence", name: "RAG Evidence", count: matchResult.evidence.length },
+                    { id: "evidence", name: "Evidence", count: matchResult.evidence.length },
                   ].map((tab) => {
                     const isSelected = activeTab === tab.id;
                     return (
@@ -347,7 +343,7 @@ export const ResumeMatcher = () => {
                           </div>
                         ))}
                         {matchResult.strengths.length === 0 && (
-                          <p className="text-sm text-gray-400 text-center py-10">No specific semantic strengths evaluated.</p>
+                          <p className="text-sm text-gray-400 text-center py-10">No specific strengths found.</p>
                         )}
                       </motion.div>
                     )}
@@ -367,7 +363,7 @@ export const ResumeMatcher = () => {
                           </div>
                         ))}
                         {matchResult.gaps.length === 0 && (
-                          <p className="text-sm text-gray-400 text-center py-10">No critical candidate profile gaps detected!</p>
+                          <p className="text-sm text-gray-400 text-center py-10">No major gaps found between your resume and this role.</p>
                         )}
                       </motion.div>
                     )}
@@ -388,7 +384,7 @@ export const ResumeMatcher = () => {
                                 <span>{snippet.source}</span>
                               </span>
                               <span className="text-[var(--color-primary-600)] bg-[var(--color-primary-100)] px-2.5 py-1 rounded-full">
-                                Similarity: {Math.round(snippet.score * 100)}%
+                                Alignment: {Math.round(snippet.score * 100)}%
                               </span>
                             </div>
                             <p className="text-sm leading-relaxed italic text-gray-900 opacity-90 border-l-2 border-white/40 pl-4">
@@ -408,13 +404,23 @@ export const ResumeMatcher = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="flex flex-col items-center justify-center p-12 rounded-2xl border-2 border-dashed border-white/40 bg-transparent min-h-[500px]"
+                className="flex flex-col items-center justify-center p-12 rounded-2xl border border-white/20 bg-transparent min-h-[500px]"
               >
                 <Layers className="w-12 h-12 mb-6 text-gray-500" />
                 <h3 className="text-lg font-bold text-white mb-2">Awaiting Analysis</h3>
-                <p className="text-sm max-w-[300px] text-center text-gray-400 leading-relaxed">
-                  Select a candidate resume and enter target job requirements to generate a role fit report.
+                <p className="text-sm text-gray-400 max-w-xs mx-auto text-center mb-6">
+                  Choose a resume and add the job details to see your fit.
                 </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRoleTitle("Senior Frontend Engineer");
+                    setJobDescription("We are looking for a Senior Frontend Engineer with strong React, Next.js, and TypeScript skills to build scalable web applications.");
+                  }}
+                  className="px-4 py-2 text-sm font-medium text-white/70 bg-white/5 hover:bg-white/10 hover:text-white rounded-lg border border-white/10 transition-colors"
+                >
+                  Try a sample report
+                </button>
               </motion.div>
             )}
           </AnimatePresence>

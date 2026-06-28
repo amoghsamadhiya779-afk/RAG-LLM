@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo, useCallback } from "react";
@@ -9,7 +9,7 @@ export interface SourceSnippet {
   doc_type: string;
   score: number;
   text: string;
-  metadata: any;
+  metadata: Record<string, unknown>;
 }
 
 export interface Message {

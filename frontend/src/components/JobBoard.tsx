@@ -2,6 +2,16 @@
 
 import React, { useState, useEffect } from "react";
 import { useRAG } from "@/context/RAGContext";
+
+interface AtsScore {
+  total_score?: number;
+  breakdown?: {
+    formatting?: number;
+    content?: number;
+    style?: number;
+    match?: number;
+  };
+}
 import { motion, AnimatePresence } from "framer-motion";
 import { FileText, PlayCircle, Sparkles, CheckCircle, ChevronDown, ChevronUp, BookOpen } from "lucide-react";
 
@@ -25,7 +35,7 @@ export const JobBoard = () => {
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [profileData, setProfileData] = useState<Record<string, unknown> | null>(null);
-  const [atsScore, setAtsScore] = useState<Record<string, unknown> | null>(null);
+  const [atsScore, setAtsScore] = useState<AtsScore | null>(null);
   const [matchedJobs, setMatchedJobs] = useState<Record<string, unknown>[]>([]);
   const [selectedJob, setSelectedJob] = useState<Record<string, unknown> | null>(null);
   const [interviewQuestions, setInterviewQuestions] = useState<Record<string, unknown>[]>([]);
@@ -63,7 +73,7 @@ export const JobBoard = () => {
       }
       const data = await analyzeResume(textToAnalyze);
       setProfileData(data.profile as Record<string, unknown>);
-      setAtsScore(data.scoring as Record<string, unknown>);
+      setAtsScore(data.scoring as AtsScore);
       const jobs = await matchJobs(data.profile as Record<string, unknown>);
       setMatchedJobs(jobs);
       setActiveTab("ats");

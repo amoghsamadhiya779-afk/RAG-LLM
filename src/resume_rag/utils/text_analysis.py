@@ -1,5 +1,5 @@
 import re
-from resume_rag.schemas import SearchResult
+from resume_rag.vector_store import SearchResult
 
 
 def _extract_signal(results: list[SearchResult], limit: int) -> list[str]:

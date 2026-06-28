@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useChat } from "@/context/ChatContext";
+import { useRAG } from "@/context/RAGContext";
 import { motion, AnimatePresence } from "framer-motion";
-import { FileText, PlayCircle, Sparkles, CheckCircle, ChevronDown, ChevronUp } from "lucide-react";
+import { FileText, PlayCircle, Sparkles, CheckCircle, ChevronDown, ChevronUp, BookOpen } from "lucide-react";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -19,7 +19,7 @@ const itemVariants = {
 };
 
 export const JobBoard = () => {
-  const { uploadResume, analyzeResume, matchJobs, seedJobs, generateInterview, ingestDocument } = useChat();
+  const { uploadResume, analyzeResume, matchJobs, seedJobs, generateInterview, ingestDocument } = useRAG();
 
   const [resumeText, setResumeText] = useState("");
   const [resumeFile, setResumeFile] = useState<File | null>(null);

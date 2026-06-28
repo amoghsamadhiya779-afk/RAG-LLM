@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from "react";
 import { useChat } from "@/context/ChatContext";
+import { useUI } from "@/context/UIContext";
 import { MessageBubble } from "./MessageBubble";
 import { Logo } from "./Logo";
 import { motion } from "framer-motion";
@@ -13,9 +14,12 @@ export const ChatWindow = () => {
     isStreaming,
     streamingText,
     sendMessage,
+  } = useChat();
+
+  const {
     isSidebarExpanded,
     setIsSidebarExpanded,
-  } = useChat();
+  } = useUI();
 
   const scrollRef = useRef<HTMLDivElement>(null);
 

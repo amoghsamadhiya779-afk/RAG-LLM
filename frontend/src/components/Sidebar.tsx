@@ -3,6 +3,7 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useChat } from "@/context/ChatContext";
+import { useUI } from "@/context/UIContext";
 import { Logo } from "./Logo";
 import {
   Plus,
@@ -15,14 +16,17 @@ import {
 
 export const Sidebar = () => {
   const {
-    isSidebarExpanded,
-    setIsSidebarExpanded,
     setCurrentSessionId,
     createNewChat,
+  } = useChat();
+
+  const {
+    isSidebarExpanded,
+    setIsSidebarExpanded,
     setIsSettingsOpen,
     activeView,
     setActiveView,
-  } = useChat();
+  } = useUI();
 
   return (
     <>

@@ -1,12 +1,16 @@
 from __future__ import annotations
 
+import logging
 import os
 from abc import ABC, abstractmethod
 from collections.abc import Iterator
 
 from resume_rag.config import Settings
 from resume_rag.vector_store import SearchResult
+from resume_rag.utils.text_analysis import _extract_gaps, _extract_signal, _keyword_coverage
 
+
+logger = logging.getLogger(__name__)
 
 class AnswerGenerator(ABC):
     @abstractmethod
@@ -64,7 +68,7 @@ class LocalExtractiveGenerator(AnswerGenerator):
     def evaluate_match(
         self, role_title: str, job_description: str, contexts: list[SearchResult]
     ) -> tuple[int, list[str], list[str]]:
-        from resume_rag.rag import _extract_gaps, _extract_signal, _keyword_coverage
+
 
         evidence_text = " ".join(result.chunk.text for result in contexts)
         coverage = _keyword_coverage(job_description, evidence_text)
@@ -208,7 +212,7 @@ class OpenAIAnswerGenerator(AnswerGenerator):
             data = json.loads(content)
             return int(data["match_score"]), list(data["strengths"]), list(data["gaps"])
         except Exception:
-            from resume_rag.rag import _extract_gaps, _extract_signal, _keyword_coverage
+
 
             evidence_text = " ".join(result.chunk.text for result in contexts)
             coverage = _keyword_coverage(job_description, evidence_text)
@@ -263,30 +267,28 @@ class OpenAIAnswerGenerator(AnswerGenerator):
         if not contexts:
             return []
             
-        filtered_contexts = []
-        for result in contexts:
-            prompt = (
-                f"You are a grader assessing relevance of a retrieved document to a user question.\n"
-                f"Here is the retrieved document:\n\n{result.chunk.text}\n\n"
-                f"Here is the user question: {question}\n\n"
-                f"If the document contains keyword(s) or semantic meaning related to the user question, "
-                f"grade it as relevant. Give a binary score 'yes' or 'no' score to indicate whether the document is relevant to the question. "
-                f"Output ONLY 'yes' or 'no'."
+        docs_text = "\n\n".join([f"Document {i}:\n{ctx.chunk.text}" for i, ctx in enumerate(contexts)])
+        prompt = (
+            f"You are a grader assessing relevance of retrieved documents to a user question.\n"
+            f"Here are the retrieved documents:\n\n{docs_text}\n\n"
+            f"Here is the user question: {question}\n\n"
+            f"For each document, determine if it contains keyword(s) or semantic meaning related to the question.\n"
+            f"Output ONLY a valid JSON array of integers containing the indices (0 to {len(contexts)-1}) of the relevant documents. Do not output anything else."
+        )
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                temperature=0.0,
+                messages=[{"role": "user", "content": prompt}],
             )
-            try:
-                response = self.client.chat.completions.create(
-                    model=self.model,
-                    temperature=0.0,
-                    messages=[{"role": "user", "content": prompt}],
-                )
-                content = response.choices[0].message.content or ""
-                if "yes" in content.lower():
-                    filtered_contexts.append(result)
-            except Exception:
-                # On error, default to keeping it
-                filtered_contexts.append(result)
-                
-        return filtered_contexts if filtered_contexts else contexts
+            content = response.choices[0].message.content or ""
+            content = content.replace("```json", "").replace("```", "").strip()
+            import json
+            indices = json.loads(content)
+            filtered = [contexts[i] for i in indices if isinstance(i, int) and 0 <= i < len(contexts)]
+            return filtered if filtered else contexts
+        except Exception:
+            return contexts
 
 
 class GeminiAnswerGenerator(AnswerGenerator):
@@ -309,11 +311,11 @@ class GeminiAnswerGenerator(AnswerGenerator):
             resp.raise_for_status()
             data = resp.json()
             return data["candidates"][0]["content"]["parts"][0]["text"]
-        except requests.exceptions.HTTPError as e:
-            print(f"Gemini API Error: {e.response.text}")
-            return ""
-        except (KeyError, IndexError, Exception) as e:
-            print(f"Gemini Exception: {e}")
+        except httpx.HTTPStatusError as e:
+            logger.error(f"Gemini API Error: {e.response.text}")
+            raise RuntimeError(f"Gemini API failed: {e.response.text}") from e
+        except Exception as e:
+            logger.error(f"Gemini Exception: {e}")
             return ""
 
     def answer(self, question: str, contexts: list[SearchResult]) -> str:
@@ -357,7 +359,7 @@ class GeminiAnswerGenerator(AnswerGenerator):
             data = json.loads(content)
             return int(data["match_score"]), list(data["strengths"]), list(data["gaps"])
         except Exception:
-            from resume_rag.rag import _extract_gaps, _extract_signal, _keyword_coverage
+
 
             evidence_text = " ".join(result.chunk.text for result in contexts)
             coverage = _keyword_coverage(job_description, evidence_text)
@@ -394,24 +396,26 @@ class GeminiAnswerGenerator(AnswerGenerator):
             return "resume_search"
 
     def grade_documents(self, question: str, contexts: list[SearchResult]) -> list[SearchResult]:
-        relevant = []
-        for ctx in contexts:
-            prompt = (
-                "You are a grader assessing relevance of a retrieved document to a user question.\n"
-                "Give a binary score 'yes' or 'no' score to indicate whether the document is relevant to the question.\n"
-                "Respond ONLY with a JSON object containing a single key 'score' with the value 'yes' or 'no'.\n"
-                f"Document: {ctx.chunk.text}\nQuestion: {question}"
-            )
-            import json
-            res = self._call_gemini(prompt)
-            res = res.replace("```json", "").replace("```", "").strip()
-            try:
-                data = json.loads(res)
-                if data.get("score") == "yes":
-                    relevant.append(ctx)
-            except Exception:
-                relevant.append(ctx)
-        return relevant
+        if not contexts:
+            return []
+            
+        docs_text = "\n\n".join([f"Document {i}:\n{ctx.chunk.text}" for i, ctx in enumerate(contexts)])
+        prompt = (
+            f"You are a grader assessing relevance of retrieved documents to a user question.\n"
+            f"Here are the retrieved documents:\n\n{docs_text}\n\n"
+            f"Here is the user question: {question}\n\n"
+            f"For each document, determine if it contains keyword(s) or semantic meaning related to the question.\n"
+            f"Output ONLY a valid JSON array of integers containing the indices (0 to {len(contexts)-1}) of the relevant documents. Do not output anything else."
+        )
+        import json
+        res = self._call_gemini(prompt)
+        res = res.replace("```json", "").replace("```", "").strip()
+        try:
+            indices = json.loads(res)
+            filtered = [contexts[i] for i in indices if isinstance(i, int) and 0 <= i < len(contexts)]
+            return filtered if filtered else contexts
+        except Exception:
+            return contexts
 
 
 def build_answer_generator(settings: Settings) -> AnswerGenerator:
@@ -420,13 +424,13 @@ def build_answer_generator(settings: Settings) -> AnswerGenerator:
         if api_key:
             return GeminiAnswerGenerator(api_key)
         else:
-            print("Warning: GEMINI_API_KEY is not set. Falling back to LocalExtractiveGenerator.")
+            logger.warning("GEMINI_API_KEY is not set. Falling back to LocalExtractiveGenerator.")
     
     if settings.llm_provider == "openai":
         api_key = settings.openai_api_key or os.environ.get("OPENAI_API_KEY")
         if api_key:
             return OpenAIAnswerGenerator(api_key, settings.openai_chat_model)
         else:
-            print("Warning: OPENAI_API_KEY is not set. Falling back to LocalExtractiveGenerator.")
+            logger.warning("OPENAI_API_KEY is not set. Falling back to LocalExtractiveGenerator.")
             
     return LocalExtractiveGenerator()

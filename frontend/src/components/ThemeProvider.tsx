@@ -2,6 +2,8 @@
 
 import React, { ReactNode, createContext, useContext, useEffect, useState } from "react";
 import { ChatProvider } from "@/context/ChatContext";
+import { UIProvider } from "@/context/UIContext";
+import { RAGProvider } from "@/context/RAGContext";
 
 export type BaseTheme = "light" | "dark";
 export type AccentColor = "green" | "red" | "blue" | "orange" | "grey";
@@ -58,7 +60,11 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <ThemeContext.Provider value={{ baseTheme, setBaseTheme, accentColor, setAccentColor }}>
-      <ChatProvider>{children}</ChatProvider>
+      <UIProvider>
+        <RAGProvider>
+          <ChatProvider>{children}</ChatProvider>
+        </RAGProvider>
+      </UIProvider>
     </ThemeContext.Provider>
   );
 };

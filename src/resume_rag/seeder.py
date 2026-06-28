@@ -1,7 +1,7 @@
 import json
 
 from resume_rag.embeddings import EmbeddingModel
-from resume_rag.vector_store import JsonVectorStore
+from resume_rag.vector_store import SQLiteVectorStore
 
 JOBS_DATA = [
     {
@@ -186,7 +186,7 @@ JOBS_DATA = [
     }
 ]
 
-def seed_jobs(vector_store: JsonVectorStore, embedding_model: EmbeddingModel) -> int:
+def seed_jobs(vector_store: SQLiteVectorStore, embedding_model: EmbeddingModel) -> int:
     vector_store.clear_jobs()
     for job in JOBS_DATA:
         vector_store.add_job(

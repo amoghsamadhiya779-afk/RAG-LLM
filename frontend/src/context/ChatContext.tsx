@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo, useCallback } from "react";
+import { API_URL } from "./RAGContext";
 
 export interface SourceSnippet {
   source: string;
@@ -50,12 +51,6 @@ interface ChatContextType {
   setTopP: (p: number) => void;
   maxTokens: number;
   setMaxTokens: (tokens: number) => void;
-  isSidebarExpanded: boolean;
-  setIsSidebarExpanded: (expanded: boolean) => void;
-  isSettingsOpen: boolean;
-  setIsSettingsOpen: (open: boolean) => void;
-  openaiKey: string;
-  setOpenaiKey: (key: string) => void;
   sessions: ChatSession[];
   currentSessionId: string | null;
   setCurrentSessionId: (id: string | null) => void;
@@ -69,262 +64,26 @@ interface ChatContextType {
   createNewChat: () => void;
   deleteSession: (id: string) => void;
   clearHistory: () => void;
-  
-  // Enterprise RAG additions
-  activeView: "chat" | "matcher" | "board";
-  setActiveView: (view: "chat" | "matcher" | "board") => void;
-  ingestedDocs: string[];
-  fetchIngestedDocs: () => Promise<void>;
-  ingestDocument: (name: string, content: string) => Promise<{ chunksAdded: number; success: boolean }>;
-  matchResult: MatchResult | null;
-  matchLoading: boolean;
-  runMatchEvaluation: (roleTitle: string, jobDescription: string) => Promise<void>;
-  clearMatchResult: () => void;
-  isBackendConnected: boolean;
-  backendStats: { indexedChunks: number; environment: string } | null;
-  
-  // Board State
-  uploadResume: (file: File) => Promise<string>;
-  analyzeResume: (text: string) => Promise<Record<string, unknown>>;
-  matchJobs: (profile: any) => Promise<any[]>;
-  upgradeSkills: (profile: any, skills: string[]) => Promise<any>;
-  generateInterview: (jobId: string, profile: any) => Promise<any>;
-  seedJobs: () => Promise<void>;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
-const API_URL_RAW = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-const API_URL = API_URL_RAW.replace(/\/+$/, "");
-
 export const ChatProvider = ({ children }: { children: ReactNode }) => {
-  // Model settings
   const [activeModel, setActiveModel] = useState<string>("gemini-2.5-pro");
   const [temperature, setTemperature] = useState<number>(0.7);
   const [topK, setTopK] = useState<number>(4);
   const [topP, setTopP] = useState<number>(0.9);
   const [maxTokens, setMaxTokens] = useState<number>(2048);
 
-  // Layout states
-  const [isSidebarExpanded, setIsSidebarExpanded] = useState<boolean>(true);
-  const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
-  const [openaiKey, setOpenaiKey] = useState<string>("");
-
-  // Chat sessions states
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
 
-  // Streaming response states
   const [isStreaming, setIsStreaming] = useState<boolean>(false);
   const [streamingText, setStreamingText] = useState<string>("");
   const [abortController, setAbortController] = useState<AbortController | null>(null);
 
-  // RAG States
-  const [activeView, setActiveView] = useState<"chat" | "matcher" | "board">("board");
-  const [ingestedDocs, setIngestedDocs] = useState<string[]>([]);
-  const [matchResult, setMatchResult] = useState<MatchResult | null>(null);
-  const [matchLoading, setMatchLoading] = useState<boolean>(false);
-  const [isBackendConnected, setIsBackendConnected] = useState<boolean>(false);
-  const [backendStats, setBackendStats] = useState<{ indexedChunks: number; environment: string } | null>(null);
-
-  // Check backend connection & fetch stats
-  const checkBackendHealth = async () => {
-    try {
-      const res = await fetch(`${API_URL}/health`);
-      if (res.ok) {
-        const data = await res.json();
-        setIsBackendConnected(true);
-        setBackendStats({
-          indexedChunks: data.indexed_chunks,
-          environment: data.environment,
-        });
-      } else {
-        setIsBackendConnected(false);
-      }
-    } catch {
-      setIsBackendConnected(false);
-    }
-  };
-
-  const fetchIngestedDocs = async () => {
-    try {
-      const res = await fetch(`${API_URL}/documents`, {
-        headers: getHeaders()
-      });
-      if (res.ok) {
-        const data = await res.json();
-        // Extract unique source names
-        const docs = data.map((d: { source?: string; name?: string }) => d.source || d.name);
-        setIngestedDocs(Array.from(new Set(docs)) as string[]);
-      }
-    } catch {}
-  };
-
-  const ingestDocument = async (name: string, content: string) => {
-    try {
-      const res = await fetch(`${API_URL}/documents`, {
-        method: "POST",
-        headers: getHeaders(),
-        body: JSON.stringify({
-          text: content,
-          source: name,
-          doc_type: "resume",
-          metadata: {}
-        })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        await checkBackendHealth();
-        await fetchIngestedDocs();
-        return { chunksAdded: data.chunks_added, success: true };
-      }
-    } catch {}
-    return { chunksAdded: 0, success: false };
-  };
-
-  const runMatchEvaluation = async (roleTitle: string, jobDescription: string) => {
-    setMatchLoading(true);
-    setMatchResult(null);
-    try {
-      const res = await fetch(`${API_URL}/match`, {
-        method: "POST",
-        headers: getHeaders(),
-        body: JSON.stringify({
-          role_title: roleTitle,
-          job_description: jobDescription,
-          top_k: 8
-        })
-      });
-      if (!res.ok) throw new Error("Failed to run match evaluation");
-      const data = await res.json();
-      setMatchResult(data);
-    } catch (e) {
-      setMatchLoading(false);
-      throw e;
-    }
-    setMatchLoading(false);
-  };
-
-  const clearMatchResult = () => setMatchResult(null);
-
-  const getHeaders = () => {
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-    };
-    if (openaiKey) {
-      headers["X-OpenAI-Key"] = openaiKey;
-    }
-    return headers;
-  };
-
-  const uploadResume = async (file: File): Promise<string> => {
-    const formData = new FormData();
-    formData.append("file", file);
-    
-    const headers: Record<string, string> = {};
-    if (openaiKey) {
-      headers["X-OpenAI-Key"] = openaiKey;
-    }
-
-    const res = await fetch(`${API_URL}/upload/resume`, {
-      method: "POST",
-      headers,
-      body: formData
-    });
-    if (!res.ok) {
-      let errTxt = "Unknown error";
-      try {
-        const errObj = await res.json();
-        errTxt = errObj.detail || JSON.stringify(errObj);
-      } catch {
-        errTxt = res.statusText;
-      }
-      throw new Error(`Upload Failed (${res.status}): ${errTxt}`);
-    }
-    const data = await res.json();
-    return data.text;
-  };
-
-  const analyzeResume = async (text: string): Promise<Record<string, unknown>> => {
-    const res = await fetch(`${API_URL}/analyze/resume`, {
-      method: "POST",
-      headers: getHeaders(),
-      body: JSON.stringify({ text, openai_key: openaiKey || undefined })
-    });
-    if (!res.ok) throw new Error("Failed to analyze resume");
-    return res.json();
-  };
-
-  const matchJobs = async (profile: any): Promise<any[]> => {
-    const res = await fetch(`${API_URL}/analyze/match`, {
-      method: "POST",
-      headers: getHeaders(),
-      body: JSON.stringify({ profile, top_k: 10 })
-    });
-    if (!res.ok) throw new Error("Failed to match jobs");
-    return res.json();
-  };
-
-  const upgradeSkills = async (profile: any, skills: string[]): Promise<any> => {
-    const res = await fetch(`${API_URL}/analyze/upgrade`, {
-      method: "POST",
-      headers: getHeaders(),
-      body: JSON.stringify({ profile, learned_skills: skills })
-    });
-    if (!res.ok) throw new Error("Failed to evaluate skill upgrades");
-    return res.json();
-  };
-
-  const generateInterview = async (jobId: string, profile: any): Promise<any> => {
-    const res = await fetch(`${API_URL}/analyze/interview`, {
-      method: "POST",
-      headers: getHeaders(),
-      body: JSON.stringify({ job_id: jobId, profile })
-    });
-    if (!res.ok) throw new Error("Failed to generate interview");
-    return res.json();
-  };
-
-  const seedJobs = async () => {
-    const res = await fetch(`${API_URL}/jobs/seed`, { method: "POST" });
-    if (!res.ok) throw new Error("Failed to seed jobs");
-  };
-
-  // Load from local storage
-  useEffect(() => {
-    // Collapse sidebar by default on mobile screens
-    if (typeof window !== "undefined" && window.innerWidth < 768) {
-      setIsSidebarExpanded(false);
-    }
-
-    const savedKey = localStorage.getItem("chat-ui-openai-key");
-    if (savedKey) setOpenaiKey(savedKey);
-
-    const savedSessions = localStorage.getItem("chat-ui-sessions");
-    if (savedSessions) {
-      try {
-        const parsed = JSON.parse(savedSessions) as ChatSession[];
-        setSessions(parsed);
-        if (parsed.length > 0) {
-          setCurrentSessionId(parsed[0].id);
-          setMessages(parsed[0].messages);
-        } else {
-          initDefaultSession();
-        }
-      } catch {
-        initDefaultSession();
-      }
-    } else {
-      initDefaultSession();
-    }
-
-    // Ping backend API on mount
-    checkBackendHealth();
-    fetchIngestedDocs();
-  }, []);
-
-  const initDefaultSession = () => {
+  const initDefaultSession = useCallback(() => {
     const defaultSession: ChatSession = {
       id: "default-session-id",
       title: "RAG Evaluation Session",
@@ -347,9 +106,28 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     setCurrentSessionId(defaultSession.id);
     setMessages(defaultSession.messages);
     localStorage.setItem("chat-ui-sessions", JSON.stringify([defaultSession]));
-  };
+  }, []);
 
-  // Sync active session settings
+  useEffect(() => {
+    const savedSessions = localStorage.getItem("chat-ui-sessions");
+    if (savedSessions) {
+      try {
+        const parsed = JSON.parse(savedSessions) as ChatSession[];
+        setSessions(parsed);
+        if (parsed.length > 0) {
+          setCurrentSessionId(parsed[0].id);
+          setMessages(parsed[0].messages);
+        } else {
+          initDefaultSession();
+        }
+      } catch {
+        initDefaultSession();
+      }
+    } else {
+      initDefaultSession();
+    }
+  }, [initDefaultSession]);
+
   useEffect(() => {
     if (!currentSessionId) return;
     const session = sessions.find(s => s.id === currentSessionId);
@@ -361,48 +139,43 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
       setMaxTokens(session.maxTokens);
       setMessages(session.messages);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentSessionId, sessions]);
+
+  const updateCurrentSessionSettings = useCallback((updates: Partial<ChatSession>) => {
+    if (!currentSessionId) return;
+    setSessions(prev => {
+      const updated = prev.map(s => (s.id === currentSessionId ? { ...s, ...updates } : s));
+      localStorage.setItem("chat-ui-sessions", JSON.stringify(updated));
+      return updated;
+    });
   }, [currentSessionId]);
 
-  // Update session settings in local storage
-  const updateCurrentSessionSettings = (updates: Partial<ChatSession>) => {
-    if (!currentSessionId) return;
-    const updated = sessions.map(s => {
-      if (s.id === currentSessionId) {
-        return { ...s, ...updates };
-      }
-      return s;
-    });
-    setSessions(updated);
-    localStorage.setItem("chat-ui-sessions", JSON.stringify(updated));
-  };
-
-  const updateModel = (model: string) => {
+  const updateModel = useCallback((model: string) => {
     setActiveModel(model);
     updateCurrentSessionSettings({ model });
-  };
+  }, [updateCurrentSessionSettings]);
 
-  const updateTemperature = (temp: number) => {
+  const updateTemperature = useCallback((temp: number) => {
     setTemperature(temp);
     updateCurrentSessionSettings({ temperature: temp });
-  };
+  }, [updateCurrentSessionSettings]);
 
-  const updateTopK = (k: number) => {
+  const updateTopK = useCallback((k: number) => {
     setTopK(k);
     updateCurrentSessionSettings({ topK: k });
-  };
+  }, [updateCurrentSessionSettings]);
 
-  const updateTopP = (p: number) => {
+  const updateTopP = useCallback((p: number) => {
     setTopP(p);
     updateCurrentSessionSettings({ topP: p });
-  };
+  }, [updateCurrentSessionSettings]);
 
-  const updateMaxTokens = (tokens: number) => {
+  const updateMaxTokens = useCallback((tokens: number) => {
     setMaxTokens(tokens);
     updateCurrentSessionSettings({ maxTokens: tokens });
-  };
+  }, [updateCurrentSessionSettings]);
 
-  const createNewChat = () => {
+  const createNewChat = useCallback(() => {
     const newSessionId = `session-${Date.now()}`;
     const newSession: ChatSession = {
       id: newSessionId,
@@ -415,44 +188,47 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
       maxTokens,
       timestamp: new Date().toISOString()
     };
-    const updated = [newSession, ...sessions];
-    setSessions(updated);
+    setSessions(prev => {
+      const updated = [newSession, ...prev];
+      localStorage.setItem("chat-ui-sessions", JSON.stringify(updated));
+      return updated;
+    });
     setCurrentSessionId(newSessionId);
     setMessages([]);
-    localStorage.setItem("chat-ui-sessions", JSON.stringify(updated));
-  };
+  }, [activeModel, temperature, topK, topP, maxTokens]);
 
-  const deleteSession = (id: string) => {
-    const updated = sessions.filter(s => s.id !== id);
-    setSessions(updated);
-    localStorage.setItem("chat-ui-sessions", JSON.stringify(updated));
-    if (currentSessionId === id) {
-      if (updated.length > 0) {
-        setCurrentSessionId(updated[0].id);
-        setMessages(updated[0].messages);
-      } else {
-        initDefaultSession();
+  const deleteSession = useCallback((id: string) => {
+    setSessions(prev => {
+      const updated = prev.filter(s => s.id !== id);
+      localStorage.setItem("chat-ui-sessions", JSON.stringify(updated));
+      if (currentSessionId === id) {
+        if (updated.length > 0) {
+          setCurrentSessionId(updated[0].id);
+          setMessages(updated[0].messages);
+        } else {
+          initDefaultSession();
+        }
       }
-    }
-  };
+      return updated;
+    });
+  }, [currentSessionId, initDefaultSession]);
 
-  const clearHistory = () => {
+  const clearHistory = useCallback(() => {
     initDefaultSession();
-  };
+  }, [initDefaultSession]);
 
-  const copyMessage = (content: string) => {
+  const copyMessage = useCallback((content: string) => {
     navigator.clipboard.writeText(content).catch(() => {});
-  };
+  }, []);
 
-  const stopGeneration = () => {
+  const stopGeneration = useCallback(() => {
     if (abortController) {
       abortController.abort();
     }
     setIsStreaming(false);
-  };
+  }, [abortController]);
 
-  // Real API RAG query executor with SSE streaming
-  const executeRAGQuery = async (userMsg: string, currentMsgs: Message[]) => {
+  const executeRAGQuery = useCallback(async (userMsg: string, currentMsgs: Message[]) => {
     setIsStreaming(true);
     setStreamingText("");
     const controller = new AbortController();
@@ -530,31 +306,33 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
       setMessages(finalMessages);
       
       if (currentSessionId) {
-        const updated = sessions.map(s => {
-          if (s.id === currentSessionId) {
-            const title = s.title === "New Chat" || s.title === "RAG Evaluation Session"
-              ? (userMsg.length > 24 ? userMsg.substring(0, 24) + "..." : userMsg)
-              : s.title;
-            return {
-              ...s,
-              title,
-              messages: finalMessages,
-              timestamp: new Date().toISOString()
-            };
-          }
-          return s;
+        setSessions(prev => {
+          const updated = prev.map(s => {
+            if (s.id === currentSessionId) {
+              const title = s.title === "New Chat" || s.title === "RAG Evaluation Session"
+                ? (userMsg.length > 24 ? userMsg.substring(0, 24) + "..." : userMsg)
+                : s.title;
+              return {
+                ...s,
+                title,
+                messages: finalMessages,
+                timestamp: new Date().toISOString()
+              };
+            }
+            return s;
+          });
+          localStorage.setItem("chat-ui-sessions", JSON.stringify(updated));
+          return updated;
         });
-        setSessions(updated);
-        localStorage.setItem("chat-ui-sessions", JSON.stringify(updated));
       }
     }
 
     setIsStreaming(false);
     setStreamingText("");
     setAbortController(null);
-  };
+  }, [topK, currentSessionId]);
 
-  const sendMessage = async (content: string, attachmentName?: string | null, attachmentText?: string | null) => {
+  const sendMessage = useCallback(async (content: string, attachmentName?: string | null, attachmentText?: string | null) => {
     if (!content.trim() && !attachmentText) return;
     if (isStreaming) return;
 
@@ -574,28 +352,30 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     setMessages(newMsgs);
 
     if (currentSessionId) {
-      const updated = sessions.map(s => {
-        if (s.id === currentSessionId) {
-          const title = s.title === "New Chat" || s.title === "RAG Evaluation Session"
-            ? (content.length > 24 ? content.substring(0, 24) + "..." : content)
-            : s.title;
-          return {
-            ...s,
-            title,
-            messages: newMsgs,
-            timestamp: new Date().toISOString()
-          };
-        }
-        return s;
+      setSessions(prev => {
+        const updated = prev.map(s => {
+          if (s.id === currentSessionId) {
+            const title = s.title === "New Chat" || s.title === "RAG Evaluation Session"
+              ? (content.length > 24 ? content.substring(0, 24) + "..." : content)
+              : s.title;
+            return {
+              ...s,
+              title,
+              messages: newMsgs,
+              timestamp: new Date().toISOString()
+            };
+          }
+          return s;
+        });
+        localStorage.setItem("chat-ui-sessions", JSON.stringify(updated));
+        return updated;
       });
-      setSessions(updated);
-      localStorage.setItem("chat-ui-sessions", JSON.stringify(updated));
     }
 
     await executeRAGQuery(userMsg.content, newMsgs);
-  };
+  }, [messages, isStreaming, currentSessionId, executeRAGQuery]);
 
-  const regenerateMessage = async (messageId: string) => {
+  const regenerateMessage = useCallback(async (messageId: string) => {
     if (isStreaming) return;
 
     const msgIdx = messages.findIndex(m => m.id === messageId);
@@ -621,69 +401,41 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     setMessages(cleanMsgs);
 
     await executeRAGQuery(lastUserQuery, cleanMsgs);
-  };
+  }, [messages, isStreaming, executeRAGQuery]);
 
-  return (
-    <ChatContext.Provider
-      value={{
-        activeModel,
-        setActiveModel: updateModel,
-        temperature,
-        setTemperature: updateTemperature,
-        topK,
-        setTopK: updateTopK,
-        topP,
-        setTopP: updateTopP,
-        maxTokens,
-        setMaxTokens: updateMaxTokens,
-        isSidebarExpanded,
-        setIsSidebarExpanded,
-        isSettingsOpen,
-        setIsSettingsOpen,
-        openaiKey,
-        setOpenaiKey: (key: string) => {
-          setOpenaiKey(key);
-          localStorage.setItem("chat-ui-openai-key", key);
-        },
-        sessions,
-        currentSessionId,
-        setCurrentSessionId,
-        messages,
-        isStreaming,
-        streamingText,
-        sendMessage,
-        regenerateMessage,
-        copyMessage,
-        stopGeneration,
-        createNewChat,
-        deleteSession,
-        clearHistory,
-        
-        // RAG States & Utilities
-        activeView,
-        setActiveView,
-        ingestedDocs,
-        fetchIngestedDocs,
-        ingestDocument,
-        matchResult,
-        matchLoading,
-        runMatchEvaluation,
-        clearMatchResult,
-        isBackendConnected,
-        backendStats,
-        
-        // Board API
-        uploadResume,
-        analyzeResume,
-        matchJobs,
-        upgradeSkills,
-        generateInterview,
-        seedJobs
-      }}
-    >
-      {children}
-    </ChatContext.Provider>
-  );
+  const value = useMemo(() => ({
+    activeModel,
+    setActiveModel: updateModel,
+    temperature,
+    setTemperature: updateTemperature,
+    topK,
+    setTopK: updateTopK,
+    topP,
+    setTopP: updateTopP,
+    maxTokens,
+    setMaxTokens: updateMaxTokens,
+    sessions,
+    currentSessionId,
+    setCurrentSessionId,
+    messages,
+    isStreaming,
+    streamingText,
+    sendMessage,
+    regenerateMessage,
+    copyMessage,
+    stopGeneration,
+    createNewChat,
+    deleteSession,
+    clearHistory
+  }), [
+    activeModel, updateModel, temperature, updateTemperature,
+    topK, updateTopK, topP, updateTopP, maxTokens, updateMaxTokens,
+    sessions, currentSessionId, messages, isStreaming, streamingText,
+    sendMessage, regenerateMessage, copyMessage, stopGeneration,
+    createNewChat, deleteSession, clearHistory
+  ]);
+
+  return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
 };
 
 export const useChat = () => {

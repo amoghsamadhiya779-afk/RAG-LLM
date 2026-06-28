@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useChat } from "@/context/ChatContext";
+import { useRAG } from "@/context/RAGContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, AlertTriangle, FileText, Sparkles, BookOpen, Layers } from "lucide-react";
 
@@ -14,7 +14,7 @@ export const ResumeMatcher = () => {
     clearMatchResult,
     ingestDocument,
     uploadResume,
-  } = useChat();
+  } = useRAG();
 
   const [selectedDoc, setSelectedDoc] = useState("");
   const [roleTitle, setRoleTitle] = useState("");

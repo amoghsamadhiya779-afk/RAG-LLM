@@ -6,7 +6,7 @@ import { ResumeMatcher } from "@/components/ResumeMatcher";
 import { JobBoard } from "@/components/JobBoard";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { CompanyMarquee } from "@/components/CompanyMarquee";
-import { useChat } from "@/context/ChatContext";
+import { useUI } from "@/context/UIContext";
 import { GlassCard } from "@/components/shared/GlassCard";
 import { motion, AnimatePresence } from "framer-motion";
 import { Settings } from "lucide-react";
@@ -14,7 +14,7 @@ import { StartupSequence } from "@/components/animations/StartupSequence";
 import { BackdropEngine } from "@/components/canvas/BackdropEngine";
 
 export default function Home() {
-  const { activeView, setActiveView } = useChat();
+  const { activeView, setActiveView } = useUI();
   const [showSettings, setShowSettings] = useState(false);
   const [booted, setBooted] = useState(false);
 

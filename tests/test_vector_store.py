@@ -1,25 +1,32 @@
-from resume_rag.chunking import chunk_document
-from resume_rag.embeddings import LocalHashEmbedding
-from resume_rag.schemas import DocumentIn
-from resume_rag.vector_store import JsonVectorStore
+import pytest
+from pathlib import Path
+from resume_rag.vector_store import SQLiteVectorStore
+from resume_rag.documents import DocumentChunk
 
-
-def test_vector_store_retrieves_relevant_resume_chunk(tmp_path):
-    store = JsonVectorStore(tmp_path / "vectors.json")
-    embeddings = LocalHashEmbedding()
-    document = DocumentIn(
-        text=(
-            "Built a FastAPI RAG pipeline with vector embeddings and semantic search.\n\n"
-            "Also created a SQL analytics dashboard for product metrics."
-        ),
-        source="resume.md",
-        doc_type="resume",
+def test_sqlite_vector_store(tmp_path: Path):
+    db_path = tmp_path / "test_store.db"
+    store = SQLiteVectorStore(index_path=db_path)
+    
+    # Test initial count
+    assert store.count == 0
+    
+    # Add a document
+    chunk = DocumentChunk(
+        content="The quick brown fox jumps over the lazy dog",
+        metadata={"source": "test_doc.txt"},
+        embedding=[0.1, 0.2, 0.3]
     )
-    chunks = chunk_document(document, chunk_size=120, overlap=20)
-
-    store.add(chunks, embeddings)
-    results = store.search("semantic search embeddings RAG", embeddings, top_k=2)
-
-    assert results
-    assert "RAG pipeline" in results[0].chunk.text
-    assert store.count == len(chunks)
+    store.add([chunk])
+    
+    assert store.count == 1
+    
+    # Test sources
+    sources = store.sources()
+    assert len(sources) == 1
+    assert sources[0]["source"] == "test_doc.txt"
+    assert sources[0]["count"] == 1
+    
+    # Delete the document
+    deleted = store.delete("test_doc.txt")
+    assert deleted == 1
+    assert store.count == 0

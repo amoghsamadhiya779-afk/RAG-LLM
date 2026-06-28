@@ -62,9 +62,9 @@ export const JobBoard = () => {
         }
       }
       const data = await analyzeResume(textToAnalyze);
-      setProfileData(data.profile);
-      setAtsScore(data.scoring);
-      const jobs = await matchJobs(data.profile);
+      setProfileData(data.profile as Record<string, unknown>);
+      setAtsScore(data.scoring as Record<string, unknown>);
+      const jobs = await matchJobs(data.profile as Record<string, unknown>);
       setMatchedJobs(jobs);
       setActiveTab("ats");
     } catch (e: unknown) {

@@ -3,21 +3,22 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useChat } from "@/context/ChatContext";
+import { useUI } from "@/context/UIContext";
+import { useRAG } from "@/context/RAGContext";
 import { useTheme } from "@/components/ThemeProvider";
 import { X, Sun, Moon, Sliders, Settings2, Palette } from "lucide-react";
 
 export const SettingsPanel = () => {
   const {
     isSettingsOpen,
-    setIsSettingsOpen,
-    temperature,
-    setTemperature,
-    topK,
-    setTopK,
-    topP,
-    setTopP,
-    maxTokens,
-    setMaxTokens,
+    setIsSettingsOpen
+  } = useUI();
+  const { openaiKey, setOpenaiKey, backendApiKey, setBackendApiKey } = useRAG();
+  const {
+    temperature, setTemperature,
+    topK, setTopK,
+    topP, setTopP,
+    maxTokens, setMaxTokens
   } = useChat();
 
   const { baseTheme, setBaseTheme, accentColor, setAccentColor } = useTheme();
@@ -75,6 +76,20 @@ export const SettingsPanel = () => {
                   placeholder="sk-..."
                   value={openaiKey}
                   onChange={(e) => setOpenaiKey(e.target.value)}
+                  className="w-full p-2 text-xs rounded-xl border border-white/40 bg-[var(--color-bg)]/50 text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-accent)]/50 transition-all shadow-[inset_0_0_10px_rgba(0,0,0,0.1)] font-mono"
+                />
+              </div>
+
+              {/* Backend API Key Input */}
+              <div className="space-y-2.5">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
+                  Backend API Key (Production Auth)
+                </label>
+                <input
+                  type="password"
+                  placeholder="Secret Token"
+                  value={backendApiKey}
+                  onChange={(e) => setBackendApiKey(e.target.value)}
                   className="w-full p-2 text-xs rounded-xl border border-white/40 bg-[var(--color-bg)]/50 text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-accent)]/50 transition-all shadow-[inset_0_0_10px_rgba(0,0,0,0.1)] font-mono"
                 />
               </div>

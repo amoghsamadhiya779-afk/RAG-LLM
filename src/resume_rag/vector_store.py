@@ -34,34 +34,34 @@ def tokenize(text: str) -> list[str]:
 class BM25:
     """Best Matching 25 (BM25) lexical ranker."""
 
-    def __init__(self, corpus: list[list[str]], k1: float = 1.5, b: float = 0.75):
+    def __init__(self, corpus: list[tuple[str, list[str]]], k1: float = 1.5, b: float = 0.75):
         self.k1 = k1
         self.b = b
         self.corpus_size = len(corpus)
-        self.avgdl = sum(len(doc) for doc in corpus) / self.corpus_size if self.corpus_size > 0 else 1.0
-        self.doc_freqs: list[dict[str, int]] = []
-        self.doc_lengths: list[int] = []
+        self.avgdl = sum(len(doc) for _, doc in corpus) / self.corpus_size if self.corpus_size > 0 else 1.0
+        self.doc_freqs: dict[str, dict[str, int]] = {}
+        self.doc_lengths: dict[str, int] = {}
         self.df: dict[str, int] = {}
         self.idf: dict[str, float] = {}
         self._initialize(corpus)
 
-    def _initialize(self, corpus: list[list[str]]):
-        for doc in corpus:
-            self.doc_lengths.append(len(doc))
+    def _initialize(self, corpus: list[tuple[str, list[str]]]):
+        for chunk_id, doc in corpus:
+            self.doc_lengths[chunk_id] = len(doc)
             frequencies: dict[str, int] = {}
             for word in doc:
                 frequencies[word] = frequencies.get(word, 0) + 1
-            self.doc_freqs.append(frequencies)
-            for word in frequencies:
+            self.doc_freqs[chunk_id] = frequencies
+            for word in set(frequencies.keys()):
                 self.df[word] = self.df.get(word, 0) + 1
 
         for word, freq in self.df.items():
             self.idf[word] = math.log((self.corpus_size - freq + 0.5) / (freq + 0.5) + 1.0)
 
-    def score(self, query: list[str], index: int) -> float:
+    def score(self, query: list[str], chunk_id: str) -> float:
         score = 0.0
-        doc_len = self.doc_lengths[index]
-        freqs = self.doc_freqs[index]
+        doc_len = self.doc_lengths.get(chunk_id, 0)
+        freqs = self.doc_freqs.get(chunk_id, {})
         for word in query:
             if word not in freqs:
                 continue
@@ -94,13 +94,21 @@ def reciprocal_rank_fusion(
     return [SearchResult(chunk=chunk_map[c_id], score=rrf_scores[c_id]) for c_id in sorted_ids]
 
 
-class JsonVectorStore:
+def _matches_filters(chunk: StoredChunk, filters: dict[str, str]) -> bool:
+    for k, v in filters.items():
+        if getattr(chunk, k, None) != v and chunk.metadata.get(k) != v:
+            return False
+    return True
+
+
+class SQLiteVectorStore:
     """Production-grade persistent vector and BM25 hybrid index using SQLite."""
 
     def __init__(self, path: Path):
         self.db_path = path.with_suffix(".db")
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._chunks: dict[str, StoredChunk] = {}
+        self._bm25_index: BM25 | None = None
         self._init_db()
         self._load_all_chunks()
 
@@ -109,7 +117,7 @@ class JsonVectorStore:
         return len(self._chunks)
 
     def _get_connection(self) -> sqlite3.Connection:
-        conn = sqlite3.connect(self.db_path)
+        conn = sqlite3.connect(self.db_path, check_same_thread=False)
         conn.execute("PRAGMA foreign_keys = ON;")
         return conn
 
@@ -171,25 +179,25 @@ class JsonVectorStore:
                     metadata=json.loads(metadata_str),
                     embedding=json.loads(embedding_str),
                 )
+        
+        corpus = [(c.id, tokenize(c.text)) for c in self._chunks.values()]
+        self._bm25_index = BM25(corpus)
 
     def add(self, chunks: list[Chunk], embedding_model: EmbeddingModel) -> int:
         embeddings = embedding_model.embed([chunk.text for chunk in chunks])
         added = 0
         with self._get_connection() as conn:
             for chunk, embedding in zip(chunks, embeddings, strict=True):
-                # Ensure document entry exists
                 conn.execute(
                     "INSERT OR IGNORE INTO documents (source, doc_type) VALUES (?, ?)",
                     (chunk.source, chunk.doc_type),
                 )
 
-                # Check if chunk exists
                 cursor = conn.execute("SELECT 1 FROM chunks WHERE id = ?", (chunk.id,))
                 exists = cursor.fetchone() is not None
                 if not exists:
                     added += 1
 
-                # Insert or update chunk record
                 conn.execute(
                     "INSERT OR REPLACE INTO chunks (id, text, source, metadata, embedding) "
                     "VALUES (?, ?, ?, ?, ?)",
@@ -203,7 +211,6 @@ class JsonVectorStore:
                 )
             conn.commit()
 
-        # Refresh memory cache
         self._load_all_chunks()
         return added
 
@@ -214,7 +221,6 @@ class JsonVectorStore:
             conn.execute("DELETE FROM documents WHERE source = ?", (source,))
             conn.commit()
 
-        # Refresh memory cache
         self._load_all_chunks()
         return count
 
@@ -230,7 +236,6 @@ class JsonVectorStore:
         if not chunks_to_search:
             return []
 
-        # 1. Dense Search (Cosine Similarity)
         query_embedding = embedding_model.embed([query])[0]
         dense_results: list[SearchResult] = []
         for chunk in chunks_to_search:
@@ -238,17 +243,13 @@ class JsonVectorStore:
             dense_results.append(SearchResult(chunk=chunk, score=score))
         dense_results = sorted(dense_results, key=lambda r: r.score, reverse=True)
 
-        # 2. Sparse Search (BM25)
-        corpus_tokens = [tokenize(c.text) for c in chunks_to_search]
         query_tokens = tokenize(query)
-        bm25 = BM25(corpus_tokens)
         sparse_results: list[SearchResult] = []
-        for idx, chunk in enumerate(chunks_to_search):
-            score = bm25.score(query_tokens, idx)
+        for chunk in chunks_to_search:
+            score = self._bm25_index.score(query_tokens, chunk.id) if getattr(self, '_bm25_index', None) else 0.0
             sparse_results.append(SearchResult(chunk=chunk, score=score))
         sparse_results = sorted(sparse_results, key=lambda r: r.score, reverse=True)
 
-        # 3. Reciprocal Rank Fusion (RRF)
         merged_results = reciprocal_rank_fusion(dense_results, sparse_results)
         return merged_results[:top_k]
 
@@ -305,67 +306,29 @@ class JsonVectorStore:
         top_k: int = 10,
     ) -> list[dict]:
         query_embedding = embedding_model.embed([query])[0]
-        
-        with self._get_connection() as conn:
-            cursor = conn.execute(
-                "SELECT id, title, company, skills, responsibilities, experience_level, salary_range, location, tech_stack, culture, embedding FROM jobs"
-            )
-            all_jobs = []
-            for row in cursor.fetchall():
-                j_id, title, company, skills_str, responsibilities, exp_lvl, salary, loc, tech_str, culture, emb_str = row
-                emb = json.loads(emb_str)
-                score = cosine_similarity(query_embedding, emb)
-                all_jobs.append({
-                    "id": j_id,
-                    "title": title,
-                    "company": company,
-                    "skills": json.loads(skills_str),
-                    "responsibilities": responsibilities,
-                    "experience_level": exp_lvl,
-                    "salary_range": salary,
-                    "location": loc,
-                    "tech_stack": json.loads(tech_str),
-                    "culture": culture,
-                    "score": score
-                })
-        
-        all_jobs = sorted(all_jobs, key=lambda x: x["score"], reverse=True)
-        return all_jobs[:top_k]
+        jobs = self.get_all_jobs()
+        if not jobs:
+            return []
+            
+        scored_jobs = []
+        for job in jobs:
+            score = cosine_similarity(query_embedding, job["embedding"])
+            job_copy = dict(job)
+            del job_copy["embedding"]
+            job_copy["score"] = score
+            scored_jobs.append(job_copy)
+            
+        return sorted(scored_jobs, key=lambda x: x["score"], reverse=True)[:top_k]
 
     def get_all_jobs(self) -> list[dict]:
+        jobs = []
         with self._get_connection() as conn:
-            cursor = conn.execute(
-                "SELECT id, title, company, skills, responsibilities, experience_level, salary_range, location, tech_stack, culture FROM jobs"
-            )
-            all_jobs = []
+            cursor = conn.execute("SELECT * FROM jobs")
+            columns = [desc[0] for desc in cursor.description]
             for row in cursor.fetchall():
-                j_id, title, company, skills_str, responsibilities, exp_lvl, salary, loc, tech_str, culture = row
-                all_jobs.append({
-                    "id": j_id,
-                    "title": title,
-                    "company": company,
-                    "skills": json.loads(skills_str),
-                    "responsibilities": responsibilities,
-                    "experience_level": exp_lvl,
-                    "salary_range": salary,
-                    "location": loc,
-                    "tech_stack": json.loads(tech_str),
-                    "culture": culture
-                })
-        return all_jobs
-
-    def clear_jobs(self) -> None:
-        with self._get_connection() as conn:
-            conn.execute("DELETE FROM jobs;")
-            conn.commit()
-
-
-def _matches_filters(chunk: StoredChunk, filters: dict[str, str]) -> bool:
-    for key, expected in filters.items():
-        if key == "doc_type" and chunk.doc_type != expected:
-            return False
-        elif key == "source" and chunk.source != expected:
-            return False
-        elif key not in ("doc_type", "source") and chunk.metadata.get(key) != expected:
-            return False
-    return True
+                job = dict(zip(columns, row))
+                job["skills"] = json.loads(job["skills"])
+                job["tech_stack"] = json.loads(job["tech_stack"])
+                job["embedding"] = json.loads(job["embedding"])
+                jobs.append(job)
+        return jobs

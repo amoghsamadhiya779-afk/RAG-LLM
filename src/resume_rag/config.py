@@ -17,8 +17,9 @@ class Settings(BaseSettings):
     llm_provider: Literal["local", "openai", "gemini"] = "gemini"
     openai_api_key: str | None = None
     gemini_api_key: str | None = None
+    backend_api_key: str = "default-dev-key"
     openai_embedding_model: str = "text-embedding-3-small"
-    openai_chat_model: str = "gpt-4.1-mini"
+    openai_chat_model: str = "gpt-4o-mini"
     chunk_size: int = 900
     chunk_overlap: int = 150
     top_k: int = 5

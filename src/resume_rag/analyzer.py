@@ -4,7 +4,7 @@ import re
 
 from resume_rag.config import Settings
 from resume_rag.embeddings import EmbeddingModel
-from resume_rag.vector_store import JsonVectorStore
+from resume_rag.vector_store import SQLiteVectorStore
 
 COMMON_SKILLS = [
     "python", "go", "golang", "java", "javascript", "typescript", "c++", "c#", "rust", "scala",
@@ -23,7 +23,7 @@ ACTION_VERBS = [
 ]
 
 class ResumeAnalyzer:
-    def __init__(self, settings: Settings, vector_store: JsonVectorStore):
+    def __init__(self, settings: Settings, vector_store: SQLiteVectorStore):
         self.settings = settings
         self.vector_store = vector_store
 
@@ -40,8 +40,8 @@ class ResumeAnalyzer:
         }
 
     def _extract_profile(self, text: str, openai_key: str | None) -> dict:
-        if openai_key or os.environ.get("OPENAI_API_KEY"):
-            return self._extract_profile_openai(text, openai_key or os.environ.get("OPENAI_API_KEY"))
+        if openai_key or self.settings.openai_api_key:
+            return self._extract_profile_openai(text, openai_key or self.settings.openai_api_key)
         return self._extract_profile_local(text)
 
     def _extract_profile_local(self, text: str) -> dict:

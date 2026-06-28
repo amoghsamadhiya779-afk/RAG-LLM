@@ -1,11 +1,11 @@
 "use client";
 
 import React from "react";
-import { useChat } from "@/context/ChatContext";
+import { useTheme } from "@/components/ThemeProvider";
 
 export const Logo = ({ className = "w-6 h-6" }: { className?: string }) => {
-  const { theme } = useChat();
-  const isDark = theme === "dark";
+  const { baseTheme } = useTheme();
+  const isDark = baseTheme === "dark";
 
   return (
     <svg

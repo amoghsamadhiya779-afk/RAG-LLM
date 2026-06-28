@@ -118,7 +118,7 @@ html.lenis {
 }
 
 .lenis.lenis-smooth {
-  scroll-behavior: auto !important;
+  scroll-behavior: auto;
 }
 
 .lenis.lenis-smooth [data-lenis-prevent] {
@@ -145,17 +145,17 @@ html.lenis {
 }
 
 /* Force dark mode texts for specific Tailwind classes as a hack for migration */
-.text-gray-900 { color: #ffffff !important; }
-.text-gray-800 { color: #f3f4f6 !important; }
-.text-gray-700 { color: #e5e7eb !important; }
-.text-gray-600 { color: #9ca3af !important; }
-.text-gray-500 { color: #6b7280 !important; }
-.bg-white { background-color: rgba(255, 255, 255, 0.02) !important; }
-.bg-gray-50 { background-color: transparent !important; }
-.bg-white\/60 { background-color: rgba(255,255,255,0.05) !important; }
-.bg-white\/40 { background-color: rgba(255,255,255,0.03) !important; }
-.bg-white\/50 { background-color: rgba(255,255,255,0.04) !important; }
-.bg-gray-100 { background-color: rgba(255,255,255,0.05) !important; }
-.border-white\/40 { border-color: rgba(255,255,255,0.1) !important; }
-.border-gray-200 { border-color: rgba(255,255,255,0.1) !important; }
-.border-gray-100 { border-color: rgba(255,255,255,0.05) !important; }
+.text-gray-900 { color: #ffffff; }
+.text-gray-800 { color: #f3f4f6; }
+.text-gray-700 { color: #e5e7eb; }
+.text-gray-600 { color: #9ca3af; }
+.text-gray-500 { color: #6b7280; }
+.bg-white { background-color: rgba(255, 255, 255, 0.02); }
+.bg-gray-50 { background-color: transparent; }
+.bg-white\/60 { background-color: rgba(255,255,255,0.05); }
+.bg-white\/40 { background-color: rgba(255,255,255,0.03); }
+.bg-white\/50 { background-color: rgba(255,255,255,0.04); }
+.bg-gray-100 { background-color: rgba(255,255,255,0.05); }
+.border-white\/40 { border-color: rgba(255,255,255,0.1); }
+.border-gray-200 { border-color: rgba(255,255,255,0.1); }
+.border-gray-100 { border-color: rgba(255,255,255,0.05); }

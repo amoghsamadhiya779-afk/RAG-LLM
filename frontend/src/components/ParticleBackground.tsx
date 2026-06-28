@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import { useChat } from "@/context/ChatContext";
+import { useTheme } from "@/components/ThemeProvider";
 
 interface Particle {
   x: number;
@@ -16,7 +16,7 @@ interface Particle {
 
 export const ParticleBackground = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { theme } = useChat();
+  const { baseTheme: theme } = useTheme();
   const mouseRef = useRef({ x: 0, y: 0, targetX: 0, targetY: 0, actualX: -9999, actualY: -9999 });
 
   useEffect(() => {
@@ -136,6 +136,7 @@ export const ParticleBackground = () => {
     render();
 
     return () => {
+      cancelAnimationFrame(animationId);
       window.removeEventListener("resize", resizeCanvas);
       window.removeEventListener("mousemove", handleMouseMove);
       cancelAnimationFrame(animationId);

@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 
+// NAMING RULE: Always use "Job Matching" and "Resume Insights" for the two main routes (nav/tab/headings). Do not deviate.
 export function Navbar() {
   return (
     <motion.nav
@@ -11,7 +12,7 @@ export function Navbar() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <div className="mx-auto max-w-7xl relative h-16 flex items-center justify-between px-6 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 shadow-lg">
+      <div className="mx-auto max-w-7xl relative h-16 flex items-center justify-between px-6 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 shadow-lg">
         
         {/* Logo */}
         <motion.div className="relative z-10 flex-shrink-0">
@@ -22,24 +23,6 @@ export function Navbar() {
             Drew.
           </Link>
         </motion.div>
-
-        {/* Desktop Navigation */}
-        <div className="relative z-10 hidden md:flex gap-8">
-          <motion.a
-            href="#workspace"
-            className="text-gray-300 hover:text-white transition-colors font-medium relative group"
-            whileHover={{ scale: 1.05 }}
-          >
-            Workspace
-          </motion.a>
-          <motion.a
-            href="#insights"
-            className="text-gray-300 hover:text-white transition-colors font-medium relative group"
-            whileHover={{ scale: 1.05 }}
-          >
-            Insights
-          </motion.a>
-        </div>
 
         {/* CTA Button */}
         <motion.button

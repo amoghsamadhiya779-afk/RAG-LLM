@@ -36,7 +36,7 @@ export const RAGProvider = ({ children }: { children: ReactNode }) => {
   const [isBackendConnected, setIsBackendConnected] = useState<boolean>(false);
   const [backendStats, setBackendStats] = useState<{ indexedChunks: number; environment: string } | null>(null);
   const [openaiKey, setOpenaiKeyState] = useState<string>("");
-  const [backendApiKey, setBackendApiKeyState] = useState<string>("");
+  const [backendApiKey, setBackendApiKeyState] = useState<string>("default-dev-key");
 
   const setOpenaiKey = useCallback((key: string) => setOpenaiKeyState(key), []);
   const setBackendApiKey = useCallback((key: string) => setBackendApiKeyState(key), []);

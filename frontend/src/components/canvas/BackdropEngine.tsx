@@ -179,7 +179,7 @@ function DynamicBlobs() {
 
 export function BackdropEngine() {
   return (
-    <div className="fixed inset-0 -z-20 bg-[#050505] pointer-events-none">
+    <div className="absolute inset-0 -z-20 bg-[#050505] pointer-events-none">
       {/* Noise Overlay */}
       <div className="absolute inset-0 z-10 opacity-[0.04] mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
       

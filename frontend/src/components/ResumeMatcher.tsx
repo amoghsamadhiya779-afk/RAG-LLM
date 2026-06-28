@@ -31,9 +31,10 @@ export const ResumeMatcher = () => {
       const text = await uploadResume(file);
       await ingestDocument(file.name, text);
       setSelectedDoc(file.name);
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error(e);
-      setErrorMsg(e.message || "Failed to upload document.");
+      const err = e as Error;
+      setErrorMsg(err.message || "Failed to upload document.");
     }
     setIsUploading(false);
   };
@@ -47,9 +48,10 @@ export const ResumeMatcher = () => {
     setErrorMsg(null);
     try {
       await runMatchEvaluation(roleTitle, jobDescription, selectedDoc);
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error(e);
-      setErrorMsg(e.message || "Failed to run match evaluation.");
+      const err = e as Error;
+      setErrorMsg(err.message || "Failed to run match evaluation.");
     }
   };
 
@@ -390,7 +392,7 @@ export const ResumeMatcher = () => {
                               </span>
                             </div>
                             <p className="text-sm leading-relaxed italic text-gray-900 opacity-90 border-l-2 border-white/40 pl-4">
-                              "{snippet.text}"
+                              &quot;{snippet.text}&quot;
                             </p>
                           </div>
                         ))}

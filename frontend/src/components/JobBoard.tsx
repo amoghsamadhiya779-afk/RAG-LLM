@@ -12,6 +12,21 @@ interface AtsScore {
     match?: number;
   };
 }
+
+interface Job {
+  id: string | number;
+  title: string;
+  company: string;
+  location: string;
+  match_score?: number;
+  salary?: string;
+  requirements?: string[];
+}
+
+interface InterviewQuestion {
+  question: string;
+  answer_guide: string;
+}
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import { FileText, PlayCircle, Sparkles, CheckCircle, ChevronDown, ChevronUp, BookOpen } from "lucide-react";
 
@@ -36,9 +51,9 @@ export const JobBoard = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [profileData, setProfileData] = useState<Record<string, unknown> | null>(null);
   const [atsScore, setAtsScore] = useState<AtsScore | null>(null);
-  const [matchedJobs, setMatchedJobs] = useState<Record<string, unknown>[]>([]);
-  const [selectedJob, setSelectedJob] = useState<Record<string, unknown> | null>(null);
-  const [interviewQuestions, setInterviewQuestions] = useState<Record<string, unknown>[]>([]);
+  const [matchedJobs, setMatchedJobs] = useState<Job[]>([]);
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [interviewQuestions, setInterviewQuestions] = useState<InterviewQuestion[]>([]);
   const [isGeneratingInterview, setIsGeneratingInterview] = useState(false);
   const [activeTab, setActiveTab] = useState<"ats" | "jobs">("ats");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -75,7 +90,7 @@ export const JobBoard = () => {
       setProfileData(data.profile as Record<string, unknown>);
       setAtsScore(data.scoring as AtsScore);
       const jobs = await matchJobs(data.profile as Record<string, unknown>);
-      setMatchedJobs(jobs);
+      setMatchedJobs(jobs as Job[]);
       setActiveTab("ats");
     } catch (e: unknown) {
       console.error(e);
@@ -85,14 +100,14 @@ export const JobBoard = () => {
     setIsAnalyzing(false);
   };
 
-  const handlePrepInterview = async (job: Record<string, unknown>) => {
+  const handlePrepInterview = async (job: Job) => {
     if (!profileData) return;
     setSelectedJob(job);
     setInterviewQuestions([]);
     setIsGeneratingInterview(true);
     try {
       const data = await generateInterview(String(job.id), profileData);
-      setInterviewQuestions(data.questions as Record<string, unknown>[]);
+      setInterviewQuestions(data.questions as InterviewQuestion[]);
     } catch (e) {
       console.error(e);
     }

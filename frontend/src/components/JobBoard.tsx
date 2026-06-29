@@ -21,11 +21,16 @@ interface Job {
   match_score?: number;
   salary?: string;
   requirements?: string[];
+  application_confidence?: string;
+  culture?: string;
+  description?: string;
+  href?: string;
 }
 
 interface InterviewQuestion {
   question: string;
   answer_guide: string;
+  type?: string;
 }
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import { FileText, PlayCircle, Sparkles, CheckCircle, ChevronDown, ChevronUp, BookOpen } from "lucide-react";
@@ -90,7 +95,7 @@ export const JobBoard = () => {
       setProfileData(data.profile as Record<string, unknown>);
       setAtsScore(data.scoring as AtsScore);
       const jobs = await matchJobs(data.profile as Record<string, unknown>);
-      setMatchedJobs(jobs as Job[]);
+      setMatchedJobs(jobs as unknown as Job[]);
       setActiveTab("ats");
     } catch (e: unknown) {
       console.error(e);
@@ -133,7 +138,7 @@ export const JobBoard = () => {
   ];
 
   return (
-    <div className="flex-1 flex flex-col h-full overflow-y-auto px-4 py-8 sm:px-12 w-full mx-auto select-text scrollbar-thin">
+    <div className="flex-1 flex flex-col h-full overflow-y-auto px-2 sm:px-6 md:px-12 py-6 sm:py-8 w-full mx-auto select-text scrollbar-thin">
       <motion.div variants={containerVariants} initial="hidden" animate="show" className="mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6 max-w-[1400px] mx-auto w-full">
         <motion.div variants={itemVariants}>
           <h1 className="text-3xl font-bold tracking-tight text-white font-sans">
@@ -162,10 +167,10 @@ export const JobBoard = () => {
         )}
       </motion.div>
 
-      <motion.div variants={containerVariants} initial="hidden" animate="show" className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-10 max-w-[1400px] mx-auto w-full">
+      <motion.div variants={containerVariants} initial="hidden" animate="show" className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 lg:gap-10 max-w-[1400px] mx-auto w-full">
         
         {/* LEFT PANE: Upload Panel */}
-        <motion.div variants={itemVariants} className="relative clay-card overflow-hidden flex flex-col min-h-[600px]">
+        <motion.div variants={itemVariants} className="relative clay-card overflow-hidden flex flex-col min-h-[600px] w-full">
           <div className="px-6 py-4 border-b border-white/40 bg-transparent flex items-center justify-between">
             <h2 className="text-sm font-semibold flex items-center gap-2 text-white">
               <FileText className="w-4 h-4 text-gray-400" /> Resume Document
@@ -177,7 +182,7 @@ export const JobBoard = () => {
             )}
           </div>
 
-          <div className="flex-1 p-8 relative overflow-y-auto scrollbar-thin">
+          <div className="flex-1 p-4 sm:p-6 lg:p-8 relative overflow-y-auto scrollbar-thin">
             {!profileData && !isAnalyzing ? (
               <div className="h-full flex flex-col justify-center items-center">
                 <label className="w-full max-w-md flex flex-col items-center justify-center p-10 border-2 border-dashed border-white/40 rounded-xl cursor-pointer transition-all duration-300 hover:bg-[var(--color-primary-100)] hover:border-[var(--color-primary-500)] group bg-transparent">
@@ -260,7 +265,7 @@ export const JobBoard = () => {
           ) : profileData && activeTab === "ats" ? (
              <motion.div variants={containerVariants} initial="hidden" animate="show" className="flex-1 space-y-6 overflow-y-auto pr-2 scrollbar-thin">
                
-               <div className="clay-card p-8 flex flex-col items-center justify-center relative overflow-hidden">
+               <div className="clay-card p-4 sm:p-6 lg:p-8 flex flex-col items-center justify-center relative overflow-hidden">
                  <h3 className="text-sm font-semibold text-gray-400 mb-6 z-10">Overall ATS Score</h3>
                  <div className="relative w-48 h-48 flex items-center justify-center z-10">
                    <svg className="w-full h-full transform -rotate-90">
@@ -288,15 +293,15 @@ export const JobBoard = () => {
                    <motion.div variants={itemVariants} key={acc.id} className="clay-card border-white/40 rounded-xl overflow-hidden bg-white/60 backdrop-blur-md">
                      <button
                        onClick={() => toggleAccordion(acc.id)}
-                       className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-transparent transition-colors"
+                       className="w-full px-4 sm:px-6 py-4 sm:py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between text-left hover:bg-transparent transition-colors gap-4 sm:gap-0"
                      >
-                       <div className="flex items-center gap-4 w-full">
+                       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between w-full gap-4">
                          <div className="flex items-center gap-3">
                            <span className="text-sm font-bold text-white">{acc.label}</span>
                          </div>
-                         <div className="flex items-center gap-4">
-                           <span className="text-xs font-semibold text-gray-400">{acc.score}/{acc.max} pts</span>
-                           <div className="w-full bg-[var(--border)] h-1.5 mt-2 rounded-full overflow-hidden relative">
+                         <div className="flex items-center gap-4 w-full sm:w-auto">
+                           <span className="text-xs font-semibold text-gray-400 whitespace-nowrap">{acc.score}/{acc.max} pts</span>
+                           <div className="w-full sm:w-32 bg-[var(--border)] h-1.5 rounded-full overflow-hidden relative">
                              <motion.div
                                initial={{ width: 0 }}
                                animate={{ width: `${(acc.score / acc.max) * 100}%` }}
@@ -305,6 +310,8 @@ export const JobBoard = () => {
                              />
                            </div>
                          </div>
+                       </div>
+                       <div className="absolute right-4 top-4 sm:relative sm:right-auto sm:top-auto self-end">
                          {expandedAccordion === acc.id ? <ChevronUp className="w-5 h-5 text-gray-500" /> : <ChevronDown className="w-5 h-5 text-gray-500" />}
                        </div>
                      </button>
@@ -381,7 +388,7 @@ export const JobBoard = () => {
                          <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-emerald-400 to-emerald-600">
                            {job.match_score}%
                          </span>
-                         <span className={`text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider ${getConfidenceColor(job.application_confidence)}`}>
+                         <span className={`text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider ${getConfidenceColor(job.application_confidence || "")}`}>
                            {job.application_confidence}
                          </span>
                        </div>

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRAG } from "@/context/RAGContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, AlertTriangle, FileText, Sparkles, BookOpen, Layers } from "lucide-react";
+import { useResumeUpload } from "@/utils/useResumeUpload";
 
 export const ResumeMatcher = () => {
   const {
@@ -50,7 +51,7 @@ export const ResumeMatcher = () => {
   const strokeDashoffset = circumference - (score / 100) * circumference;
 
   return (
-    <div className="flex-1 flex flex-col h-full overflow-y-auto px-4 py-8 sm:px-12 w-full max-w-[1400px] mx-auto select-text scrollbar-thin">
+    <div className="flex-1 flex flex-col h-full overflow-y-auto px-2 sm:px-6 md:px-12 py-6 sm:py-8 w-full max-w-[1400px] mx-auto select-text scrollbar-thin">
       
       {/* Page Header */}
       <div className="mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
@@ -59,7 +60,7 @@ export const ResumeMatcher = () => {
             Job Matching
           </h1>
           <p className="text-sm mt-2 text-gray-400 font-medium">
-            See how well your resume matches the role you're applying for.
+            See how well your resume matches the role you&apos;re applying for.
           </p>
         </div>
         {matchResult && (
@@ -77,7 +78,7 @@ export const ResumeMatcher = () => {
       {displayError && (
           <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/50 text-red-200 text-sm animate-in fade-in slide-in-from-top-2 relative">
             <div className="flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              <AlertTriangle className="w-4 h-4 flex-shrink-0" />
               <p>{displayError}</p>
             </div>
             <button 
@@ -89,11 +90,11 @@ export const ResumeMatcher = () => {
           </div>
         )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 lg:gap-10 items-start">
         
         {/* Left Form Panel */}
         <div className="lg:col-span-5">
-          <div className="p-8 rounded-2xl clay-card">
+          <div className="p-4 sm:p-6 lg:p-8 rounded-2xl clay-card w-full">
             
             <div className="flex items-center gap-2 mb-6">
               <FileText className="w-5 h-5 text-[var(--color-primary-600)]" />
@@ -111,7 +112,7 @@ export const ResumeMatcher = () => {
                   onChange={(e) => setSelectedDoc(e.target.value)}
                   className="w-full p-3 text-sm rounded-xl border border-white/40 bg-transparent text-white focus:outline-none focus:border-[var(--color-primary-500)] focus:ring-1 focus:ring-[var(--accent)] transition-all cursor-pointer shadow-sm"
                 >
-                  <option value="" disabled className="bg-gray-900 text-white">Choose a resume you've uploaded...</option>
+                  <option value="" disabled className="bg-gray-900 text-white">Choose a resume you&apos;ve uploaded...</option>
                   {ingestedDocs.map((doc, idx) => (
                     <option key={idx} value={doc} className="bg-gray-900 text-white">{doc}</option>
                   ))}

@@ -294,8 +294,8 @@ class OpenAIAnswerGenerator(AnswerGenerator):
 class GeminiAnswerGenerator(AnswerGenerator):
     def __init__(self, api_key: str):
         self.api_key = api_key
-        # Use gemini-1.5-flash as the latest standard for fast tasks
-        self.url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
+        # Use gemini-2.5-flash as the latest standard for fast tasks
+        self.url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
         self.headers = {
             "Content-Type": "application/json",
             "X-goog-api-key": self.api_key

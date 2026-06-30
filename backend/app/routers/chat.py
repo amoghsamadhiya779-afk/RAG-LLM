@@ -46,6 +46,9 @@ async def chat_with_gemini(
                 text = data["candidates"][0]["content"]["parts"][0]["text"]
                 return ChatResponse(response=text)
             else:
-                raise HTTPException(status_code=500, detail="Gemini API Error")
+                error_msg = f"Gemini API Error ({resp.status_code}): {resp.text}"
+                raise HTTPException(status_code=500, detail=error_msg)
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to generate response: {e}")

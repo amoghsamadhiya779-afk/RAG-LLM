@@ -21,7 +21,6 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-dvh bg-void text-bone font-sans">
-      <SiteHeader />
       
       <main className="relative z-10 bg-void">
         {/* Hero Section */}
@@ -81,13 +80,6 @@ export default function LandingPage() {
         {/* FAQ Section */}
         <FAQ />
       </main>
-      
-      {/* Simple Footer */}
-      <ScrollReveal>
-        <footer className="border-t border-bone/[0.06] py-12 text-center">
-          <p className="text-[14px] text-fog">© {new Date().getFullYear()} Dimension. All rights reserved.</p>
-        </footer>
-      </ScrollReveal>
     </div>
   );
 }

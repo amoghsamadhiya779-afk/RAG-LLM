@@ -367,6 +367,8 @@ function Kanban({ job }: { job: JobWithCompany }) {
   );
 }
 
+import { SiteHeader } from "@/components/site/header";
+
 export default function Dashboard() {
   return (
     <Suspense fallback={<div className="container-page py-10 animate-pulse h-[80vh] bg-muted/20 rounded-xl" />}>

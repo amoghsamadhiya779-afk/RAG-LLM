@@ -10,6 +10,7 @@ import { api } from "@/services/api";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import type { ApplicationStage, JobWithCompany } from "@/types";
+import Link from "next/link";
 
 const STAGES: { v: ApplicationStage; label: string }[] = [
   { v: "applied", label: "Applied" },
@@ -36,6 +37,25 @@ function DashboardContent() {
     queryKey: ["jobs", "mine", session?.user?.id],
     queryFn: () => api.jobs.mine(),
     enabled: !!session?.user?.id,
+  });
+
+  const { data: resumes = [] } = useQuery({
+    queryKey: ["resumes", "mine", session?.user?.id],
+    queryFn: () => api.resumes.mine(),
+    enabled: !!session?.user?.id,
+  });
+  const resumeId = resumes[0]?.id;
+
+  const { data: recommendedJobs, isLoading: isLoadingRecs } = useQuery({
+    queryKey: ["jobs", "recommended", resumeId],
+    queryFn: () => api.jobs.recommended(resumeId as string),
+    enabled: !!resumeId && activeTab === "personalized-recs",
+  });
+
+  const { data: skillGaps, isLoading: isLoadingGaps } = useQuery({
+    queryKey: ["insights", "skill-gap", resumeId],
+    queryFn: () => api.insights.skillGap(resumeId as string),
+    enabled: !!resumeId && activeTab === "skill-gap",
   });
 
   return (
@@ -143,18 +163,39 @@ function DashboardContent() {
               <p className="text-muted-foreground mb-8">Jobs ranked to your profile, not someone else's algorithm.</p>
               
               <div className="grid gap-4 sm:grid-cols-2">
-                {/* Mock data for the layout, will be hooked up to backend later */}
-                {[1, 2, 3, 4].map(i => (
-                  <div key={i} className="rounded-xl border border-border bg-surface/50 p-5 flex flex-col hover:border-primary/30 transition-colors">
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="h-12 w-12 rounded bg-muted animate-pulse" />
-                      <span className="bg-green-500/10 text-green-500 text-xs px-2 py-1 rounded-full font-medium">9{10-i}% Match</span>
-                    </div>
-                    <div className="h-4 w-3/4 rounded bg-muted animate-pulse mb-2" />
-                    <div className="h-3 w-1/2 rounded bg-muted animate-pulse mb-6" />
-                    <Button variant="outline" className="w-full mt-auto">View Match Details</Button>
+                {!resumeId ? (
+                  <div className="col-span-2 p-8 text-center bg-[#1d1d1d]/50 rounded-xl border border-[#e5e5e5]/10">
+                    <p className="text-[#c2c2c2] mb-4">Please upload a resume first to get personalized job recommendations.</p>
                   </div>
-                ))}
+                ) : isLoadingRecs ? (
+                  [1, 2, 3, 4].map(i => (
+                    <div key={i} className="rounded-xl border border-[#e5e5e5]/10 bg-[#1d1d1d]/50 p-5 flex flex-col">
+                      <div className="h-12 w-12 rounded bg-[#3d3d3d] animate-pulse mb-4" />
+                      <div className="h-4 w-3/4 rounded bg-[#3d3d3d] animate-pulse mb-2" />
+                      <div className="h-3 w-1/2 rounded bg-[#3d3d3d] animate-pulse mb-6" />
+                    </div>
+                  ))
+                ) : recommendedJobs?.length ? (
+                  recommendedJobs.map((job: JobWithCompany, i: number) => (
+                    <div key={job.id} className="rounded-xl border border-[#e5e5e5]/10 bg-[#1d1d1d]/80 p-5 flex flex-col hover:border-[#6b62f2]/50 transition-colors">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="h-12 w-12 rounded bg-[#3d3d3d]/50 border border-[#e5e5e5]/10 flex items-center justify-center text-white font-bold">
+                          {job.company?.name?.[0] || "U"}
+                        </div>
+                        <span className="bg-[#6b62f2]/20 text-[#6b62f2] text-xs px-2 py-1 rounded-full font-medium">Top Match</span>
+                      </div>
+                      <h3 className="font-semibold text-white truncate">{job.title}</h3>
+                      <p className="text-sm text-[#b2b2b2] mb-6">{job.company?.name || "Unknown"} • {job.location || "Remote"}</p>
+                      <Link href={`/jobs/${job.id}`}>
+                        <Button variant="outline" className="w-full mt-auto border-[#e5e5e5]/10 hover:bg-[#3d3d3d]/50 text-white">View Match Details</Button>
+                      </Link>
+                    </div>
+                  ))
+                ) : (
+                  <div className="col-span-2 p-8 text-center bg-[#1d1d1d]/50 rounded-xl border border-[#e5e5e5]/10">
+                    <p className="text-[#c2c2c2]">No recommendations found right now.</p>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -168,33 +209,49 @@ function DashboardContent() {
               
               <div className="grid gap-8 md:grid-cols-2">
                 <div className="space-y-6">
-                  <div>
-                    <div className="flex justify-between text-sm mb-2">
-                      <span className="font-medium">React Native</span>
-                      <span className="text-primary font-medium">High Impact</span>
+                  {!resumeId ? (
+                    <div className="p-8 text-center bg-[#1d1d1d]/50 rounded-xl border border-[#e5e5e5]/10">
+                      <p className="text-[#c2c2c2]">Please upload a resume first to get your skill-gap analysis.</p>
                     </div>
-                    <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
-                      <div className="h-full bg-primary w-[80%] rounded-full" />
+                  ) : isLoadingGaps ? (
+                    <div className="space-y-4">
+                      {[1, 2].map(i => (
+                        <div key={i}>
+                          <div className="flex justify-between text-sm mb-2">
+                            <div className="h-4 w-24 bg-[#3d3d3d] rounded animate-pulse" />
+                            <div className="h-4 w-20 bg-[#3d3d3d] rounded animate-pulse" />
+                          </div>
+                          <div className="h-2 w-full bg-[#3d3d3d]/50 rounded-full overflow-hidden">
+                            <div className="h-full bg-[#3d3d3d] w-1/3 rounded-full animate-pulse" />
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                    <p className="text-xs text-muted-foreground mt-2">Required by 80% of senior mobile roles.</p>
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-sm mb-2">
-                      <span className="font-medium">GraphQL</span>
-                      <span className="text-primary font-medium">Medium Impact</span>
+                  ) : skillGaps?.length ? (
+                    skillGaps.map((gap: any, i: number) => (
+                      <div key={i}>
+                        <div className="flex justify-between text-sm mb-2">
+                          <span className="font-medium text-white">{gap.skill}</span>
+                          <span className="text-[#6b62f2] font-medium">{gap.impact}</span>
+                        </div>
+                        <div className="h-2 w-full bg-[#3d3d3d]/50 rounded-full overflow-hidden">
+                          <div className="h-full bg-[#6b62f2]" style={{ width: `${gap.progress || 10}%` }} />
+                        </div>
+                        <p className="text-xs text-[#b2b2b2] mt-2">{gap.description}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-8 text-center bg-[#1d1d1d]/50 rounded-xl border border-[#e5e5e5]/10">
+                      <p className="text-[#c2c2c2]">No skill gaps identified. You're fully matched!</p>
                     </div>
-                    <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
-                      <div className="h-full bg-primary w-[45%] rounded-full" />
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-2">Required by 45% of full-stack roles.</p>
-                  </div>
+                  )}
                 </div>
                 
-                <div className="rounded-xl border border-dashed border-primary/30 bg-primary/5 p-6 flex flex-col justify-center items-center text-center">
-                  <Target className="h-10 w-10 text-primary mb-4" />
-                  <h3 className="font-semibold mb-2">Unlock Senior Roles</h3>
-                  <p className="text-sm text-muted-foreground mb-4">Adding React Native to your skillset will increase your match rate for Senior Frontend roles by 34%.</p>
-                  <Button size="sm">Explore Learning Paths</Button>
+                <div className="rounded-xl border border-dashed border-[#6b62f2]/30 bg-[#6b62f2]/5 p-6 flex flex-col justify-center items-center text-center">
+                  <Target className="h-10 w-10 text-[#6b62f2] mb-4" />
+                  <h3 className="font-semibold mb-2 text-white">Unlock Senior Roles</h3>
+                  <p className="text-sm text-[#b2b2b2] mb-4">Mastering these missing skills will significantly increase your match rate for top-tier roles.</p>
+                  <Button size="sm" className="bg-[#6b62f2] hover:bg-[#5b52e2] text-white">Explore Learning Paths</Button>
                 </div>
               </div>
             </div>

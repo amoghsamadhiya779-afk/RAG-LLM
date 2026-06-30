@@ -175,6 +175,14 @@ export const jobs = {
     } as JobWithCompany));
   },
 
+  async semanticSearch(query: string): Promise<JobWithCompany[]> {
+    if (!query.trim()) {
+      const res = await this.list();
+      return res.items;
+    }
+    return fetchApi<JobWithCompany[]>(`/jobs/search/semantic?q=${encodeURIComponent(query)}`);
+  },
+
   async recommended(resumeId: string): Promise<JobWithCompany[]> {
     return fetchApi(`/jobs/recommended?resumeId=${resumeId}`);
   },
@@ -295,13 +303,19 @@ export const billing = {
 };
 
 export const chat = {
-  async send(message: string): Promise<{ response: string }> {
+  async send(input: { message: string; history: { role: string; text: string }[]; context_data: any }): Promise<{ reply: string }> {
     return fetchApi("/chat", {
       method: "POST",
-      body: JSON.stringify({ message }),
+      body: JSON.stringify(input),
     });
   },
 };
 
-export const api = { auth, jobs, companies, applications, resumes, saved, admin, billing, chat };
+export const insights = {
+  async skillGap(resumeId: string): Promise<any[]> {
+    return fetchApi(`/insights/skill-gap?resumeId=${resumeId}`);
+  }
+};
+
+export const api = { auth, jobs, companies, applications, resumes, saved, admin, billing, chat, insights };
 export type Api = typeof api;

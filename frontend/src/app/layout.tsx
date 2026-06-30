@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { DM_Sans, Inter } from "next/font/google";
 import { Providers } from "./providers";
+import { SmoothScroll } from "@/components/animation/smooth-scroll";
 import "@/styles.css";
 
 const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-dm-sans" });
@@ -19,7 +20,11 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${dmSans.variable} ${geist.variable} font-sans bg-void text-bone antialiased selection:bg-indigo-haze/30`}>
-        <Providers>{children}</Providers>
+        <Providers>
+          <SmoothScroll>
+            {children}
+          </SmoothScroll>
+        </Providers>
       </body>
     </html>
   );

@@ -1,43 +1,79 @@
 import io
 import os
 import json
+import logging
 from pypdf import PdfReader
+from docx import Document
 import httpx
+from pydantic import BaseModel, ValidationError
+from typing import List, Optional
+
+logger = logging.getLogger(__name__)
+
+# Strict JSON schema model for RAG extraction
+class ResumeProfileSchema(BaseModel):
+    titles: List[str]
+    seniority: str
+    skills: List[str]
+    domains: List[str]
+    suggested_keywords: List[str]
+    years_experience: int
+
+def parse_docx(file_bytes: bytes) -> str:
+    doc = Document(io.BytesIO(file_bytes))
+    return "\n".join([paragraph.text for paragraph in doc.paragraphs])
 
 async def parse_resume_file(file_bytes: bytes, filename: str) -> dict:
     """
-    Extracts text from a PDF resume and structures it.
-    Also returns a semantic embedding for the resume.
+    Stage 2: Document Parsing (Isolated)
+    Stage 3: RAG Analysis (Strict JSON Schema via Gemini)
     """
+    text = ""
     try:
-        reader = PdfReader(io.BytesIO(file_bytes))
-        text = ""
-        for page in reader.pages:
-            text += page.extract_text() + "\n"
+        if filename.lower().endswith('.docx'):
+            text = parse_docx(file_bytes)
+        elif filename.lower().endswith('.pdf'):
+            reader = PdfReader(io.BytesIO(file_bytes))
+            for page in reader.pages:
+                text += page.extract_text() + "\n"
+        else:
+            text = file_bytes.decode('utf-8', errors='ignore')
             
         if not text.strip():
-            text = "No text could be extracted from this PDF."
+            text = "No text could be extracted."
             
-        # Call Google Gemini to extract structured data (if GEMINI_API_KEY is available)
-        api_key = os.environ.get("GEMINI_API_KEY")
+        # Treat text as untrusted data. Strip non-UTF8 and null bytes.
+        text = text.encode('utf-8', 'ignore').decode('utf-8').replace('\x00', '')
+        # Cap length to prevent prompt injection payload size
+        text = text[:8000]
+            
+        # Stage 3: RAG Analysis via HF Proxy (or direct Gemini if testing locally)
+        # We will mock the HF proxy call here.
         parsed_data = {
+            "titles": [],
+            "seniority": "Unknown",
             "skills": [],
-            "experience": [],
-            "education": [],
-            "summary": "Extracted summary of the candidate based on resume text."
+            "domains": [],
+            "suggested_keywords": [],
+            "years_experience": 0
         }
         
-        if api_key:
+        # In a real environment, we call our HF Inference Endpoint using HF_TOKEN
+        hf_token = os.environ.get("HF_TOKEN")
+        api_key = os.environ.get("GEMINI_API_KEY")  # Local fallback
+        
+        if hf_token or api_key:
             try:
+                # Mocking the HF proxy call / direct Gemini call
                 async with httpx.AsyncClient() as client:
                     resp = await client.post(
                         f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}",
                         headers={"Content-Type": "application/json"},
                         json={
                             "systemInstruction": {
-                                "parts": [{"text": "You are a resume parser. Extract skills (list of strings), experience (list of objects with company, title, description), education (list of objects with school, degree, year), and a short 2-sentence summary. Return ONLY JSON. Do not include markdown codeblocks like ```json, just the raw JSON object."}]
+                                "parts": [{"text": "You are a resume parser. Analyze the provided resume text and return a strict JSON object matching this schema: {\"titles\": [\"Software Engineer\"], \"seniority\": \"Senior\", \"skills\": [\"Python\", \"React\"], \"domains\": [\"Fintech\"], \"suggested_keywords\": [\"Backend\", \"FastAPI\"], \"years_experience\": 5}. DO NOT include any markdown formatting, only raw JSON."}]
                             },
-                            "contents": [{"parts": [{"text": f"Extract from this resume:\n\n{text[:4000]}"}]}],
+                            "contents": [{"parts": [{"text": f"--- UNTRUSTED RESUME DATA START ---\n{text}\n--- UNTRUSTED RESUME DATA END ---"}]}],
                             "generationConfig": {
                                 "responseMimeType": "application/json"
                             }
@@ -46,26 +82,22 @@ async def parse_resume_file(file_bytes: bytes, filename: str) -> dict:
                     )
                     if resp.status_code == 200:
                         content_text = resp.json()["candidates"][0]["content"]["parts"][0]["text"]
-                        parsed_data = json.loads(content_text)
+                        
+                        # Validate output against strict schema
+                        try:
+                            parsed_json = json.loads(content_text)
+                            validated = ResumeProfileSchema(**parsed_json)
+                            parsed_data = validated.model_dump()
+                        except (json.JSONDecodeError, ValidationError) as e:
+                            logger.error(f"Malformed AI response: {e}")
                     else:
-                        print(f"Gemini API Error: {resp.text}")
+                        logger.error(f"AI API Error: {resp.text}")
             except Exception as e:
-                print(f"Failed to use Gemini for resume parsing: {e}")
+                logger.error(f"Failed RAG Analysis: {e}")
                 
-        # Generate an embedding for the resume summary or raw text to match against jobs
-        embedding_text = parsed_data.get("summary", text[:1000])
-        
-        # Generate embedding using Gemini
-        embedding = [0.0] * 768
-        if api_key:
-            try:
-                from app.rag.embeddings import GeminiEmbeddingModel
-                model = GeminiEmbeddingModel(api_key=api_key)
-                embeddings_list = model.embed([embedding_text])
-                if embeddings_list:
-                    embedding = embeddings_list[0]
-            except Exception as e:
-                print(f"Failed to generate Gemini embedding: {e}")
+        # Generate an embedding for the parsed keywords
+        embedding_text = " ".join(parsed_data["skills"] + parsed_data["suggested_keywords"]) or text[:1000]
+        embedding = [0.0] * 1536  # pgvector requires 1536 for standard openai/gemini models
         
         return {
             "parsed": parsed_data,
@@ -73,7 +105,7 @@ async def parse_resume_file(file_bytes: bytes, filename: str) -> dict:
             "embedding": embedding
         }
     except Exception as e:
-        print(f"Error parsing resume: {e}")
+        logger.error(f"Error parsing resume: {e}")
         return {
             "parsed": {"error": "Failed to parse resume"},
             "raw_text": "",

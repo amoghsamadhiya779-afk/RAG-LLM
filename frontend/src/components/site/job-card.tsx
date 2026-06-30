@@ -19,7 +19,7 @@ export function JobCard({ job, matchScore }: { job: JobWithCompany; matchScore?:
 
   return (
     <motion.div whileHover={{ y: -2 }} transition={{ duration: 0.2 }}>
-      <Link href={`/jobs/${job.id}`} className="block group">
+      <Link href={job.url || `/jobs/${job.id}`} target={job.url ? "_blank" : undefined} rel={job.url ? "noopener noreferrer" : undefined} className="block group">
         <div className="glass-card flex gap-4 p-5 transition-all hover:bg-iron/40 hover:border-bone/20">
           <Avatar className="h-12 w-12 rounded-xl bg-void border border-bone/10 shadow-sm shrink-0">
             <AvatarImage src={job.company.logoUrl || ""} />

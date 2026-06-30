@@ -8,6 +8,7 @@ from app.schemas.schemas import JobCreate, JobUpdate, JobResponse, JobWithCompan
 from app.repositories.job_repo import JobRepository
 from app.core.deps import get_current_user, require_role, get_current_profile
 from app.models.models import User, Profile, RoleEnum
+from app.core.config import settings
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 
@@ -73,7 +74,7 @@ async def search_jobs_with_internet(
     query_str = " ".join(request.keywords)
     results = []
     
-    serper_api_key = os.environ.get("SERPER_API_KEY")
+    serper_api_key = settings.SERPER_API_KEY
     if serper_api_key and query_str:
         serper_endpoint = "https://google.serper.dev/search"
         try:

@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import auth, jobs, companies, applications, resumes, admin
+from app.routers import auth, jobs, companies, applications, resumes, admin, chat
 from app.core.config import settings
 
 app = FastAPI(title=settings.PROJECT_NAME)
@@ -19,6 +19,7 @@ app.include_router(companies.router)
 app.include_router(applications.router)
 app.include_router(resumes.router)
 app.include_router(admin.router)
+app.include_router(chat.router)
 
 @app.get("/health")
 async def health():

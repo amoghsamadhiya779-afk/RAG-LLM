@@ -272,5 +272,14 @@ export const billing = {
   },
 };
 
-export const api = { auth, jobs, companies, applications, resumes, saved, admin, billing };
+export const chat = {
+  async send(message: string): Promise<{ response: string }> {
+    return fetchApi("/chat", {
+      method: "POST",
+      body: JSON.stringify({ message }),
+    });
+  },
+};
+
+export const api = { auth, jobs, companies, applications, resumes, saved, admin, billing, chat };
 export type Api = typeof api;

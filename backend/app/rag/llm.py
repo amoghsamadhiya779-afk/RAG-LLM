@@ -292,28 +292,23 @@ class OpenAIAnswerGenerator(AnswerGenerator):
 
 
 class GeminiAnswerGenerator(AnswerGenerator):
-    def __init__(self, api_key: str):
-        self.api_key = api_key
-        # Use gemini-2.5-flash as the latest standard for fast tasks
-        self.url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
-        self.headers = {
-            "Content-Type": "application/json",
-            "X-goog-api-key": self.api_key
-        }
+    def __init__(self, api_key: str, model: str):
+        from google import genai
+        self.client = genai.Client(api_key=api_key)
+        self.model = model
 
-    def _call_gemini(self, prompt: str) -> str:
-        import requests
-        payload = {
-            "contents": [{"parts": [{"text": prompt}]}]
-        }
+    def _call_gemini(self, prompt: str, json_mode: bool = False) -> str:
+        from google.genai import types
+        config = None
+        if json_mode:
+            config = types.GenerateContentConfig(response_mime_type="application/json")
         try:
-            resp = requests.post(self.url, headers=self.headers, json=payload)
-            resp.raise_for_status()
-            data = resp.json()
-            return data["candidates"][0]["content"]["parts"][0]["text"]
-        except httpx.HTTPStatusError as e:
-            logger.error(f"Gemini API Error: {e.response.text}")
-            raise RuntimeError(f"Gemini API failed: {e.response.text}") from e
+            resp = self.client.models.generate_content(
+                model=self.model,
+                contents=prompt,
+                config=config,
+            )
+            return resp.text or ""
         except Exception as e:
             logger.error(f"Gemini Exception: {e}")
             return ""
@@ -353,7 +348,7 @@ class GeminiAnswerGenerator(AnswerGenerator):
             f"- gaps: a list of up to 4 critical missing qualifications or experience gaps.\n"
             f"Return ONLY valid JSON (no markdown block wrappers)."
         )
-        content = self._call_gemini(prompt)
+        content = self._call_gemini(prompt, json_mode=True)
         content = content.replace("```json", "").replace("```", "").strip()
         try:
             data = json.loads(content)
@@ -387,7 +382,7 @@ class GeminiAnswerGenerator(AnswerGenerator):
             f"Question: {question}"
         )
         import json
-        res = self._call_gemini(prompt)
+        res = self._call_gemini(prompt, json_mode=True)
         res = res.replace("```json", "").replace("```", "").strip()
         try:
             data = json.loads(res)
@@ -408,7 +403,7 @@ class GeminiAnswerGenerator(AnswerGenerator):
             f"Output ONLY a valid JSON array of integers containing the indices (0 to {len(contexts)-1}) of the relevant documents. Do not output anything else."
         )
         import json
-        res = self._call_gemini(prompt)
+        res = self._call_gemini(prompt, json_mode=True)
         res = res.replace("```json", "").replace("```", "").strip()
         try:
             indices = json.loads(res)
@@ -420,9 +415,11 @@ class GeminiAnswerGenerator(AnswerGenerator):
 
 def build_answer_generator(settings: Settings) -> AnswerGenerator:
     if settings.llm_provider == "gemini":
-        api_key = settings.gemini_api_key or os.environ.get("GEMINI_API_KEY")
+        from app.core.config import settings as core_settings
+        api_key = core_settings.GEMINI_API_KEY or os.environ.get("GEMINI_API_KEY")
         if api_key:
-            return GeminiAnswerGenerator(api_key)
+            model = core_settings.GEMINI_MODEL or settings.GEMINI_MODEL or "gemini-2.5-flash"
+            return GeminiAnswerGenerator(api_key, model)
         else:
             logger.warning("GEMINI_API_KEY is not set. Falling back to LocalExtractiveGenerator.")
     

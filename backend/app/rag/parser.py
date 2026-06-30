@@ -59,40 +59,36 @@ async def parse_resume_file(file_bytes: bytes, filename: str) -> dict:
             "years_experience": 0
         }
         
-        # In a real environment, we call our HF Inference Endpoint using HF_TOKEN
-        hf_token = os.environ.get("HF_TOKEN")
-        api_key = settings.GEMINI_API_KEY or os.environ.get("GEMINI_API_KEY")  # Local fallback
+        # Standardize on settings.GEMINI_API_KEY and fallback to os.environ.get("GEMINI_API_KEY")
+        api_key = settings.GEMINI_API_KEY or os.environ.get("GEMINI_API_KEY")
         
-        if hf_token or api_key:
+        if api_key:
             try:
-                # Mocking the HF proxy call / direct Gemini call
-                async with httpx.AsyncClient() as client:
-                    resp = await client.post(
-                        f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}",
-                        headers={"Content-Type": "application/json"},
-                        json={
-                            "systemInstruction": {
-                                "parts": [{"text": "You are a resume parser. Analyze the provided resume text and return a strict JSON object matching this schema: {\"titles\": [\"Software Engineer\"], \"seniority\": \"Senior\", \"skills\": [\"Python\", \"React\"], \"domains\": [\"Fintech\"], \"suggested_keywords\": [\"Backend\", \"FastAPI\"], \"years_experience\": 5}. DO NOT include any markdown formatting, only raw JSON."}]
-                            },
-                            "contents": [{"parts": [{"text": f"--- UNTRUSTED RESUME DATA START ---\n{text}\n--- UNTRUSTED RESUME DATA END ---"}]}],
-                            "generationConfig": {
-                                "responseMimeType": "application/json"
-                            }
-                        },
-                        timeout=30.0
-                    )
-                    if resp.status_code == 200:
-                        content_text = resp.json()["candidates"][0]["content"]["parts"][0]["text"]
-                        
-                        # Validate output against strict schema
-                        try:
-                            parsed_json = json.loads(content_text)
-                            validated = ResumeProfileSchema(**parsed_json)
-                            parsed_data = validated.model_dump()
-                        except (json.JSONDecodeError, ValidationError) as e:
-                            logger.error(f"Malformed AI response: {e}")
-                    else:
-                        logger.error(f"AI API Error: {resp.text}")
+                from google import genai
+                from google.genai import types
+                
+                model = settings.GEMINI_MODEL or "gemini-2.5-flash"
+                genai_client = genai.Client(api_key=api_key)
+                
+                config = types.GenerateContentConfig(
+                    system_instruction="You are a resume parser. Analyze the provided resume text and return a strict JSON object matching this schema: {\"titles\": [\"Software Engineer\"], \"seniority\": \"Senior\", \"skills\": [\"Python\", \"React\"], \"domains\": [\"Fintech\"], \"suggested_keywords\": [\"Backend\", \"FastAPI\"], \"years_experience\": 5}. DO NOT include any markdown formatting, only raw JSON.",
+                    response_mime_type="application/json"
+                )
+                
+                resp = await genai_client.aio.models.generate_content(
+                    model=model,
+                    contents=f"--- UNTRUSTED RESUME DATA START ---\n{text}\n--- UNTRUSTED RESUME DATA END ---",
+                    config=config
+                )
+                content_text = resp.text
+                if content_text:
+                    # Validate output against strict schema
+                    try:
+                        parsed_json = json.loads(content_text)
+                        validated = ResumeProfileSchema(**parsed_json)
+                        parsed_data = validated.model_dump()
+                    except (json.JSONDecodeError, ValidationError) as e:
+                        logger.error(f"Malformed AI response: {e}")
             except Exception as e:
                 logger.error(f"Failed RAG Analysis: {e}")
                 

@@ -12,6 +12,7 @@ from app.repositories.resume_repo import ResumeRepository
 from app.core.deps import get_current_user, require_role
 from app.models.models import User, RoleEnum
 from app.rag.parser import parse_resume_file
+from app.core.config import settings
 
 router = APIRouter(prefix="/resumes", tags=["resumes"])
 
@@ -164,7 +165,7 @@ async def score_ats(
     resume_text = resume.parsed if resume.parsed else "No resume data"
     
     hf_token = os.environ.get("HF_TOKEN")
-    api_key = os.environ.get("GEMINI_API_KEY") # local fallback if no HF space
+    api_key = settings.GEMINI_API_KEY or os.environ.get("GEMINI_API_KEY") # local fallback if no HF space
     
     report_data = {
         "match_percentage": 0,

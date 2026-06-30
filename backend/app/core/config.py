@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     # AI / Embeddings
     OPENAI_API_KEY: str = ""
     SERPER_API_KEY: str = ""
+    GEMINI_API_KEY: str = ""
     EMBEDDING_MODEL_NAME: str = "text-embedding-3-small"
     EMBEDDING_DIMENSION: int = 1536
     

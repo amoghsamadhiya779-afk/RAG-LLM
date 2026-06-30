@@ -1,5 +1,5 @@
 import pytest
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 from app.main import app
 import uuid
 
@@ -38,7 +38,8 @@ def mock_search_provider(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_internet_search(mock_search_provider):
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
         response = await ac.post("/jobs/search", json={"keywords": ["python", "remote"]})
         assert response.status_code == 200
         data = response.json()
@@ -47,7 +48,8 @@ async def test_internet_search(mock_search_provider):
 
 @pytest.mark.asyncio
 async def test_ats_scoring(mock_hf_provider):
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
         # Note: In a real test we'd need an auth token and an existing resume ID in DB
         # This is a structural representation of the test
         pass

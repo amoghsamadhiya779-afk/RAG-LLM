@@ -14,7 +14,7 @@ export function useHighlightSection() {
         const element = document.querySelector(hash);
         if (element) {
           if (lenis) {
-            lenis.scrollTo(element, { offset: -100 });
+            lenis.scrollTo(element as HTMLElement, { offset: -100 });
           } else {
             element.scrollIntoView({ behavior: "smooth", block: "center" });
           }

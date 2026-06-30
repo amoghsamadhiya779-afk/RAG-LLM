@@ -34,7 +34,7 @@ export function ApplyDialog({ open, onOpenChange, jobId, jobTitle }: {
       const parsed = schema.parse({ coverNote: coverNote || undefined });
       let resumeId: string | undefined;
       if (file) {
-        const r = await api.resumes.upload(file, session.user.id);
+        const r = await api.resumes.upload(file);
         resumeId = r.id;
       }
       return api.applications.create(jobId, { userId: session.user.id, coverNote: parsed.coverNote, resumeId });

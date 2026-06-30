@@ -24,20 +24,20 @@ function Profile() {
 
   const { data: resumes = [] } = useQuery({
     queryKey: ["resumes", session?.user.id],
-    queryFn: () => api.resumes.mine(session!.user.id),
+    queryFn: () => api.resumes.mine(),
     enabled: !!session,
   });
   const latestResume = resumes[0] ?? null;
 
   const { data: saved = [] } = useQuery({
     queryKey: ["saved", session?.user.id],
-    queryFn: () => api.saved.list(session!.user.id),
+    queryFn: () => api.saved.list(),
     enabled: !!session,
   });
 
   const { data: applications = [] } = useQuery({
     queryKey: ["applications", "mine", session?.user.id],
-    queryFn: () => api.applications.mine(session!.user.id),
+    queryFn: () => api.applications.mine(),
     enabled: !!session,
   });
 
@@ -50,7 +50,7 @@ function Profile() {
   const upload = useMutation({
     mutationFn: async () => {
       if (!file || !session) throw new Error("Pick a file");
-      const r = await api.resumes.upload(file, session.user.id);
+      const r = await api.resumes.upload(file);
       await api.resumes.parse(r.id);
       return r;
     },

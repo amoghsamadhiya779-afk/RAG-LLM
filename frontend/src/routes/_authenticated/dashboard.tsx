@@ -29,7 +29,7 @@ function Dashboard() {
 
   const { data: jobs, isLoading } = useQuery({
     queryKey: ["jobs", "mine", session?.user.id],
-    queryFn: () => api.jobs.mine(session!.user.id),
+    queryFn: () => api.jobs.mine(),
     enabled: !!session,
   });
 

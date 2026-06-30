@@ -5,7 +5,7 @@ import { SiteHeader } from "@/components/site/header";
 import { SiteFooter } from "@/components/site/footer";
 import { JobCard } from "@/components/site/job-card";
 import { api } from "@/services/api";
-import type { JobWithCompany } from "@/types";
+import type { Job, JobWithCompany } from "@/types";
 
 export const Route = createFileRoute("/companies/$id")({
   loader: async ({ params }) => {
@@ -26,7 +26,7 @@ export const Route = createFileRoute("/companies/$id")({
 
 function CompanyPage() {
   const { company, jobs } = Route.useLoaderData();
-  const withCompany: JobWithCompany[] = jobs.map((j: JobWithCompany) => ({ ...j, company }));
+  const withCompany: JobWithCompany[] = jobs.map((j: Job) => ({ ...j, company }));
 
   return (
     <div className="min-h-dvh flex flex-col">

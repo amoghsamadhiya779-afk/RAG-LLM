@@ -57,7 +57,7 @@ function JobDetail() {
 
   const { data: savedIds } = useQuery({
     queryKey: ["saved", "ids", session?.user.id],
-    queryFn: () => session ? api.saved.ids(session.user.id) : Promise.resolve([] as string[]),
+    queryFn: () => session ? api.saved.ids() : Promise.resolve([] as string[]),
     enabled: !!session,
   });
   const isSaved = !!savedIds?.includes(job.id);
@@ -65,7 +65,7 @@ function JobDetail() {
   const toggleSave = useMutation({
     mutationFn: () => {
       if (!session) throw new Error("Sign in to save jobs");
-      return api.saved.toggle(session.user.id, job.id);
+      return api.saved.toggle(job.id);
     },
     onSuccess: (res) => {
       toast.success(res.saved ? "Saved" : "Removed");

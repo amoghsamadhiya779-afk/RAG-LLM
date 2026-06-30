@@ -69,24 +69,14 @@ export default function AiWorkspaceSection({ className }: { className?: string }
         document.getElementById("ai-matching")?.scrollIntoView({ behavior: "smooth" });
       }
     } catch (e: any) {
-      // Fallback for unauthenticated demo mode on landing page
-      toast.info("Demo mode active: Displaying simulated parsed data.");
-      setParsedSkills(["React", "TypeScript", "Python", "System Design", "Node.js"]);
-      setMatchedJobs([
-        { id: "mock-1", title: "Senior Frontend Engineer", company: { name: "Google", id: "1" }, description: "", requirements: [], job_type: "full-time", level: "senior", tags: [], status: "live", featured: false, views: 0, created_at: "" },
-        { id: "mock-2", title: "Fullstack AI Developer", company: { name: "OpenAI", id: "2" }, description: "", requirements: [], job_type: "full-time", level: "senior", tags: [], status: "live", featured: false, views: 0, created_at: "" },
-        { id: "mock-3", title: "React Engineer (Remote)", company: { name: "Vercel", id: "3" }, description: "", requirements: [], job_type: "full-time", level: "mid", tags: [], status: "live", featured: false, views: 0, created_at: "" }
-      ] as any);
-      setTimeout(() => {
-        document.getElementById("ai-matching")?.scrollIntoView({ behavior: "smooth" });
-      }, 500);
+      toast.error(e.message || "Failed to process resume.");
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
-  const handleChat = (e: React.FormEvent) => {
+  const handleChat = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!chatInput.trim()) return;
     
@@ -95,10 +85,15 @@ export default function AiWorkspaceSection({ className }: { className?: string }
     setChatInput("");
     setIsChatTyping(true);
     
-    setTimeout(() => {
-      setMessages(prev => [...prev, { role: "ai", text: `I found several roles matching "${userMsg}". Check out the semantic search results or upload your resume for a precise match!` }]);
+    try {
+      const { response } = await api.chat.send(userMsg);
+      setMessages(prev => [...prev, { role: "ai", text: response }]);
+    } catch (e: any) {
+      toast.error(e.message || "Failed to contact Gemini.");
+      setMessages(prev => [...prev, { role: "ai", text: "Sorry, I am having trouble connecting to my Gemini brain right now." }]);
+    } finally {
       setIsChatTyping(false);
-    }, 1500);
+    }
   };
 
   return (

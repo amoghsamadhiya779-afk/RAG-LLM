@@ -73,8 +73,7 @@ export default function LandingPage() {
         {/* Jobs Section */}
         <JobsSection />
 
-        {/* Pricing Cards Section */}
-        <PricingCards />
+
 
         {/* FAQ Section */}
         <FAQ />

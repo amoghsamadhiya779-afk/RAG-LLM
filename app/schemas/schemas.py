@@ -131,9 +131,15 @@ class JobWithCompanyResponse(JobResponse):
 # ----------------- Resumes -----------------
 
 class ParsedResume(BaseModel):
+    titles: List[str]
+    seniority: str
     skills: List[str]
-    experience: List[dict] # list of { title: str, company: str, years: number }
-    education: List[dict] # list of { school: str, degree: str }
+    domains: List[str]
+    suggested_keywords: List[str]
+    years_experience: int
+
+class KeywordsResponse(BaseModel):
+    suggested_keywords: List[str]
 
 class ResumeResponse(BaseModel):
     id: uuid.UUID

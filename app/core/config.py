@@ -4,7 +4,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "DevBoard API"
     
     # Database
-    DATABASE_URL: str = "postgresql+asyncpg://devboard:password@localhost:5432/devboard"
+    DATABASE_URL: str = "sqlite+aiosqlite:///./rag_llm.db"
     
     # Redis
     REDIS_URL: str = "redis://localhost:6379/0"

@@ -98,14 +98,4 @@ class JobRepository:
         await self.db.refresh(job)
         return job
 
-    async def search_semantic(self, qvec: list[float], limit: int = 20) -> List[Job]:
-        # pgvector cosine similarity
-        stmt = (
-            select(Job)
-            .options(selectinload(Job.company))
-            .where(Job.status == JobStatusEnum.live)
-            .order_by(desc(Job.featured), Job.embedding.cosine_distance(qvec))
-            .limit(limit)
-        )
-        result = await self.db.execute(stmt)
-        return list(result.scalars().all())
+

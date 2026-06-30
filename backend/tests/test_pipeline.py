@@ -1,4 +1,5 @@
 import pytest
+import httpx
 from httpx import AsyncClient, ASGITransport
 from app.main import app
 import uuid
@@ -29,20 +30,24 @@ def mock_search_provider(monkeypatch):
     class MockResponse:
         status_code = 200
         def json(self):
-            return {"web": {"results": [{"title": "Mock Job", "description": "Mock desc", "url": "http://mock"}]}}
+            return {"organic": [{"title": "Mock Job", "snippet": "Mock desc", "link": "http://mock"}]}
             
-    async def mock_get(*args, **kwargs):
-        return MockResponse()
+    original_post = httpx.AsyncClient.post
+    
+    async def mock_post(self, url, *args, **kwargs):
+        if "serper.dev" in str(url):
+            return MockResponse()
+        return await original_post(self, url, *args, **kwargs)
         
-    monkeypatch.setattr("httpx.AsyncClient.get", mock_get)
+    monkeypatch.setattr("httpx.AsyncClient.post", mock_post)
 
 @pytest.mark.asyncio
 async def test_internet_search(mock_search_provider):
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
         response = await ac.post("/jobs/search", json={"keywords": ["python", "remote"]})
-        assert response.status_code == 200
         data = response.json()
+        assert response.status_code == 200
         assert len(data) > 0
         assert data[0]["title"] == "Mock Job"
 

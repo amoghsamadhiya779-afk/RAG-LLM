@@ -164,7 +164,7 @@ export const jobs = {
 
 export const companies = {
   async get(id: string): Promise<{ company: Company; jobs: Job[] } | null> {
-    return fetchApi(`/companies/${id}`).catch(() => null);
+    return fetchApi<{ company: Company; jobs: Job[] }>(`/companies/${id}`).catch(() => null);
   },
 
   async upsert(input: Partial<Company>): Promise<Company> {

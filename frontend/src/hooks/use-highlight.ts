@@ -1,8 +1,10 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { useLenis } from "./use-lenis";
 
 export function useHighlightSection() {
   const pathname = usePathname();
+  const lenis = useLenis();
 
   useEffect(() => {
     // wait a moment for rendering and framer-motion transition
@@ -11,7 +13,11 @@ export function useHighlightSection() {
       if (hash) {
         const element = document.querySelector(hash);
         if (element) {
-          element.scrollIntoView({ behavior: "smooth", block: "center" });
+          if (lenis) {
+            lenis.scrollTo(element, { offset: -100 });
+          } else {
+            element.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
           
           // Apply highlight effect
           element.classList.add("ring-2", "ring-primary", "ring-offset-4", "ring-offset-background", "shadow-[0_0_30px_rgba(var(--primary),0.3)]", "transition-all", "duration-1000");

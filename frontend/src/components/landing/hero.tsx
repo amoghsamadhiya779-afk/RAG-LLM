@@ -2,13 +2,16 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Search, Sparkles, FileText, Zap } from "lucide-react";
 import { reveal, revealStagger } from "@/lib/motion";
+import { Parallax } from "@/components/animation/parallax";
 
 export function Hero() {
   return (
     <section className="relative overflow-hidden pt-24 pb-28 sm:pt-32 sm:pb-40">
       {/* Dimension Gradient Backdrop */}
       <div aria-hidden className="absolute inset-0 -z-20 bg-dawn-wash" />
-      <div aria-hidden className="absolute left-1/2 top-[10%] -z-10 h-[600px] w-[600px] -translate-x-1/2 bg-radial-indigo" />
+      <Parallax speed={0.6} className="absolute inset-0 -z-10 pointer-events-none">
+        <div aria-hidden className="absolute left-1/2 top-[10%] h-[600px] w-[600px] -translate-x-1/2 bg-radial-indigo" />
+      </Parallax>
       
       {/* Bottom fade to void */}
       <div aria-hidden className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-b from-transparent to-void" />
@@ -50,7 +53,7 @@ export function Hero() {
 
           <motion.div variants={reveal} className="mt-10">
             <Link
-              href="/auth"
+              href="/jobs"
               className="inline-flex h-10 items-center justify-center gap-2 rounded-pill bg-paper px-5 text-[15px] font-medium text-void transition-colors hover:bg-paper/90"
             >
               Start Searching

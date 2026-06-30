@@ -4,6 +4,7 @@ import { MapPin, Briefcase, DollarSign, Clock, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { JobWithCompany } from "@/types";
+import { motion } from "framer-motion";
 
 export function JobCard({ job, matchScore }: { job: JobWithCompany; matchScore?: number }) {
   const isMatch = matchScore !== undefined && matchScore >= 70;
@@ -17,14 +18,14 @@ export function JobCard({ job, matchScore }: { job: JobWithCompany; matchScore?:
   const salary = formatSalary(job.salaryMin, job.salaryMax);
 
   return (
-    <Link href={`/jobs/${job.id}`}>
-      <div className="glass-card group relative transition-all hover:bg-iron/40 hover:border-bone/20">
-        <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-          <Avatar className="h-12 w-12 rounded-xl bg-void border border-bone/10 shadow-sm">
+    <motion.div whileHover={{ y: -2 }} transition={{ duration: 0.2 }}>
+      <Link href={`/jobs/${job.id}`} className="block group">
+        <div className="glass-card flex gap-4 p-5 transition-all hover:bg-iron/40 hover:border-bone/20">
+          <Avatar className="h-12 w-12 rounded-xl bg-void border border-bone/10 shadow-sm shrink-0">
             <AvatarImage src={job.company.logoUrl || ""} />
             <AvatarFallback className="rounded-xl font-bold text-void bg-bone">{job.company.name.charAt(0)}</AvatarFallback>
           </Avatar>
-
+          
           <div className="flex-1 space-y-3">
             <div>
               <div className="flex items-center justify-between">
@@ -73,7 +74,7 @@ export function JobCard({ job, matchScore }: { job: JobWithCompany; matchScore?:
             )}
           </div>
         </div>
-      </div>
-    </Link>
+      </Link>
+    </motion.div>
   );
 }

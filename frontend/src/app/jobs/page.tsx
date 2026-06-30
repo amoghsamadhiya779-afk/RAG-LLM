@@ -10,6 +10,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { JobCard } from "@/components/site/job-card";
 import { api } from "@/services/api";
+import { SiteHeader } from "@/components/site/header";
+import { Parallax } from "@/components/animation/parallax";
 import type { JobType, JobLevel } from "@/types";
 
 const ALL_TAGS = ["TypeScript", "React", "Next.js", "Go", "Rust", "Python", "PyTorch", "Postgres", "Kubernetes", "OpenTelemetry", "WebGL", "OSS", "DevRel"];
@@ -59,16 +61,23 @@ function BrowseJobsContent() {
   const clearAll = () => { setTags([]); setRemote(false); setJobType(undefined); setLevel(undefined); setSalaryMin(0); setQuery(""); };
 
   return (
-    <div className="bg-void min-h-dvh text-bone pt-24 pb-12">
-      <div className="container-page">
-        <div className="mb-8 flex items-center gap-3 rounded-pill border border-bone/10 bg-char/60 px-4 py-2 backdrop-blur-md shadow-sm">
+    <div className="relative min-h-dvh text-bone pb-12 font-sans overflow-hidden">
+      <SiteHeader />
+      {/* Dimension Gradient Backdrop */}
+      <div aria-hidden className="absolute inset-0 -z-20 bg-dawn-wash opacity-50" />
+      <Parallax speed={0.6} className="absolute inset-0 -z-10 pointer-events-none">
+        <div aria-hidden className="absolute left-1/2 top-[10%] h-[600px] w-[600px] -translate-x-1/2 bg-radial-indigo" />
+      </Parallax>
+      <div className="container-page relative z-10 pt-24">
+        <div className="mb-8 flex items-center gap-3 rounded-pill border border-bone/10 bg-[#1d1d1d]/60 px-4 py-2 backdrop-blur-md shadow-sm">
           <Search className="h-5 w-5 text-mist" />
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder='Search "react remote senior" or "ML internship"'
-            className="border-0 bg-transparent text-[16px] text-bone placeholder:text-fog focus-visible:ring-0 px-0 h-10"
+            className="border-0 !bg-transparent text-[16px] text-bone placeholder:text-fog focus-visible:ring-0 px-0 h-10"
             aria-label="Search jobs"
+            style={{ backgroundColor: "transparent" }}
           />
           {(query || tags.length || remote || jobType || level || salaryMin > 0) ? (
             <Button variant="ghost" size="sm" onClick={clearAll} className="gap-1 rounded-pill text-mist hover:text-bone hover:bg-iron/50"><X className="h-4 w-4" />Clear filters</Button>

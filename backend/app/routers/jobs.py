@@ -68,47 +68,46 @@ async def search_jobs_with_internet(
 ):
     """
     Stage 5: Internet-powered job search.
-    Queries public web via LangSearch API.
+    Queries public web via Serper.
     """
     query_str = " ".join(request.keywords)
     results = []
     
-    langsearch_api_key = os.environ.get("LANGSEARCH_API_KEY")
-    if langsearch_api_key and query_str:
-        langsearch_endpoint = "https://api.langsearch.com/v1/web-search"
+    serper_api_key = os.environ.get("SERPER_API_KEY")
+    if serper_api_key and query_str:
+        serper_endpoint = "https://google.serper.dev/search"
         try:
             async with httpx.AsyncClient(follow_redirects=False) as client:
-                resp = await client.get(
-                    langsearch_endpoint,
-                    headers={"Authorization": f"Bearer {langsearch_api_key}"},
-                    params={"q": query_str},
+                resp = await client.post(
+                    serper_endpoint,
+                    headers={
+                        "X-API-KEY": serper_api_key,
+                        "Content-Type": "application/json"
+                    },
+                    json={"q": query_str + " jobs"},
                     timeout=10.0
                 )
                 if resp.status_code == 200:
                     data = resp.json()
-                    items = []
-                    if isinstance(data, list):
-                        items = data
-                    elif isinstance(data, dict):
-                        items = data.get("results") or data.get("items") or data.get("web", {}).get("results") or []
+                    items = data.get("organic", [])
                     
                     for item in items:
                         results.append({
                             "id": str(uuid.uuid4()),
                             "title": item.get("title", "Unknown Role"),
-                            "description": item.get("description") or item.get("snippet") or "",
-                            "url": item.get("url", ""),
-                            "source": "LangSearch"
+                            "description": item.get("snippet") or "",
+                            "url": item.get("link", ""),
+                            "source": "Web Search",
                         })
         except Exception as e:
-            pass
+            print(f"Serper API Error: {e}")
             
-    if not results and not langsearch_api_key:
+    if not results and not serper_api_key:
         results = [
             {
                 "id": str(uuid.uuid4()),
                 "title": "Senior React Developer (Mock Internet Result)",
-                "description": "This is a mock internet search result. Configure LANGSEARCH_API_KEY to see real internet results.",
+                "description": "This is a mock internet search result. Configure SERPER_API_KEY to see real internet results.",
                 "url": "https://example.com/job",
                 "source": "Mock API"
             },

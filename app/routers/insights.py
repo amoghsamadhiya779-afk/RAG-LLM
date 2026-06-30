@@ -38,7 +38,6 @@ async def get_skill_gap(
         return []
         
     # 3. Analyze with Gemini
-    api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         raise HTTPException(status_code=500, detail="Gemini API Key missing")
         
@@ -50,26 +49,28 @@ async def get_skill_gap(
     resume_context = json.dumps(resume.parsed)
     
     try:
-        async with httpx.AsyncClient() as client:
-            resp = await client.post(
-                f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}",
-                headers={"Content-Type": "application/json"},
-                json={
-                    "systemInstruction": {
-                        "parts": [{"text": "You are an expert Career Coach and AI Analyzer. You are provided with a user's parsed resume and a sample of live tech jobs. Identify 2 key technical skills the user lacks compared to these job requirements, but would have a high impact on their employability. Output a strict JSON array of objects. Format: [{\"skill\": \"Skill Name\", \"impact\": \"High Impact\", \"progress\": 20, \"description\": \"Short description of why it's needed\"}]"}]
-                    },
-                    "contents": [{"parts": [{"text": f"--- PARSED RESUME ---\n{resume_context}\n\n--- SAMPLE JOBS ---\n{jobs_context}"}]}],
-                    "generationConfig": {"responseMimeType": "application/json"}
-                },
-                timeout=20.0
-            )
-            
-            if resp.status_code == 200:
-                content_text = resp.json()["candidates"][0]["content"]["parts"][0]["text"]
-                skills = json.loads(content_text)
-                return skills
-            else:
-                raise HTTPException(status_code=500, detail="Failed to analyze skill gap")
+        from google import genai
+        from google.genai import types
+        
+        model = settings.GEMINI_MODEL or "gemini-2.5-flash"
+        genai_client = genai.Client(api_key=api_key)
+        
+        config = types.GenerateContentConfig(
+            system_instruction="You are an expert Career Coach and AI Analyzer. You are provided with a user's parsed resume and a sample of live tech jobs. Identify 2 key technical skills the user lacks compared to these job requirements, but would have a high impact on their employability. Output a strict JSON array of objects. Format: [{\"skill\": \"Skill Name\", \"impact\": \"High Impact\", \"progress\": 20, \"description\": \"Short description of why it's needed\"}]",
+            response_mime_type="application/json"
+        )
+        
+        resp = await genai_client.aio.models.generate_content(
+            model=model,
+            contents=f"--- PARSED RESUME ---\n{resume_context}\n\n--- SAMPLE JOBS ---\n{jobs_context}",
+            config=config
+        )
+        content_text = resp.text
+        if content_text:
+            skills = json.loads(content_text)
+            return skills
+        else:
+            raise HTTPException(status_code=500, detail="Failed to analyze skill gap")
     except Exception as e:
         print(f"Skill gap analysis failed: {e}")
         raise HTTPException(status_code=500, detail="Internal AI error")

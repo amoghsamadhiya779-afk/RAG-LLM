@@ -1,14 +1,8 @@
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
-import { LogOut } from "lucide-react";
-import { useAuth } from "@/hooks/use-auth";
-import { cn } from "@/lib/utils";
+import { usePathname } from "next/navigation";
 
 export function SiteHeader() {
-  const { session, signOut } = useAuth();
-  const router = useRouter();
   const pathname = usePathname();
-  const role = session?.profile.role;
 
   return (
     <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2">
@@ -34,31 +28,14 @@ export function SiteHeader() {
             </>
           )}
 
-          {session ? (
-            <>
-              {role === "employer" && (
-                <Link href="/dashboard" className="flex h-8 items-center rounded-pill px-3 text-[15px] font-medium text-mist transition-colors hover:bg-iron hover:text-bone">Dashboard</Link>
-              )}
-              <Link href="/ai-workspace" className="flex h-8 items-center rounded-pill px-3 text-[15px] font-medium text-mist transition-colors hover:bg-iron hover:text-bone">AI Workspace</Link>
-              
-              <div className="mx-2 h-4 w-px bg-bone/10" />
-              
-              <button
-                onClick={async () => { await signOut(); router.push("/"); }}
-                className="flex h-8 w-8 items-center justify-center rounded-pill text-mist transition-colors hover:bg-iron hover:text-bone"
-                title="Sign out"
-              >
-                <LogOut className="h-4 w-4" />
-              </button>
-            </>
-          ) : (
-            <>
-              <div className="mx-2 h-4 w-px bg-bone/10" />
-              <Link href="/auth" className="flex h-8 items-center rounded-pill bg-paper px-4 text-[15px] font-medium text-void transition-colors hover:bg-paper/90">
-                Get Started
-              </Link>
-            </>
-          )}
+          <Link href="/dashboard" className="flex h-8 items-center rounded-pill px-3 text-[15px] font-medium text-mist transition-colors hover:bg-iron hover:text-bone">Dashboard</Link>
+          <Link href="/ai-workspace" className="flex h-8 items-center rounded-pill px-3 text-[15px] font-medium text-mist transition-colors hover:bg-iron hover:text-bone">AI Workspace</Link>
+          
+          <div className="mx-2 h-4 w-px bg-bone/10" />
+          
+          <Link href="/post" className="flex h-8 items-center rounded-pill bg-paper px-4 text-[15px] font-medium text-void transition-colors hover:bg-paper/90">
+            Post a Job
+          </Link>
         </div>
       </nav>
     </div>

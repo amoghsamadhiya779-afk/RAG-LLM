@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, Suspense } from "react";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
@@ -21,12 +21,9 @@ const TYPES: { v: JobType; label: string }[] = [
 ];
 const LEVELS: JobLevel[] = ["intern", "junior", "mid", "senior", "staff", "principal"];
 
-import { Suspense } from "react";
-
 function BrowseJobsContent() {
   const searchParams = useSearchParams();
   const initialQ = searchParams.get("q") || searchParams.get("search") || "";
-
   
   const [query, setQuery] = useState(initialQ);
   const [tags, setTags] = useState<string[]>([]);
@@ -62,101 +59,105 @@ function BrowseJobsContent() {
   const clearAll = () => { setTags([]); setRemote(false); setJobType(undefined); setLevel(undefined); setSalaryMin(0); setQuery(""); };
 
   return (
-    <div className="container-page py-10">
-      <div className="mb-6 flex items-center gap-2 rounded-xl border border-border bg-surface/60 p-2 backdrop-blur">
-        <Search className="ml-2 h-4 w-4 text-muted-foreground" />
-        <Input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder='Search "react remote senior" or "ML internship"'
-          className="border-0 bg-transparent focus-visible:ring-0"
-          aria-label="Search jobs"
-        />
-        {(query || tags.length || remote || jobType || level || salaryMin > 0) ? (
-          <Button variant="ghost" size="sm" onClick={clearAll} className="gap-1"><X className="h-3.5 w-3.5" />Clear</Button>
-        ) : null}
-      </div>
+    <div className="bg-void min-h-dvh text-bone pt-24 pb-12">
+      <div className="container-page">
+        <div className="mb-8 flex items-center gap-3 rounded-pill border border-bone/10 bg-char/60 px-4 py-2 backdrop-blur-md shadow-sm">
+          <Search className="h-5 w-5 text-mist" />
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder='Search "react remote senior" or "ML internship"'
+            className="border-0 bg-transparent text-[16px] text-bone placeholder:text-fog focus-visible:ring-0 px-0 h-10"
+            aria-label="Search jobs"
+          />
+          {(query || tags.length || remote || jobType || level || salaryMin > 0) ? (
+            <Button variant="ghost" size="sm" onClick={clearAll} className="gap-1 rounded-pill text-mist hover:text-bone hover:bg-iron/50"><X className="h-4 w-4" />Clear filters</Button>
+          ) : null}
+        </div>
 
-      <div className="grid gap-8 lg:grid-cols-[260px_1fr]">
-        <aside className="space-y-6">
-          <div className="flex items-center gap-2 text-sm font-medium">
-            <SlidersHorizontal className="h-4 w-4" /> Filters
-          </div>
+        <div className="grid gap-10 xl:grid-cols-[280px_1fr]">
+          <aside className="space-y-8 glass-card p-6 h-fit sticky top-24">
+            <div className="flex items-center gap-2 text-[16px] font-medium text-paper mb-2">
+              <SlidersHorizontal className="h-4 w-4" /> Filters
+            </div>
 
-          <div>
-            <div className="mb-2 text-xs font-medium uppercase text-muted-foreground">Stack</div>
-            <div className="flex flex-wrap gap-1.5">
-              {ALL_TAGS.map((t) => (
-                <button
-                  key={t}
-                  onClick={() => toggleTag(t)}
-                  className={`rounded-md px-2 py-1 text-xs transition-colors ${tags.includes(t) ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"}`}
-                >
-                  {t}
-                </button>
-              ))}
+            <div>
+              <div className="mb-3 text-[12px] font-medium uppercase tracking-wider text-fog">Stack</div>
+              <div className="flex flex-wrap gap-2">
+                {ALL_TAGS.map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => toggleTag(t)}
+                    className={`rounded-pill px-3 py-1 text-[13px] transition-colors border ${tags.includes(t) ? "bg-paper text-void border-paper font-medium" : "bg-void text-mist border-bone/10 hover:bg-iron/50"}`}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
 
-          <label className="flex items-center gap-2 text-sm">
-            <Checkbox checked={remote} onCheckedChange={(v) => setRemote(!!v)} />
-            Remote only
-          </label>
+            <label className="flex items-center gap-3 text-[14px] text-bone cursor-pointer">
+              <Checkbox checked={remote} onCheckedChange={(v) => setRemote(!!v)} className="border-bone/20 data-[state=checked]:bg-paper data-[state=checked]:text-void" />
+              Remote only
+            </label>
 
-          <div>
-            <div className="mb-2 text-xs font-medium uppercase text-muted-foreground">Type</div>
-            <div className="flex flex-wrap gap-1.5">
-              {TYPES.map((t) => (
-                <button
-                  key={t.v}
-                  onClick={() => setJobType(jobType === t.v ? undefined : t.v)}
-                  className={`rounded-md px-2 py-1 text-xs ${jobType === t.v ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"}`}
-                >{t.label}</button>
-              ))}
+            <div>
+              <div className="mb-3 text-[12px] font-medium uppercase tracking-wider text-fog">Type</div>
+              <div className="flex flex-wrap gap-2">
+                {TYPES.map((t) => (
+                  <button
+                    key={t.v}
+                    onClick={() => setJobType(jobType === t.v ? undefined : t.v)}
+                    className={`rounded-pill px-3 py-1 text-[13px] border ${jobType === t.v ? "bg-paper text-void border-paper font-medium" : "bg-void text-mist border-bone/10 hover:bg-iron/50"}`}
+                  >{t.label}</button>
+                ))}
+              </div>
             </div>
-          </div>
 
-          <div>
-            <div className="mb-2 text-xs font-medium uppercase text-muted-foreground">Level</div>
-            <div className="flex flex-wrap gap-1.5">
-              {LEVELS.map((l) => (
-                <button
-                  key={l}
-                  onClick={() => setLevel(level === l ? undefined : l)}
-                  className={`rounded-md px-2 py-1 text-xs capitalize ${level === l ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"}`}
-                >{l}</button>
-              ))}
+            <div>
+              <div className="mb-3 text-[12px] font-medium uppercase tracking-wider text-fog">Level</div>
+              <div className="flex flex-wrap gap-2">
+                {LEVELS.map((l) => (
+                  <button
+                    key={l}
+                    onClick={() => setLevel(level === l ? undefined : l)}
+                    className={`rounded-pill px-3 py-1 text-[13px] capitalize border ${level === l ? "bg-paper text-void border-paper font-medium" : "bg-void text-mist border-bone/10 hover:bg-iron/50"}`}
+                  >{l}</button>
+                ))}
+              </div>
             </div>
-          </div>
 
-          <div>
-            <div className="mb-2 flex items-center justify-between text-xs uppercase text-muted-foreground">
-              <span>Min salary</span>
-              <span className="text-primary">${salaryMin}k+</span>
+            <div>
+              <div className="mb-3 flex items-center justify-between text-[12px] uppercase tracking-wider text-fog">
+                <span>Min salary</span>
+                <span className="text-bone">${salaryMin}k+</span>
+              </div>
+              <Slider value={[salaryMin]} onValueChange={(v) => setSalaryMin(v[0])} min={0} max={300} step={10} className="py-2" />
             </div>
-            <Slider value={[salaryMin]} onValueChange={(v) => setSalaryMin(v[0])} min={0} max={300} step={10} />
-          </div>
-        </aside>
+          </aside>
 
-        <section>
-          <div className="mb-4 text-sm text-muted-foreground">
-            {loading ? "Searching…" : `${results.length} ${results.length === 1 ? "role" : "roles"}`}
-          </div>
-          {loading ? (
-            <div className="grid gap-4 sm:grid-cols-2">
-              {Array.from({ length: 6 }).map((_, i) => <div key={i} className="glass-card h-40 animate-pulse" />)}
+          <section>
+            <div className="mb-6 flex items-center justify-between text-[15px] text-mist pb-4 border-b border-bone/[0.06]">
+              <span>{loading ? "Searching…" : `${results.length} ${results.length === 1 ? "role" : "roles"}`}</span>
             </div>
-          ) : results.length === 0 ? (
-            <div className="glass-card p-10 text-center text-muted-foreground">
-              <p>No roles match your filters.</p>
-              <Button variant="outline" className="mt-4" onClick={clearAll}>Clear filters</Button>
-            </div>
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-2">
-              {results.map((j: any) => <JobCard key={j.id} job={j} />)}
-            </div>
-          )}
-        </section>
+            {loading ? (
+              <div className="grid gap-4 md:grid-cols-2">
+                {Array.from({ length: 6 }).map((_, i) => <div key={i} className="glass-card h-[160px] animate-pulse bg-char" />)}
+              </div>
+            ) : results.length === 0 ? (
+              <div className="glass-card p-12 text-center flex flex-col items-center justify-center">
+                <Search className="h-8 w-8 text-fog mb-4" />
+                <h3 className="text-[20px] font-medium text-paper">No roles found</h3>
+                <p className="text-[15px] text-mist mt-2 max-w-sm">We couldn't find any roles matching your current filters. Try adjusting your search criteria.</p>
+                <Button variant="outline" className="mt-6 rounded-pill border-bone/20 text-bone hover:bg-iron" onClick={clearAll}>Clear filters</Button>
+              </div>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2">
+                {results.map((j: any) => <JobCard key={j.id} job={j} />)}
+              </div>
+            )}
+          </section>
+        </div>
       </div>
     </div>
   );
@@ -164,7 +165,7 @@ function BrowseJobsContent() {
 
 export default function BrowseJobs() {
   return (
-    <Suspense fallback={<div className="container-page py-10 animate-pulse h-[600px] bg-muted/20 rounded-xl" />}>
+    <Suspense fallback={<div className="container-page py-10 animate-pulse h-[600px] bg-void rounded-xl" />}>
       <BrowseJobsContent />
     </Suspense>
   );

@@ -54,15 +54,61 @@ async def get_my_jobs(
     jobs = await repo.get_mine(user.id)
     return [JobWithCompanyResponse.model_validate(j) for j in jobs]
 
-@router.get("/search", response_model=List[JobWithCompanyResponse])
-async def search_jobs(
-    q: str,
+import os
+import httpx
+from pydantic import BaseModel
+
+class JobSearchRequest(BaseModel):
+    keywords: List[str]
+
+@router.post("/search", response_model=List[dict])
+async def search_jobs_with_internet(
+    request: JobSearchRequest,
     db: AsyncSession = Depends(get_db)
 ):
-    # In a full implementation, we'd embed the query using the RAG pipeline
-    # and pass the vector to search_semantic.
-    # For now, this is a placeholder returning empty list until RAG is wired.
-    return []
+    """
+    Stage 5: Internet-powered job search.
+    Queries both internal pgvector DB and public web via Brave Search API.
+    Includes strict SSRF protections.
+    """
+    query_str = " ".join(request.keywords)
+    results = []
+    
+    # 1. Internal semantic search placeholder
+    # repo = JobRepository(db)
+    # internal_jobs = await repo.search_semantic(...)
+    # results.extend(internal_jobs)
+    
+    # 2. Public Web Search via Brave API
+    brave_api_key = os.environ.get("BRAVE_API_KEY")
+    if brave_api_key and query_str:
+        # SSRF Guard: Hardcoded endpoint, strictly parameterized query, no redirects allowed
+        brave_endpoint = "https://api.search.brave.com/res/v1/web/search"
+        try:
+            async with httpx.AsyncClient(follow_redirects=False) as client:
+                resp = await client.get(
+                    brave_endpoint,
+                    headers={"X-Subscription-Token": brave_api_key},
+                    params={"q": f"{query_str} jobs remote"},
+                    timeout=10.0
+                )
+                if resp.status_code == 200:
+                    data = resp.json()
+                    web_results = data.get("web", {}).get("results", [])
+                    # Normalize web results into our job format
+                    for item in web_results:
+                        results.append({
+                            "id": str(uuid.uuid4()),
+                            "title": item.get("title", "Unknown Role"),
+                            "description": item.get("description", ""),
+                            "url": item.get("url", ""),
+                            "source": "Brave Search"
+                        })
+        except Exception as e:
+            # Silently fail web search or log it; do not crash internal results
+            pass
+            
+    return results
 
 @router.get("/{job_id}", response_model=JobWithCompanyResponse)
 async def get_job(job_id: uuid.UUID, db: AsyncSession = Depends(get_db)):

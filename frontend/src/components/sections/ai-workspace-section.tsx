@@ -35,11 +35,13 @@ export default function AiWorkspaceSection({ className }: { className?: string }
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
     setIsSearching(true);
+    
     try {
-      const results = await api.jobs.semanticSearch(searchQuery);
-      setSearchResults(results);
-    } catch (e) {
-      toast.error("Failed to perform semantic search.");
+      // Use the Internet Search endpoint (Serper API) instead of the vector database semantic search
+      const results = await api.jobs.search(searchQuery);
+      setSearchResults(results || []);
+    } catch (e: any) {
+      toast.error("Failed to perform internet search.");
     } finally {
       setIsSearching(false);
     }

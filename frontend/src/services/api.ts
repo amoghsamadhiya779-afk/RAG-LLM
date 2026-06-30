@@ -162,6 +162,7 @@ export const jobs = {
       companyId: r.id,
       title: r.title,
       description: r.description,
+      url: r.url,
       company: { id: r.id, name: r.source || "Web Search", logoUrl: "" },
       salaryMin: null,
       salaryMax: null,

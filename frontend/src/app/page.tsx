@@ -13,6 +13,7 @@ import CompaniesSection from "@/components/sections/companies-section";
 import AiWorkspaceSection from "@/components/sections/ai-workspace-section";
 import { ScrollReveal } from "@/components/animation/scroll-reveal";
 import { useHighlightSection } from "@/hooks/use-highlight";
+import { Suspense } from "react";
 
 export default function LandingPage() {
   // Activate highlight / smooth scroll on hash matches across all sections
@@ -71,7 +72,9 @@ export default function LandingPage() {
         </div>
 
         {/* Jobs Section */}
-        <JobsSection />
+        <Suspense fallback={<div className="container-page py-24 min-h-[50vh] bg-void" />}>
+          <JobsSection />
+        </Suspense>
 
 
 

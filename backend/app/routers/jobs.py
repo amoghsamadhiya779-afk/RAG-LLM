@@ -68,47 +68,130 @@ async def search_jobs_with_internet(
 ):
     """
     Stage 5: Internet-powered job search.
-    Queries both internal pgvector DB and public web via Brave Search API.
-    Includes strict SSRF protections.
+    Queries public web via LangSearch API.
     """
     query_str = " ".join(request.keywords)
     results = []
     
-    # 1. Internal semantic search placeholder
-    # repo = JobRepository(db)
-    # internal_jobs = await repo.search_semantic(...)
-    # results.extend(internal_jobs)
-    
-    # 2. Public Web Search via Brave API
-    brave_api_key = os.environ.get("BRAVE_API_KEY")
-    if brave_api_key and query_str:
-        # SSRF Guard: Hardcoded endpoint, strictly parameterized query, no redirects allowed
-        brave_endpoint = "https://api.search.brave.com/res/v1/web/search"
+    langsearch_api_key = os.environ.get("LANGSEARCH_API_KEY")
+    if langsearch_api_key and query_str:
+        langsearch_endpoint = "https://api.langsearch.com/v1/web-search"
         try:
             async with httpx.AsyncClient(follow_redirects=False) as client:
                 resp = await client.get(
-                    brave_endpoint,
-                    headers={"X-Subscription-Token": brave_api_key},
-                    params={"q": f"{query_str} jobs remote"},
+                    langsearch_endpoint,
+                    headers={"Authorization": f"Bearer {langsearch_api_key}"},
+                    params={"q": query_str},
                     timeout=10.0
                 )
                 if resp.status_code == 200:
                     data = resp.json()
-                    web_results = data.get("web", {}).get("results", [])
-                    # Normalize web results into our job format
-                    for item in web_results:
+                    items = []
+                    if isinstance(data, list):
+                        items = data
+                    elif isinstance(data, dict):
+                        items = data.get("results") or data.get("items") or data.get("web", {}).get("results") or []
+                    
+                    for item in items:
                         results.append({
                             "id": str(uuid.uuid4()),
                             "title": item.get("title", "Unknown Role"),
-                            "description": item.get("description", ""),
+                            "description": item.get("description") or item.get("snippet") or "",
                             "url": item.get("url", ""),
-                            "source": "Brave Search"
+                            "source": "LangSearch"
                         })
         except Exception as e:
-            # Silently fail web search or log it; do not crash internal results
             pass
             
+    if not results and not langsearch_api_key:
+        results = [
+            {
+                "id": str(uuid.uuid4()),
+                "title": "Senior React Developer (Mock Internet Result)",
+                "description": "This is a mock internet search result. Configure LANGSEARCH_API_KEY to see real internet results.",
+                "url": "https://example.com/job",
+                "source": "Mock API"
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "title": "Machine Learning Intern (Mock)",
+                "description": "Looking for a bright ML intern to join our AI startup. Required: Python, PyTorch.",
+                "url": "https://example.com/ml-intern",
+                "source": "Mock API"
+            }
+        ]
+        
     return results
+
+@router.get("/search/semantic", response_model=List[JobWithCompanyResponse])
+async def search_jobs_semantic(
+    q: str = Query(..., description="The semantic search query"),
+    location: Optional[str] = Query(None),
+    salaryMin: Optional[float] = Query(None),
+    remote: Optional[bool] = Query(None),
+    jobType: Optional[str] = Query(None),
+    level: Optional[str] = Query(None),
+    tags: Optional[List[str]] = Query(None),
+    db: AsyncSession = Depends(get_db)
+):
+    from sqlalchemy import select
+    from sqlalchemy.orm import selectinload
+    from app.models.models import Job, JobStatusEnum
+    
+    stmt = select(Job).options(selectinload(Job.company)).where(Job.status == JobStatusEnum.live)
+    if location:
+        stmt = stmt.where(Job.location.ilike(f"%{location}%"))
+    if salaryMin is not None:
+        stmt = stmt.where(Job.salary_min >= salaryMin)
+    if remote is not None:
+        stmt = stmt.where(Job.remote == remote)
+    if jobType:
+        stmt = stmt.where(Job.job_type == jobType)
+    if level:
+        stmt = stmt.where(Job.level == level)
+    if tags:
+        stmt = stmt.where(Job.tags.overlap(tags))
+        
+    result = await db.execute(stmt)
+    jobs = list(result.scalars().all())
+    
+    if not jobs:
+        return []
+        
+    langsearch_api_key = os.environ.get("LANGSEARCH_API_KEY")
+    if not langsearch_api_key:
+        return [JobWithCompanyResponse.model_validate(j) for j in jobs]
+        
+    documents = [
+        f"Title: {j.title}\nCompany: {j.company.name if j.company else 'Unknown'}\nLocation: {j.location or 'Remote'}\nDescription: {j.description}\nRequirements: {', '.join(j.requirements or [])}"
+        for j in jobs
+    ]
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                "https://api.langsearch.com/v1/rerank",
+                headers={"Authorization": f"Bearer {langsearch_api_key}"},
+                json={"query": q, "documents": documents},
+                timeout=10.0
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                results_list = data.get("results", [])
+                scores = {item["index"]: item.get("relevance_score", 0.0) for item in results_list}
+                
+                jobs_with_scores = []
+                for idx, job in enumerate(jobs):
+                    score = scores.get(idx, 0.0)
+                    jobs_with_scores.append((job, score))
+                    
+                jobs_with_scores.sort(key=lambda x: x[1], reverse=True)
+                sorted_jobs = [item[0] for item in jobs_with_scores]
+                return [JobWithCompanyResponse.model_validate(j) for j in sorted_jobs]
+    except Exception as e:
+        pass
+        
+    return [JobWithCompanyResponse.model_validate(j) for j in jobs]
 
 import json
 from app.repositories.resume_repo import ResumeRepository

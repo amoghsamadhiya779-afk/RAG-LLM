@@ -159,12 +159,15 @@ export const jobs = {
     // Map internet search results to JobWithCompany shape for the UI
     return results.map(r => ({
       id: r.id,
+      companyId: r.id,
       title: r.title,
       description: r.description,
       company: { id: r.id, name: r.source || "Web Search", logoUrl: "" },
       salaryMin: null,
       salaryMax: null,
       remote: true,
+      location: "Remote",
+      level: null,
       jobType: "full_time",
       createdAt: new Date().toISOString(),
       tags: ["Internet Result"],
@@ -172,7 +175,7 @@ export const jobs = {
       status: "live",
       featured: false,
       views: 0
-    } as JobWithCompany));
+    } as unknown as JobWithCompany));
   },
 
   async semanticSearch(query: string): Promise<JobWithCompany[]> {
@@ -303,10 +306,10 @@ export const billing = {
 };
 
 export const chat = {
-  async send(input: { message: string; history: { role: string; text: string }[]; context_data: any }): Promise<{ reply: string }> {
+  async send(message: string): Promise<{ response: string }> {
     return fetchApi("/chat", {
       method: "POST",
-      body: JSON.stringify(input),
+      body: JSON.stringify({ message }),
     });
   },
 };

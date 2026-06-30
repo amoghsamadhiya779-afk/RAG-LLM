@@ -18,8 +18,11 @@ app.include_router(jobs.router)
 app.include_router(companies.router)
 app.include_router(applications.router)
 app.include_router(resumes.router)
+app.include_router(saved_jobs.router)
 app.include_router(admin.router)
+app.include_router(billing.router)
 app.include_router(chat.router)
+app.include_router(insights.router)
 
 @app.get("/health")
 async def health():

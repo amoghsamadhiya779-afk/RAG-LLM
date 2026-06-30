@@ -68,7 +68,7 @@ async def parse_resume_file(file_bytes: bytes, filename: str) -> dict:
                 # Mocking the HF proxy call / direct Gemini call
                 async with httpx.AsyncClient() as client:
                     resp = await client.post(
-                        f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}",
+                        f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}",
                         headers={"Content-Type": "application/json"},
                         json={
                             "systemInstruction": {

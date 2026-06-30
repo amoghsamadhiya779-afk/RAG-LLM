@@ -73,17 +73,18 @@ function BrowseJobs() {
     <div className="min-h-dvh flex flex-col">
       <SiteHeader />
       <main className="flex-1 container-page py-10">
-        <div className="mb-6 flex items-center gap-2 rounded-xl border border-border bg-surface/60 p-2 backdrop-blur">
-          <Search className="ml-2 h-4 w-4 text-muted-foreground" />
+        <div className="mb-6 flex items-center gap-3 rounded-pill border border-bone/10 bg-char px-4 py-2 shadow-sm">
+          <Search className="ml-2 h-5 w-5 text-mist" />
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder='Search "react remote senior" or "ML internship"'
-            className="border-0 bg-transparent focus-visible:ring-0"
+            className="border-0 !bg-transparent text-[16px] text-bone placeholder:text-fog focus-visible:ring-0 px-0 h-10 flex-1"
             aria-label="Search jobs"
+            style={{ backgroundColor: "transparent" }}
           />
           {(query || tags.length || remote || jobType || level || salaryMin > 0) ? (
-            <Button variant="ghost" size="sm" onClick={clearAll} className="gap-1"><X className="h-3.5 w-3.5" />Clear</Button>
+            <Button variant="ghost" size="sm" onClick={clearAll} className="gap-1 rounded-pill"><X className="h-3.5 w-3.5" />Clear</Button>
           ) : null}
         </div>
 
@@ -100,7 +101,7 @@ function BrowseJobs() {
                   <button
                     key={t}
                     onClick={() => toggleTag(t)}
-                    className={`rounded-md px-2 py-1 text-xs transition-colors ${tags.includes(t) ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"}`}
+                    className={`rounded-pill px-3 py-1 text-xs transition-colors ${tags.includes(t) ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"}`}
                   >
                     {t}
                   </button>
@@ -120,7 +121,7 @@ function BrowseJobs() {
                   <button
                     key={t.v}
                     onClick={() => setJobType(jobType === t.v ? undefined : t.v)}
-                    className={`rounded-md px-2 py-1 text-xs ${jobType === t.v ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"}`}
+                    className={`rounded-pill px-3 py-1 text-xs ${jobType === t.v ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"}`}
                   >{t.label}</button>
                 ))}
               </div>
@@ -133,7 +134,7 @@ function BrowseJobs() {
                   <button
                     key={l}
                     onClick={() => setLevel(level === l ? undefined : l)}
-                    className={`rounded-md px-2 py-1 text-xs capitalize ${level === l ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"}`}
+                    className={`rounded-pill px-3 py-1 text-xs capitalize ${level === l ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"}`}
                   >{l}</button>
                 ))}
               </div>

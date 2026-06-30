@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { DM_Sans, Inter } from "next/font/google";
 import { Providers } from "./providers";
 import { SmoothScroll } from "@/components/animation/smooth-scroll";
+import { SiteHeader } from "@/components/site/header";
+import { SiteFooter } from "@/components/site/footer";
 import "@/styles.css";
 
 const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-dm-sans" });
@@ -22,7 +24,13 @@ export default function RootLayout({
       <body className={`${dmSans.variable} ${geist.variable} font-sans bg-void text-bone antialiased selection:bg-indigo-haze/30`}>
         <Providers>
           <SmoothScroll>
-            {children}
+            <div className="flex flex-col min-h-dvh">
+              <SiteHeader />
+              <main className="flex-1 pt-16">
+                {children}
+              </main>
+              <SiteFooter />
+            </div>
           </SmoothScroll>
         </Providers>
       </body>

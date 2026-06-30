@@ -53,7 +53,7 @@ export function Hero() {
 
           <motion.div variants={reveal} className="mt-10">
             <Link
-              href="/jobs"
+              href="#jobs"
               className="inline-flex h-10 items-center justify-center gap-2 rounded-pill bg-paper px-5 text-[15px] font-medium text-void transition-colors hover:bg-paper/90"
             >
               Start Searching

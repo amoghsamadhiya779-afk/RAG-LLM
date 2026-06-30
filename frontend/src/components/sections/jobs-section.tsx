@@ -133,13 +133,13 @@ function JobsSectionContent() {
         </p>
       </div>
 
-      <div className="relative mx-auto rounded-2xl border border-bone/10 bg-[#121212]/50 shadow-2xl backdrop-blur-md overflow-hidden">
+      <div className="relative mx-auto rounded-cards border border-bone/10 bg-char/50 shadow-2xl backdrop-blur-md overflow-hidden">
         {/* Window Header */}
-        <div className="flex h-12 items-center border-b border-bone/10 bg-[#1a1a1a]/80 px-4">
+        <div className="flex h-12 items-center border-b border-bone/10 bg-graphite/80 px-4">
           <div className="flex gap-2">
-            <div className="h-3 w-3 rounded-full bg-red-500/80 border border-red-500/50" />
-            <div className="h-3 w-3 rounded-full bg-yellow-500/80 border border-yellow-500/50" />
-            <div className="h-3 w-3 rounded-full bg-green-500/80 border border-green-500/50" />
+            <div className="h-3 w-3 rounded-full border border-red-500/50" style={{ backgroundColor: "rgba(239, 68, 68, 0.8)" }} />
+            <div className="h-3 w-3 rounded-full border border-yellow-500/50" style={{ backgroundColor: "rgba(234, 179, 8, 0.8)" }} />
+            <div className="h-3 w-3 rounded-full border border-green-500/50" style={{ backgroundColor: "rgba(34, 197, 94, 0.8)" }} />
           </div>
           <div className="flex-1 pr-12 text-center text-[13px] font-medium text-fog font-geist tracking-wide">
             job_search
@@ -200,7 +200,7 @@ function JobsSectionContent() {
           </div>
           {loading ? (
             <div className="grid gap-4 md:grid-cols-2">
-              {Array.from({ length: 6 }).map((_, i) => <div key={i} className="glass-card h-[160px] animate-pulse bg-char" />)}
+              {Array.from({ length: 6 }).map((_, i) => <div key={i} className="glass-card h-[160px] animate-pulse bg-char/40" />)}
             </div>
           ) : results.length === 0 ? (
             <div className="glass-card p-12 text-center flex flex-col items-center justify-center">

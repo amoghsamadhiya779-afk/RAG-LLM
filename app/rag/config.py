@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     llm_provider: Literal["local", "openai", "gemini"] = "gemini"
     openai_api_key: str | None = None
     gemini_api_key: str | None = None
+    GEMINI_MODEL: str | None = Field(default=None, validation_alias="GEMINI_MODEL")
+    GEMINI_EMBED_MODEL: str | None = Field(default=None, validation_alias="GEMINI_EMBED_MODEL")
     backend_api_key: str = "default-dev-key"
     openai_embedding_model: str = "text-embedding-3-small"
     openai_chat_model: str = "gpt-4o-mini"

@@ -103,24 +103,10 @@ async def search_jobs_with_internet(
         except Exception as e:
             print(f"Serper API Error: {e}")
             
-    if not results and not serper_api_key:
-        results = [
-            {
-                "id": str(uuid.uuid4()),
-                "title": "Senior React Developer (Mock Internet Result)",
-                "description": "This is a mock internet search result. Configure SERPER_API_KEY to see real internet results.",
-                "url": "https://example.com/job",
-                "source": "Mock API"
-            },
-            {
-                "id": str(uuid.uuid4()),
-                "title": "Machine Learning Intern (Mock)",
-                "description": "Looking for a bright ML intern to join our AI startup. Required: Python, PyTorch.",
-                "url": "https://example.com/ml-intern",
-                "source": "Mock API"
-            }
-        ]
+    if not serper_api_key:
+        raise HTTPException(status_code=400, detail="SERPER_API_KEY is not configured on the backend.")
         
+    return results
     return results
 
 @router.get("/search/semantic", response_model=List[JobWithCompanyResponse])
@@ -156,41 +142,7 @@ async def search_jobs_semantic(
     jobs = list(result.scalars().all())
     
     if not jobs:
-        import uuid
-        from datetime import datetime
-        from app.schemas.schemas import JobWithCompanyResponse, CompanyResponse
-        from app.models.models import JobTypeEnum, JobLevelEnum
-        
-        mock_company = CompanyResponse(
-            id=uuid.uuid4(),
-            slug="mock-company",
-            owner_id=uuid.uuid4(),
-            created_at=datetime.utcnow(),
-            name="Mock AI Corp (No DB Data)",
-            website="https://example.com",
-            logo_url="",
-            about="This is a mock company since the database is empty.",
-            location="San Francisco, CA",
-            size="11-50"
-        )
-        
-        mock_job = JobWithCompanyResponse(
-            id=uuid.uuid4(),
-            company_id=mock_company.id,
-            title="Senior React Developer (Mock Result)",
-            description="This is a mock job because there are no jobs in the database. Please run the seed script or add jobs.",
-            requirements=["React", "TypeScript", "Tailwind CSS"],
-            location="Remote",
-            remote=True,
-            job_type=JobTypeEnum.full_time,
-            level=JobLevelEnum.senior,
-            salary_min=120000.0,
-            salary_max=160000.0,
-            tags=["react", "frontend"],
-            created_at=datetime.utcnow(),
-            company=mock_company
-        )
-        return [mock_job]
+        return []
         
     langsearch_api_key = os.environ.get("LANGSEARCH_API_KEY")
     if not langsearch_api_key:

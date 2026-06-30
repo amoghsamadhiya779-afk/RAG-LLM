@@ -40,26 +40,24 @@ export default function CompaniesSection({ className }: { className?: string }) 
         ) : (
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {companies.map((c: any, i: number) => (
-              <motion.div 
+              <div 
                 key={c.id} 
-                initial={{ opacity: 0, y: 8 }} 
-                whileInView={{ opacity: 1, y: 0 }} 
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.05 }}
+                className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both"
+                style={{ animationDelay: `${i * 100}ms` }}
               >
-                <Link href={`/companies/${c.slug || c.id}`} className="glass-card block p-5 transition-colors hover:border-indigo-haze/40">
+                <Link href={`/companies/${c.slug || c.id}`} className="block p-6 rounded-2xl bg-[#1d1d1d]/80 backdrop-blur-md border border-[#e5e5e5]/10 shadow-2xl transition-colors hover:border-[#6b62f2]/50">
                   <div className="flex items-center gap-3">
-                    <div className="grid h-12 w-12 place-items-center rounded-xl border border-bone/10 bg-iron/50 text-paper font-semibold shadow-inner">
+                    <div className="grid h-12 w-12 place-items-center rounded-xl border border-[#e5e5e5]/10 bg-[#3d3d3d]/50 text-white font-semibold shadow-inner">
                       {c.name[0]}
                     </div>
                     <div>
-                      <h3 className="font-geist text-[17px] font-semibold text-paper">{c.name}</h3>
-                      <p className="text-[13px] text-ash">{c.location ?? "Remote"}</p>
+                      <h3 className="font-geist text-[17px] font-semibold text-white">{c.name}</h3>
+                      <p className="text-[13px] text-[#b2b2b2]">{c.location ?? "Remote"}</p>
                     </div>
                   </div>
-                  <p className="mt-3 line-clamp-2 text-[14px] text-fog leading-relaxed">{c.about}</p>
+                  <p className="mt-3 line-clamp-2 text-[14px] text-[#797979] leading-relaxed">{c.about}</p>
                 </Link>
-              </motion.div>
+              </div>
             ))}
           </div>
         )}

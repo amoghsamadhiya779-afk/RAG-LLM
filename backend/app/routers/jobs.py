@@ -156,7 +156,41 @@ async def search_jobs_semantic(
     jobs = list(result.scalars().all())
     
     if not jobs:
-        return []
+        import uuid
+        from datetime import datetime
+        from app.schemas.schemas import JobWithCompanyResponse, CompanyResponse
+        from app.models.models import JobTypeEnum, JobLevelEnum
+        
+        mock_company = CompanyResponse(
+            id=uuid.uuid4(),
+            slug="mock-company",
+            owner_id=uuid.uuid4(),
+            created_at=datetime.utcnow(),
+            name="Mock AI Corp (No DB Data)",
+            website="https://example.com",
+            logo_url="",
+            about="This is a mock company since the database is empty.",
+            location="San Francisco, CA",
+            size="11-50"
+        )
+        
+        mock_job = JobWithCompanyResponse(
+            id=uuid.uuid4(),
+            company_id=mock_company.id,
+            title="Senior React Developer (Mock Result)",
+            description="This is a mock job because there are no jobs in the database. Please run the seed script or add jobs.",
+            requirements=["React", "TypeScript", "Tailwind CSS"],
+            location="Remote",
+            remote=True,
+            job_type=JobTypeEnum.full_time,
+            level=JobLevelEnum.senior,
+            salary_min=120000.0,
+            salary_max=160000.0,
+            tags=["react", "frontend"],
+            created_at=datetime.utcnow(),
+            company=mock_company
+        )
+        return [mock_job]
         
     langsearch_api_key = os.environ.get("LANGSEARCH_API_KEY")
     if not langsearch_api_key:
@@ -234,7 +268,7 @@ async def get_recommended_jobs(
     try:
         async with httpx.AsyncClient() as client:
             resp = await client.post(
-                f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}",
+                f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}",
                 headers={"Content-Type": "application/json"},
                 json={
                     "systemInstruction": {

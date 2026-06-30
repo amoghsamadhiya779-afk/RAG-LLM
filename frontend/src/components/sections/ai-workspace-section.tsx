@@ -280,25 +280,25 @@ export default function AiWorkspaceSection({ className }: { className?: string }
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.3 }}
-            className="rounded-3xl border border-primary/20 bg-card/80 backdrop-blur-xl p-0 shadow-[0_0_30px_rgba(var(--primary),0.05)] lg:col-span-2 overflow-hidden flex flex-col min-h-[400px] relative"
+            className="rounded-3xl border border-bone/10 bg-char/80 backdrop-blur-xl p-0 shadow-2xl lg:col-span-2 overflow-hidden flex flex-col min-h-[400px] relative"
           >
             {/* Top decorative gradient */}
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-50" />
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-indigo-haze/50 to-transparent opacity-50" />
             
-            <div className="flex items-center gap-3 p-5 border-b border-border/50 bg-background/50 backdrop-blur-md z-10">
-              <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 text-primary shadow-inner">
-                <Bot className="h-5 w-5" />
-                <span className="absolute top-0 right-0 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-background animate-pulse" />
+            <div className="flex items-center gap-3 p-5 border-b border-bone/10 bg-void/50 backdrop-blur-md z-10">
+              <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-haze/20 border border-indigo-haze/30 text-indigo-haze shadow-inner">
+                <Bot className="h-5 w-5 text-paper" />
+                <span className="absolute top-0 right-0 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-void animate-pulse" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold flex items-center gap-2">
-                  Career Assistant <Sparkles className="h-3.5 w-3.5 text-primary" />
+                <h2 className="text-lg font-semibold flex items-center gap-2 text-paper">
+                  Career Assistant <Sparkles className="h-3.5 w-3.5 text-indigo-haze" />
                 </h2>
-                <p className="text-xs text-muted-foreground">Powered by RAG & Gemini</p>
+                <p className="text-xs text-mist">Powered by RAG & Gemini</p>
               </div>
             </div>
             
-            <div className="flex-1 p-6 overflow-y-auto space-y-6 max-h-[350px] bg-gradient-to-b from-muted/5 to-transparent scroll-smooth">
+            <div className="flex-1 p-6 overflow-y-auto space-y-6 max-h-[350px] bg-void/30 scroll-smooth">
               {messages.map((msg, idx) => (
                 <motion.div 
                   key={idx} 
@@ -308,14 +308,14 @@ export default function AiWorkspaceSection({ className }: { className?: string }
                   className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                 >
                   {msg.role === "ai" && (
-                    <div className="flex-shrink-0 mt-1 flex h-8 w-8 items-center justify-center rounded-full bg-surface border border-primary/20 text-primary">
+                    <div className="flex-shrink-0 mt-1 flex h-8 w-8 items-center justify-center rounded-full bg-iron/50 border border-bone/10 text-paper">
                       <Bot className="h-4 w-4" />
                     </div>
                   )}
                   <div className={`max-w-[75%] px-5 py-3.5 text-[15px] leading-relaxed shadow-sm ${
                     msg.role === "user" 
-                      ? "bg-primary text-primary-foreground rounded-2xl rounded-tr-sm" 
-                      : "bg-surface/80 backdrop-blur-sm border border-border/50 text-foreground rounded-2xl rounded-tl-sm"
+                      ? "bg-indigo-haze text-paper rounded-2xl rounded-tr-sm" 
+                      : "bg-iron/50 backdrop-blur-md border border-bone/10 text-bone rounded-2xl rounded-tl-sm"
                   }`}>
                     {msg.text}
                   </div>
@@ -328,32 +328,32 @@ export default function AiWorkspaceSection({ className }: { className?: string }
                   initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                   className="flex gap-3 justify-start"
                 >
-                  <div className="flex-shrink-0 mt-1 flex h-8 w-8 items-center justify-center rounded-full bg-surface border border-primary/20 text-primary">
+                  <div className="flex-shrink-0 mt-1 flex h-8 w-8 items-center justify-center rounded-full bg-iron/50 border border-bone/10 text-paper">
                     <Bot className="h-4 w-4" />
                   </div>
-                  <div className="bg-surface/80 backdrop-blur-sm border border-border/50 rounded-2xl rounded-tl-sm px-5 py-4 flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "0ms" }} />
-                    <span className="w-1.5 h-1.5 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "150ms" }} />
-                    <span className="w-1.5 h-1.5 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "300ms" }} />
+                  <div className="bg-iron/50 backdrop-blur-md border border-bone/10 rounded-2xl rounded-tl-sm px-5 py-4 flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-mist animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-mist animate-bounce" style={{ animationDelay: "150ms" }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-mist animate-bounce" style={{ animationDelay: "300ms" }} />
                   </div>
                 </motion.div>
               )}
             </div>
 
-            <form onSubmit={handleChat} className="p-4 border-t border-border/50 bg-background/80 backdrop-blur-md flex gap-3 items-center z-10">
+            <form onSubmit={handleChat} className="p-4 border-t border-bone/10 bg-char/80 backdrop-blur-md flex gap-3 items-center z-10">
               <div className="relative flex-1 group">
                 <Input 
                   placeholder="Ask about remote React roles, salaries, or specific skills..."
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
-                  className="w-full pl-4 pr-12 py-6 rounded-2xl bg-surface/50 border-border/50 focus-visible:ring-primary/30 focus-visible:border-primary/50 transition-all text-[15px]"
+                  className="w-full pl-4 pr-12 py-6 rounded-2xl bg-void/50 border-bone/10 text-paper placeholder:text-smoke focus-visible:ring-indigo-haze/30 focus-visible:border-indigo-haze/50 transition-all text-[15px]"
                   disabled={isChatTyping}
                 />
                 <Button 
                   type="submit" 
                   size="icon" 
                   disabled={!chatInput.trim() || isChatTyping}
-                  className="absolute right-1.5 top-1.5 h-9 w-9 rounded-xl bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-colors disabled:opacity-50 disabled:bg-transparent"
+                  className="absolute right-1.5 top-1.5 h-9 w-9 rounded-xl bg-indigo-haze/20 text-indigo-haze hover:bg-indigo-haze hover:text-paper transition-colors disabled:opacity-50 disabled:bg-transparent"
                 >
                   <Send className="h-4 w-4" />
                 </Button>

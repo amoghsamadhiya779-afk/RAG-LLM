@@ -36,7 +36,7 @@ export default function AiWorkspaceSection({ className }: { className?: string }
     if (!searchQuery.trim()) return;
     setIsSearching(true);
     try {
-      const results = await api.jobs.search(searchQuery);
+      const results = await api.jobs.semanticSearch(searchQuery);
       setSearchResults(results);
     } catch (e) {
       toast.error("Failed to perform semantic search.");
@@ -115,7 +115,7 @@ export default function AiWorkspaceSection({ className }: { className?: string }
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="rounded-3xl border border-border bg-card p-6 shadow-sm flex flex-col"
+            className="glass-card flex flex-col"
           >
             <div className="flex items-center gap-3 mb-6">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -127,20 +127,23 @@ export default function AiWorkspaceSection({ className }: { className?: string }
               </div>
             </div>
             
-            <div className="flex gap-2">
-              <Input 
-                placeholder="e.g. 'remote senior react roles on AI teams'" 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                className="flex-1"
-              />
-              <Button onClick={handleSearch} disabled={isSearching}>
+            <div className="flex gap-3 w-full">
+              <div className="flex flex-1 items-center gap-3 rounded-pill border border-bone/10 bg-[#1d1d1d] px-4 py-1.5 shadow-sm">
+                <Search className="h-4 w-4 text-mist" />
+                <Input 
+                  placeholder="e.g. 'remote senior react roles on AI teams'" 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                  className="border-0 bg-[#1d1d1d] text-[15px] text-white placeholder:text-gray-400 focus-visible:ring-0 px-0 h-8 flex-1"
+                />
+              </div>
+              <Button onClick={handleSearch} disabled={isSearching} className="rounded-pill px-6">
                 {isSearching ? "Searching..." : "Search"}
               </Button>
             </div>
             
-            <div className="mt-4 flex-1 rounded-md border border-dashed border-border bg-muted/30 p-4 overflow-y-auto max-h-[300px] min-h-[150px]">
+            <div className="mt-4 flex-1 rounded-inputs border border-dashed border-bone/10 bg-char/30 p-4 overflow-y-auto max-h-[300px] min-h-[150px]">
               {searchResults.length > 0 ? (
                 <div className="space-y-3">
                   {searchResults.map(j => (
@@ -166,7 +169,7 @@ export default function AiWorkspaceSection({ className }: { className?: string }
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="rounded-3xl border border-border bg-card p-6 shadow-sm flex flex-col"
+            className="glass-card flex flex-col"
           >
             <div className="flex items-center gap-3 mb-6">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -186,7 +189,7 @@ export default function AiWorkspaceSection({ className }: { className?: string }
               onChange={handleFileUpload} 
             />
             
-            <div className="flex flex-col items-center justify-center gap-4 rounded-md border-2 border-dashed border-border bg-muted/30 p-10 text-center transition-colors hover:bg-muted/50">
+            <div className="flex flex-col items-center justify-center gap-4 rounded-cards border-2 border-dashed border-bone/10 bg-char/30 p-10 text-center transition-colors hover:bg-char/50">
               <UploadCloud className="h-10 w-10 text-muted-foreground" />
               <div>
                 <p className="text-sm font-medium">Click to upload or drag and drop</p>
@@ -202,7 +205,7 @@ export default function AiWorkspaceSection({ className }: { className?: string }
                 <h3 className="text-sm font-medium mb-2">Extracted Skills:</h3>
                 <div className="flex flex-wrap gap-1.5">
                   {parsedSkills.map((s, i) => (
-                    <span key={i} className="bg-primary/10 text-primary text-xs px-2 py-1 rounded-md">{s}</span>
+                    <span key={i} className="bg-primary/10 text-bone text-xs px-2.5 py-1 rounded-tags border border-bone/5">{s}</span>
                   ))}
                 </div>
               </div>
@@ -216,7 +219,7 @@ export default function AiWorkspaceSection({ className }: { className?: string }
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="rounded-3xl border border-border bg-card p-6 shadow-sm lg:col-span-2"
+            className="glass-card lg:col-span-2 flex flex-col"
           >
             <div className="flex items-center gap-3 mb-6">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -231,12 +234,12 @@ export default function AiWorkspaceSection({ className }: { className?: string }
             <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
               {matchedJobs.length > 0 ? (
                 matchedJobs.map((job) => (
-                  <div key={job.id} className="flex flex-col rounded-lg border border-primary/40 bg-surface/40 p-5 shadow-[0_0_15px_rgba(var(--primary),0.1)] hover:shadow-[0_0_20px_rgba(var(--primary),0.2)] transition-shadow">
+                  <div key={job.id} className="flex flex-col rounded-cards border border-bone/10 bg-char/40 p-5 transition-all hover:bg-iron/40 hover:border-bone/20">
                     <div className="flex items-start justify-between mb-2">
-                      <div className="h-10 w-10 rounded bg-primary/20 flex items-center justify-center font-bold text-primary">
+                      <div className="h-10 w-10 rounded-xl bg-void border border-bone/10 flex items-center justify-center font-bold text-bone shrink-0">
                         {job.company?.name?.[0]?.toUpperCase()}
                       </div>
-                      <span className="inline-flex items-center rounded-full bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-600">
+                      <span className="inline-flex items-center rounded-pill bg-indigo-haze/20 px-2.5 py-0.5 text-xs font-medium text-bone border border-indigo-haze/30">
                         {Math.floor(Math.random() * (99 - 85 + 1) + 85)}% Match
                       </span>
                     </div>
@@ -253,15 +256,15 @@ export default function AiWorkspaceSection({ className }: { className?: string }
                 ))
               ) : (
                 [1, 2, 3].map((i) => (
-                  <div key={i} className="flex flex-col rounded-lg border border-border bg-background p-5 opacity-50 grayscale">
+                  <div key={i} className="flex flex-col rounded-cards border border-bone/10 bg-char/40 p-5 opacity-50 grayscale">
                     <div className="flex items-start justify-between mb-2">
-                      <div className="h-10 w-10 rounded bg-muted/50" />
-                      <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                      <div className="h-10 w-10 rounded-xl bg-void border border-bone/10" />
+                      <span className="inline-flex items-center rounded-pill bg-char border border-bone/10 px-2.5 py-0.5 text-xs font-medium text-fog">
                         --% Match
                       </span>
                     </div>
-                    <div className="mt-2 h-4 w-3/4 rounded bg-muted/50" />
-                    <div className="mt-2 h-3 w-1/2 rounded bg-muted/50" />
+                    <div className="mt-2 h-4 w-3/4 rounded-pill bg-iron/40" />
+                    <div className="mt-2 h-3 w-1/2 rounded-pill bg-iron/40" />
                     
                     <div className="mt-6">
                       <Button className="w-full gap-2" variant="outline" disabled>
@@ -288,7 +291,7 @@ export default function AiWorkspaceSection({ className }: { className?: string }
             <div className="flex items-center gap-3 p-5 border-b border-bone/10 bg-void/50 backdrop-blur-md z-10">
               <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-haze/20 border border-indigo-haze/30 text-indigo-haze shadow-inner">
                 <Bot className="h-5 w-5 text-paper" />
-                <span className="absolute top-0 right-0 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-void animate-pulse" />
+                <span className="absolute top-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-void animate-pulse" style={{ backgroundColor: "#22c55e" }} />
               </div>
               <div>
                 <h2 className="text-lg font-semibold flex items-center gap-2 text-paper">
@@ -341,12 +344,12 @@ export default function AiWorkspaceSection({ className }: { className?: string }
             </div>
 
             <form onSubmit={handleChat} className="p-4 border-t border-bone/10 bg-char/80 backdrop-blur-md flex gap-3 items-center z-10">
-              <div className="relative flex-1 group">
+              <div className="flex flex-1 items-center gap-3 rounded-pill border border-bone/10 bg-[#1d1d1d] px-4 py-2 shadow-sm">
                 <Input 
-                  placeholder="Ask about remote React roles, salaries, or specific skills..."
+                  placeholder="Ask about remote React roles, salaries, or specific skills..." 
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
-                  className="w-full pl-4 pr-12 py-6 rounded-2xl bg-void/50 border-bone/10 text-paper placeholder:text-smoke focus-visible:ring-indigo-haze/30 focus-visible:border-indigo-haze/50 transition-all text-[15px]"
+                  className="border-0 bg-[#1d1d1d] text-[14px] text-white placeholder:text-gray-400 focus-visible:ring-0 px-0 h-10 flex-1"
                   disabled={isChatTyping}
                 />
                 <Button 

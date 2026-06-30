@@ -55,7 +55,10 @@ async def get_current_profile(
     return profile
 
 def require_role(allowed_roles: list[RoleEnum]):
-    async def role_checker(profile: Profile = Depends(get_current_profile)):
+    async def role_checker(
+        user: User = Depends(get_current_user),
+        profile: Profile = Depends(get_current_profile)
+    ):
         # Bypassing role checks to enable all sections for all users
-        return profile
+        return user
     return role_checker

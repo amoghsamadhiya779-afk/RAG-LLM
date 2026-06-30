@@ -55,7 +55,7 @@ class GeminiEmbeddingModel(EmbeddingModel):
     def __init__(self, api_key: str):
         self.api_key = api_key
         # Use header authentication as provided by user
-        self.url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-2:batchEmbedContents"
+        self.url = "https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:batchEmbedContents"
 
     def embed(self, texts: list[str]) -> list[list[float]]:
         import requests
@@ -72,7 +72,7 @@ class GeminiEmbeddingModel(EmbeddingModel):
             payload = {
                 "requests": [
                     {
-                        "model": "models/gemini-embedding-2",
+                        "model": "models/text-embedding-004",
                         "content": {"parts": [{"text": text}]}
                     }
                     for text in batch_texts

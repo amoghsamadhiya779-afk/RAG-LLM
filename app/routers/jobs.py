@@ -110,6 +110,81 @@ async def search_jobs_with_internet(
             
     return results
 
+import json
+from app.repositories.resume_repo import ResumeRepository
+
+@router.get("/recommended", response_model=List[JobWithCompanyResponse])
+async def get_recommended_jobs(
+    resumeId: uuid.UUID = Query(..., description="The ID of the parsed resume"),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    ATS Recommended Jobs powered by Gemini RAG.
+    Matches the user's parsed resume against live jobs.
+    """
+    # 1. Fetch Resume
+    resume_repo = ResumeRepository(db)
+    resume = await resume_repo.get_by_id(resumeId)
+    if not resume or not resume.parsed:
+        raise HTTPException(status_code=400, detail="Resume not found or not fully parsed yet.")
+    
+    # 2. Fetch Live Jobs (For production, this would use pgvector. For this demo, fetch top 10 latest live jobs)
+    job_repo = JobRepository(db)
+    filters = JobFilters(status="live")
+    jobs, _ = await job_repo.get_all(filters, page=1, page_size=10)
+    
+    if not jobs:
+        return []
+        
+    # 3. Gemini ATS Evaluation
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        return [JobWithCompanyResponse.model_validate(j) for j in jobs[:3]] # Fallback if no API key
+        
+    jobs_context = "\n\n".join([
+        f"JOB_ID: {j.id}\nTitle: {j.title}\nCompany: {j.company.name if j.company else 'Unknown'}\nTags: {', '.join(j.tags or [])}\nRequirements: {', '.join(j.requirements or [])}" 
+        for j in jobs
+    ])
+    
+    resume_context = json.dumps(resume.parsed)
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}",
+                headers={"Content-Type": "application/json"},
+                json={
+                    "systemInstruction": {
+                        "parts": [{"text": "You are an ATS Matching engine. You will be provided with a parsed resume (JSON) and a list of live jobs. Select the top 3 best matching JOB_IDs for this candidate. Output ONLY a strict JSON array of strings containing the 3 UUIDs. Example: [\"uuid1\", \"uuid2\", \"uuid3\"]"}]
+                    },
+                    "contents": [{"parts": [{"text": f"--- PARSED RESUME ---\n{resume_context}\n\n--- LIVE JOBS ---\n{jobs_context}"}]}],
+                    "generationConfig": {"responseMimeType": "application/json"}
+                },
+                timeout=20.0
+            )
+            
+            if resp.status_code == 200:
+                content_text = resp.json()["candidates"][0]["content"]["parts"][0]["text"]
+                recommended_ids = json.loads(content_text)
+                
+                # Filter the jobs that match the recommended IDs
+                matched_jobs = [j for j in jobs if str(j.id) in recommended_ids]
+                # If Gemini returned fewer than 3 or hallucinated, pad with remaining
+                if len(matched_jobs) < 3:
+                    for j in jobs:
+                        if j not in matched_jobs:
+                            matched_jobs.append(j)
+                        if len(matched_jobs) >= 3:
+                            break
+                            
+                return [JobWithCompanyResponse.model_validate(j) for j in matched_jobs[:3]]
+    except Exception as e:
+        # Graceful fallback to latest jobs if Gemini API fails
+        print(f"Gemini ATS matching failed: {e}")
+        pass
+        
+    return [JobWithCompanyResponse.model_validate(j) for j in jobs[:3]]
+
 @router.get("/{job_id}", response_model=JobWithCompanyResponse)
 async def get_job(job_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
     repo = JobRepository(db)

@@ -149,8 +149,30 @@ export const jobs = {
       const res = await this.list();
       return res.items;
     }
-    const params = new URLSearchParams({ q: query });
-    return fetchApi(`/jobs/search?${params.toString()}`);
+    
+    // Call the POST /jobs/search endpoint which queries Brave Search
+    const results = await fetchApi<any[]>("/jobs/search", {
+      method: "POST",
+      body: JSON.stringify({ keywords: query.split(" ").filter(Boolean) })
+    });
+    
+    // Map internet search results to JobWithCompany shape for the UI
+    return results.map(r => ({
+      id: r.id,
+      title: r.title,
+      description: r.description,
+      company: { id: r.id, name: r.source || "Web Search", logoUrl: "" },
+      salaryMin: null,
+      salaryMax: null,
+      remote: true,
+      jobType: "full_time",
+      createdAt: new Date().toISOString(),
+      tags: ["Internet Result"],
+      requirements: [],
+      status: "live",
+      featured: false,
+      views: 0
+    } as JobWithCompany));
   },
 
   async recommended(resumeId: string): Promise<JobWithCompany[]> {

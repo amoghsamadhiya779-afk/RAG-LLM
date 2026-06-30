@@ -13,10 +13,11 @@ COPY --chown=user backend/requirements.txt ./
 RUN pip install --user --no-cache-dir -r requirements.txt
 
 COPY --chown=user backend/app ./app
+COPY --chown=user backend/scripts ./scripts
 
 ENV PYTHONPATH=/app
 
 # Hugging Face Spaces exposes port 7860 by default for Docker containers
 EXPOSE 7860
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "7860"]
+CMD ["sh", "-c", "python scripts/seed.py && uvicorn app.main:app --host 0.0.0.0 --port 7860"]

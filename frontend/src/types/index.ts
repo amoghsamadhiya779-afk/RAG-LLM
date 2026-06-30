@@ -57,6 +57,7 @@ export type Job = {
   featured: boolean;
   views: number;
   createdAt: string;
+  url?: string; // Used for external/internet search results
 };
 
 export type JobWithCompany = Job & { company: Company };

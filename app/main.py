@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import auth, jobs, companies, applications, resumes, admin, chat
+from app.routers import auth, jobs, companies, applications, resumes, saved_jobs, admin, billing, chat, insights
 from app.core.config import settings
 
 app = FastAPI(title=settings.PROJECT_NAME)

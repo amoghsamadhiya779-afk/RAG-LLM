@@ -52,47 +52,34 @@ class OpenAIEmbedding(EmbeddingModel):
 
 
 class GeminiEmbeddingModel(EmbeddingModel):
-    def __init__(self, api_key: str):
-        self.api_key = api_key
-        # Use header authentication as provided by user
-        self.url = "https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:batchEmbedContents"
+    def __init__(self, api_key: str, model: str):
+        from google import genai
+        self.client = genai.Client(api_key=api_key)
+        self.model = model
 
     def embed(self, texts: list[str]) -> list[list[float]]:
-        import requests
-        headers = {
-            "Content-Type": "application/json",
-            "X-goog-api-key": self.api_key
-        }
-        
-        # Batching up to 100 texts at a time (Gemini limits)
         results = []
         batch_size = 100
         for i in range(0, len(texts), batch_size):
             batch_texts = texts[i:i + batch_size]
-            payload = {
-                "requests": [
-                    {
-                        "model": "models/text-embedding-004",
-                        "content": {"parts": [{"text": text}]}
-                    }
-                    for text in batch_texts
-                ]
-            }
-            response = requests.post(self.url, headers=headers, json=payload)
-            response.raise_for_status()
-            data = response.json()
-            for item in data.get("embeddings", []):
-                results.append(item["values"])
+            response = self.client.models.embed_content(
+                model=self.model,
+                contents=batch_texts,
+            )
+            for item in response.embeddings:
+                results.append(item.values)
                 
         return results
 
 
 def build_embedding_model(settings: Settings) -> EmbeddingModel:
     if settings.embedding_provider == "gemini":
-        api_key = settings.gemini_api_key or os.environ.get("GEMINI_API_KEY")
+        from app.core.config import settings as core_settings
+        api_key = core_settings.GEMINI_API_KEY or os.environ.get("GEMINI_API_KEY")
         if not api_key:
             return LocalHashEmbedding()
-        return GeminiEmbeddingModel(api_key)
+        model = core_settings.GEMINI_EMBED_MODEL or settings.GEMINI_EMBED_MODEL or "text-embedding-004"
+        return GeminiEmbeddingModel(api_key, model)
     if settings.embedding_provider == "openai":
         api_key = settings.openai_api_key or os.environ.get("OPENAI_API_KEY")
         if not api_key:

@@ -25,30 +25,23 @@ async def chat_with_gemini(
         return ChatResponse(response="Gemini API Key is missing on the server. Please configure it in .env.")
         
     try:
-        async with httpx.AsyncClient() as client:
-            resp = await client.post(
-                f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}",
-                headers={"Content-Type": "application/json"},
-                json={
-                    "systemInstruction": {
-                        "parts": [{"text": "You are the jOBiON Career Assistant. You help users find jobs, give career advice, and summarize their skills. Be concise, professional, and encouraging."}]
-                    },
-                    "contents": [{"parts": [{"text": request.message}]}],
-                    "generationConfig": {
-                        "temperature": 0.7
-                    }
-                },
-                timeout=15.0
-            )
-            
-            if resp.status_code == 200:
-                data = resp.json()
-                text = data["candidates"][0]["content"]["parts"][0]["text"]
-                return ChatResponse(response=text)
-            else:
-                error_msg = f"Gemini API Error ({resp.status_code}): {resp.text}"
-                raise HTTPException(status_code=500, detail=error_msg)
-    except HTTPException:
-        raise
+        from google import genai
+        from google.genai import types
+        
+        model = settings.GEMINI_MODEL or "gemini-2.5-flash"
+        genai_client = genai.Client(api_key=api_key)
+        
+        config = types.GenerateContentConfig(
+            system_instruction="You are the jOBiON Career Assistant. You help users find jobs, give career advice, and summarize their skills. Be concise, professional, and encouraging.",
+            temperature=0.7
+        )
+        
+        resp = await genai_client.aio.models.generate_content(
+            model=model,
+            contents=request.message,
+            config=config
+        )
+        text = resp.text or ""
+        return ChatResponse(response=text)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to generate response: {e}")

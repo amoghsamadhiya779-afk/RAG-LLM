@@ -84,7 +84,11 @@ async def upload_resume(
     repo = ResumeRepository(db)
     resume = await repo.create(user.id, safe_filename)
     
-    background_tasks.add_task(process_resume_bg, resume.id, file_bytes, safe_filename)
+    # Process synchronously to avoid race conditions with frontend
+    await process_resume_bg(resume.id, file_bytes, safe_filename)
+    
+    # Reload resume to get parsed data
+    resume = await repo.get_by_id(resume.id)
     
     return ResumeResponse.model_validate(resume)
 
@@ -164,7 +168,6 @@ async def score_ats(
         
     resume_text = resume.parsed if resume.parsed else "No resume data"
     
-    hf_token = os.environ.get("HF_TOKEN")
     api_key = settings.GEMINI_API_KEY or os.environ.get("GEMINI_API_KEY") # local fallback if no HF space
     
     report_data = {
@@ -175,28 +178,31 @@ async def score_ats(
         "suggestions": []
     }
     
-    if hf_token or api_key:
-        # Mocking the call to HF proxy which uses Gemini.
+    if api_key:
+        # Call Gemini using official SDK
         try:
-            async with httpx.AsyncClient() as client:
-                resp = await client.post(
-                    f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}",
-                    headers={"Content-Type": "application/json"},
-                    json={
-                        "systemInstruction": {
-                            "parts": [{"text": "You are an ATS (Applicant Tracking System). Compare the resume against the job text. Output a strict JSON object: {\"match_percentage\": 85, \"keyword_coverage\": [\"React\"], \"missing_skills\": [\"Go\"], \"flags\": [\"Missing degree\"], \"suggestions\": [\"Add more metrics\"]}"}]
-                        },
-                        "contents": [{"parts": [{"text": f"--- RESUME ---\n{resume_text}\n--- JOB ---\n{request.job_text}"}]}],
-                        "generationConfig": {"responseMimeType": "application/json"}
-                    },
-                    timeout=30.0
-                )
-                if resp.status_code == 200:
-                    content_text = resp.json()["candidates"][0]["content"]["parts"][0]["text"]
-                    parsed_json = json.loads(content_text)
-                    # Validate
-                    report_data = AtsScoreReport(**parsed_json).model_dump()
-        except Exception as e:
+            from google import genai
+            from google.genai import types
+            
+            model = settings.GEMINI_MODEL or "gemini-2.5-flash"
+            genai_client = genai.Client(api_key=api_key)
+            
+            config = types.GenerateContentConfig(
+                system_instruction="You are an ATS (Applicant Tracking System). Compare the resume against the job text. Output a strict JSON object: {\"match_percentage\": 85, \"keyword_coverage\": [\"React\"], \"missing_skills\": [\"Go\"], \"flags\": [\"Missing degree\"], \"suggestions\": [\"Add more metrics\"]}",
+                response_mime_type="application/json"
+            )
+            
+            resp = await genai_client.aio.models.generate_content(
+                model=model,
+                contents=f"--- RESUME ---\n{resume_text}\n--- JOB ---\n{request.job_text}",
+                config=config
+            )
+            content_text = resp.text
+            if content_text:
+                parsed_json = json.loads(content_text)
+                # Validate
+                report_data = AtsScoreReport(**parsed_json).model_dump()
+        except Exception:
             pass # fallback to error report
             
     return AtsScoreReport(**report_data)

@@ -9,6 +9,7 @@ from pydantic import BaseModel, ValidationError
 from typing import List, Optional
 
 logger = logging.getLogger(__name__)
+from app.core.config import settings
 
 # Strict JSON schema model for RAG extraction
 class ResumeProfileSchema(BaseModel):
@@ -60,7 +61,7 @@ async def parse_resume_file(file_bytes: bytes, filename: str) -> dict:
         
         # In a real environment, we call our HF Inference Endpoint using HF_TOKEN
         hf_token = os.environ.get("HF_TOKEN")
-        api_key = os.environ.get("GEMINI_API_KEY")  # Local fallback
+        api_key = settings.GEMINI_API_KEY or os.environ.get("GEMINI_API_KEY")  # Local fallback
         
         if hf_token or api_key:
             try:

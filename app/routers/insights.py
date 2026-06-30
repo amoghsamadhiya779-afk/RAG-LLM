@@ -11,6 +11,7 @@ import json
 from app.db.session import get_db
 from app.models.models import Job, JobStatusEnum, Resume
 from app.repositories.resume_repo import ResumeRepository
+from app.core.config import settings
 
 router = APIRouter(prefix="/insights", tags=["insights"])
 
@@ -19,11 +20,14 @@ async def get_skill_gap(
     resumeId: uuid.UUID = Query(..., description="The ID of the user's uploaded resume"),
     db: AsyncSession = Depends(get_db)
 ):
-    # 1. Fetch Resume
-    repo = ResumeRepository(db)
-    resume = await repo.get_by_id(resumeId)
+    # Fetch user's resume
+    resume_repo = ResumeRepository(db)
+    resume = await resume_repo.get_by_id(resumeId)
+    
     if not resume or not resume.parsed:
-        raise HTTPException(status_code=404, detail="Resume not found or not fully parsed")
+        return {"error": "Resume not found or not parsed yet. Please upload a resume first."}
+        
+    api_key = settings.GEMINI_API_KEY or os.environ.get("GEMINI_API_KEY")
         
     # 2. Fetch some top live jobs as a target sample
     stmt = select(Job).where(Job.status == JobStatusEnum.live).limit(10)

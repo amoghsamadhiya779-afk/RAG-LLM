@@ -8,7 +8,7 @@ import os
 import httpx
 import json
 
-from app.database import get_db
+from app.db.session import get_db
 from app.models.models import Job, JobStatusEnum, Resume
 from app.repositories.resume_repo import ResumeRepository
 

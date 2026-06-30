@@ -1,7 +1,7 @@
 import uuid
 import os
 import re
-import magic
+import mimetypes
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
@@ -59,12 +59,12 @@ async def upload_resume(
     if len(file_bytes) > MAX_FILE_SIZE:
         raise HTTPException(status_code=413, detail="File too large. Maximum size is 5MB.")
     
-    # 2. Magic byte MIME check
-    try:
-        mime_type = magic.from_buffer(file_bytes, mime=True)
-    except Exception:
-        # Fallback if magic fails (e.g. Windows without libmagic)
-        mime_type = file.content_type or "application/octet-stream"
+    # 2. Check MIME type
+    mime_type = file.content_type
+    if not mime_type:
+        mime_type, _ = mimetypes.guess_type(file.filename or "")
+    if not mime_type:
+        mime_type = "application/octet-stream"
         
     if mime_type not in ALLOWED_MIMES:
         raise HTTPException(status_code=415, detail=f"Unsupported file type: {mime_type}. Allowed: PDF, DOCX, TXT.")

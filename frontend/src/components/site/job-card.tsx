@@ -18,9 +18,9 @@ export function JobCard({ job, matchScore }: { job: JobWithCompany; matchScore?:
   const salary = formatSalary(job.salaryMin, job.salaryMax);
 
   return (
-    <motion.div whileHover={{ y: -2 }} transition={{ duration: 0.2 }}>
-      <Link href={job.url || `/jobs/${job.id}`} target={job.url ? "_blank" : undefined} rel={job.url ? "noopener noreferrer" : undefined} className="block group">
-        <div className="glass-card flex gap-4 p-5 transition-all hover:bg-iron/40 hover:border-bone/20">
+    <motion.div whileHover={{ y: -2 }} transition={{ duration: 0.2 }} className="group">
+      <div className="glass-card flex flex-col p-5 transition-all hover:bg-iron/40 hover:border-bone/20">
+        <div className="flex gap-4">
           <Avatar className="h-12 w-12 rounded-xl bg-void border border-bone/10 shadow-sm shrink-0">
             <AvatarImage src={job.company.logoUrl || ""} />
             <AvatarFallback className="rounded-xl font-bold text-void bg-bone">{job.company.name.charAt(0)}</AvatarFallback>
@@ -74,7 +74,12 @@ export function JobCard({ job, matchScore }: { job: JobWithCompany; matchScore?:
             )}
           </div>
         </div>
-      </Link>
+        <div className="mt-4 pt-3 border-t border-bone/[0.06] flex justify-end">
+          <Link href={job.url || `/jobs/${job.id}`} target={job.url ? "_blank" : undefined} rel={job.url ? "noopener noreferrer" : undefined} className="text-sm font-medium text-indigo-400 hover:text-indigo-300 transition-colors inline-flex items-center gap-1">
+            View Job Details &rarr;
+          </Link>
+        </div>
+      </div>
     </motion.div>
   );
 }

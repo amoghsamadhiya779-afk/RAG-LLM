@@ -1,8 +1,29 @@
+"use client";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useLenis } from "@/hooks/use-lenis";
 
 export function SiteHeader() {
   const pathname = usePathname();
+  const lenis = useLenis();
+
+  const handleAnchorClick = (e: React.MouseEvent<HTMLAnchorElement>, hash: string) => {
+    // If we're on the homepage, prevent default router navigation and smooth scroll using Lenis
+    if (pathname === "/") {
+      e.preventDefault();
+      const targetElement = document.querySelector(hash);
+      if (targetElement) {
+        if (lenis) {
+          lenis.scrollTo(targetElement as HTMLElement, { offset: -80 });
+        } else {
+          targetElement.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+        // Update URL hash without causing a page jump
+        window.history.pushState(null, "", hash);
+      }
+    }
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 border-b border-bone/10 bg-void/80 backdrop-blur-md">
@@ -13,21 +34,38 @@ export function SiteHeader() {
         </Link>
         
         <nav className="flex items-center gap-6">
-          {pathname === "/" ? (
-            <>
-              <Link href="#features" className="text-[14px] font-medium text-mist transition-colors hover:text-bone">Features</Link>
-              <Link href="#use-cases" className="text-[14px] font-medium text-mist transition-colors hover:text-bone">Use Cases</Link>
-              <Link href="#pricing" className="text-[14px] font-medium text-mist transition-colors hover:text-bone">Pricing</Link>
-            </>
-          ) : (
-            <>
-              <Link href="/jobs" className="text-[14px] font-medium text-mist transition-colors hover:text-bone">Jobs</Link>
-              <Link href="/companies" className="text-[14px] font-medium text-mist transition-colors hover:text-bone">Companies</Link>
-            </>
-          )}
-
-          <Link href="/dashboard" className="text-[14px] font-medium text-mist transition-colors hover:text-bone">Dashboard</Link>
-          <Link href="/ai-workspace" className="text-[14px] font-medium text-mist transition-colors hover:text-bone">AI Workspace</Link>
+          <Link 
+            href="/#features" 
+            onClick={(e) => handleAnchorClick(e, "#features")}
+            className="text-[14px] font-medium text-mist transition-colors hover:text-bone"
+          >
+            Features
+          </Link>
+          <Link 
+            href="/#jobs" 
+            onClick={(e) => handleAnchorClick(e, "#jobs")}
+            className="text-[14px] font-medium text-mist transition-colors hover:text-bone"
+          >
+            Jobs
+          </Link>
+          <Link 
+            href="/#companies" 
+            onClick={(e) => handleAnchorClick(e, "#companies")}
+            className="text-[14px] font-medium text-mist transition-colors hover:text-bone"
+          >
+            Companies
+          </Link>
+          <Link 
+            href="/#ai-workspace" 
+            onClick={(e) => handleAnchorClick(e, "#ai-workspace")}
+            className="text-[14px] font-medium text-mist transition-colors hover:text-bone"
+          >
+            AI Workspace
+          </Link>
+          
+          <Link href="/dashboard" className="text-[14px] font-medium text-mist transition-colors hover:text-bone">
+            Dashboard
+          </Link>
         </nav>
         
         <div className="flex items-center gap-4">

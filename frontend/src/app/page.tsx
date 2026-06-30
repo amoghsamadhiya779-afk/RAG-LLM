@@ -2,129 +2,82 @@
 
 import { SiteHeader } from "@/components/site/header";
 import { Hero } from "@/components/landing/hero";
-import { Search, Sparkles, FileText, Bot, Compass, Briefcase } from "lucide-react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { FadeIn } from "@/components/animation/fade-in";
-import { StaggerChildren } from "@/components/animation/stagger";
+import { LogoMarquee } from "@/components/landing/logo-marquee";
+import { SplitFeature } from "@/components/landing/split-feature";
+import { MatchVisual } from "@/components/landing/match-visual";
+import { PipelineVisual } from "@/components/landing/pipeline-visual";
+import { PricingCards } from "@/components/landing/pricing-cards";
+import { FAQ } from "@/components/landing/faq";
+import JobsSection from "@/components/sections/jobs-section";
+import CompaniesSection from "@/components/sections/companies-section";
+import AiWorkspaceSection from "@/components/sections/ai-workspace-section";
 import { ScrollReveal } from "@/components/animation/scroll-reveal";
-import { Parallax } from "@/components/animation/parallax";
+import { useHighlightSection } from "@/hooks/use-highlight";
 
 export default function LandingPage() {
+  // Activate highlight / smooth scroll on hash matches across all sections
+  useHighlightSection();
+
   return (
     <div className="min-h-dvh bg-void text-bone font-sans">
       <SiteHeader />
+      
       <main className="relative z-10 bg-void">
+        {/* Hero Section */}
         <Hero />
         
-        {/* Features Section */}
-        <section id="features" className="container-page py-24 sm:py-32">
-          <FadeIn className="mb-16">
-            <h2 className="font-geist text-[32px] font-semibold text-paper">
-              Search that actually<br />understands you.
-            </h2>
-            <p className="mt-4 text-[18px] text-mist max-w-xl">
-              Forget keyword roulette. We read job descriptions the way you read them — and rank them by what you've actually shipped.
-            </p>
-          </FadeIn>
+        {/* Brand Trust Section */}
+        <LogoMarquee />
+        
+        {/* Features Split Feature: AI Matching Visual */}
+        <div id="features">
+          <SplitFeature
+            eyebrow="AI Matching"
+            title="Search that actually understands you."
+            body="Forget keyword roulette. We index the details of your actual project experience and match them to the real needs of engineering teams."
+            bullets={[
+              "Natural-language search across every live role",
+              "Pre-scored match percentages shown instantly",
+              "Deep alignment based on tech stack and seniority level"
+            ]}
+            ctaLabel="Try the search"
+            ctaTo="#jobs"
+            visual={<MatchVisual />}
+          />
+        </div>
 
-          <StaggerChildren className="grid gap-6 md:grid-cols-3">
-            {[
-              { icon: Search, title: "Semantic search", desc: "Ask in plain English — 'remote senior react roles on AI teams' — and get ranked results." },
-              { icon: Sparkles, title: "AI matching", desc: "Jobs ranked to your resume by skill overlap and seniority alignment." },
-              { icon: FileText, title: "Instant parsing", desc: "Upload a PDF or DOCX — we extract skills, experience, and education in seconds." },
-            ].map((f, i) => (
-              <div key={i} className="glass-card">
-                <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-iron border border-bone/10">
-                  <f.icon className="h-5 w-5 text-bone" />
-                </div>
-                <h3 className="font-geist text-[24px] font-medium text-paper mb-2">{f.title}</h3>
-                <p className="text-[16px] text-mist leading-relaxed">{f.desc}</p>
-              </div>
-            ))}
-          </StaggerChildren>
-        </section>
+        {/* Jobs Section */}
+        <JobsSection />
 
-        {/* Use Cases Section */}
-        <section id="use-cases" className="relative border-t border-bone/[0.06] py-24 sm:py-32 bg-char/30 overflow-hidden">
-          <div className="container-page">
-            <div className="grid gap-16 lg:grid-cols-2 lg:items-center">
-              <ScrollReveal direction="left">
-                <h2 className="font-geist text-[32px] font-semibold text-paper mb-6">
-                  From search to offer.
-                </h2>
-                <p className="text-[18px] text-mist mb-8">
-                  Type what you want in plain English. We turn your query into a ranked feed of roles, pre-scored against your resume — then route you to one-click apply.
-                </p>
-                <div className="space-y-4">
-                  {[
-                    "Natural-language search across every live role",
-                    "Match score visible before you click apply",
-                    "Resume parsed once, reused everywhere"
-                  ].map((bullet, i) => (
-                    <div key={i} className="flex items-center gap-3">
-                      <div className="flex h-6 w-6 items-center justify-center rounded-full border border-bone/20 bg-void">
-                        <span className="text-[12px] text-bone font-medium">{i + 1}</span>
-                      </div>
-                      <span className="text-[16px] text-bone">{bullet}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-10">
-                  <Link href="/jobs">
-                    <Button className="rounded-pill bg-paper text-void px-6 hover:bg-paper/90">
-                      Try the search
-                    </Button>
-                  </Link>
-                </div>
-              </ScrollReveal>
-              <Parallax speed={0.8}>
-                <div className="glass-card relative aspect-square overflow-hidden bg-void/50 flex items-center justify-center p-8">
-                  <div className="absolute inset-0 bg-radial-indigo opacity-20" />
-                  <div className="relative z-10 w-full rounded-2xl border border-bone/10 bg-char p-6 shadow-2xl">
-                     <div className="flex items-center gap-4 border-b border-bone/10 pb-4">
-                       <div className="h-10 w-10 rounded-lg bg-void border border-bone/10 flex items-center justify-center">
-                         <Bot className="h-5 w-5 text-bone" />
-                       </div>
-                       <div>
-                         <h4 className="font-geist font-medium text-paper text-[16px]">AI Assistant</h4>
-                         <p className="text-[14px] text-mist">Reviewing your matches...</p>
-                       </div>
-                     </div>
-                     <div className="mt-4 space-y-3">
-                       <div className="h-8 rounded-pill bg-iron/50 w-3/4" />
-                       <div className="h-8 rounded-pill bg-iron/50 w-1/2" />
-                     </div>
-                  </div>
-                </div>
-              </Parallax>
-            </div>
-          </div>
-        </section>
+        {/* Companies Section */}
+        <CompaniesSection />
 
-        {/* Pricing / CTA Section */}
-        <section id="pricing" className="container-page py-24 sm:py-32 border-t border-bone/[0.06]">
-          <FadeIn className="mx-auto max-w-2xl text-center">
-            <h2 className="font-sans text-[48px] tracking-[-0.035em] text-paper mb-6">
-              Ready to find your match?
-            </h2>
-            <p className="text-[18px] text-mist mb-10">
-              Join thousands of engineers who have already discovered their next career defining role.
-            </p>
-            <div className="flex items-center justify-center gap-4">
-              <Link href="/auth">
-                <Button className="h-12 rounded-pill bg-paper text-void px-8 text-[16px] hover:bg-paper/90">
-                  Get Started
-                </Button>
-              </Link>
-              <Link href="/post">
-                <Button variant="outline" className="h-12 rounded-pill px-8 text-[16px]">
-                  Post a Job
-                </Button>
-              </Link>
-            </div>
-          </FadeIn>
-        </section>
+        {/* Use Cases Split Feature: Application Pipeline Tracking */}
+        <div id="use-cases">
+          <SplitFeature
+            eyebrow="For Employers"
+            title="Manage applicants without the chaos."
+            body="Receive pre-sorted, high-signal applications matched directly to your role specs. Sync candidates directly back to your ATS."
+            bullets={[
+              "ATS integration with Greenhouse, Lever, and Workable",
+              "Instantly view resume parse data & match insights",
+              "Collaborate with your team on a simple applicant pipeline"
+            ]}
+            ctaLabel="Post a Job"
+            ctaTo="/post"
+            visual={<PipelineVisual />}
+            reverse
+          />
+        </div>
+
+        {/* AI Workspace Section */}
+        <AiWorkspaceSection />
+
+        {/* Pricing Cards Section */}
+        <PricingCards />
+
+        {/* FAQ Section */}
+        <FAQ />
       </main>
       
       {/* Simple Footer */}

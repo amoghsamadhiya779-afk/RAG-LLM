@@ -51,3 +51,44 @@ Integrity mode: development
 - [ ] GitHub Actions CI pipeline runs completely green locally (via act) or verified via scripts.
 - [ ] All agent/bot files (like `AGENTS.md`) are completely removed from the final repository state.
 </USER_REQUEST>
+
+## Follow-up — 2026-06-30T19:47:15+05:30
+
+<USER_REQUEST>
+# Teamwork Project Prompt — Draft
+
+> Status: Launched
+> Goal: Single Hero Website UI Refactor
+
+Refactor the Next.js frontend into a "Single Hero Website" to eliminate slow page loads. Extract the Jobs, Companies, and AI Workspace logic into standalone components, integrate them vertically on the homepage (`app/page.tsx`), and update the navbar (`SiteHeader`) to use smooth-scrolling anchor links.
+
+Working directory: `C:\Users\Lenovo\Desktop\RAG & LLM\frontend`
+Integrity mode: benchmark
+
+## Requirements
+
+### R1. Extract Sections
+Extract the core functionality from `app/jobs/page.tsx`, `app/companies/page.tsx`, and `app/ai-workspace/page.tsx` into reusable React components (e.g., inside `src/components/sections/`). Once extracted, completely delete the old standalone `app/jobs/page.tsx`, `app/companies/page.tsx`, and `app/ai-workspace/page.tsx` routes.
+
+### R2. Integrate Homepage
+Assemble the extracted section components onto the main `app/page.tsx` homepage. Wrap each component in a distinctly ID'd section tag (e.g., `<section id="jobs">`). Create a seamless, continuous-scrolling "Single Hero" landing experience. 
+
+### R3. Overhaul Navbar
+Update `src/components/site/header.tsx`. Replace all conditional routing links with unified smooth-scrolling anchor tags (e.g., `href="#jobs"`, `href="#companies"`, `href="#ai-workspace"`).
+
+### R4. Premium UI
+Incorporate high-quality, modern UI components (draw inspiration from `https://21st.dev/community/components`) to ensure the Single Hero Website feels ultra-polished and production-grade.
+
+## Acceptance Criteria
+
+### Component Architecture
+- [ ] `app/page.tsx` imports and renders the Jobs, Companies, and AI Workspace sections vertically.
+- [ ] The standalone route pages (`app/jobs/page.tsx`, `app/companies/page.tsx`, `app/ai-workspace/page.tsx`) have been deleted.
+
+### Navigation
+- [ ] The `SiteHeader` component uses `#` anchor links for internal navigation instead of Next.js paths.
+
+### Compilation
+- [ ] Running `npm run build` from the `frontend/` directory completes successfully with exit code 0. No unresolved import errors from the deleted routes.
+</USER_REQUEST>
+

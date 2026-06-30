@@ -46,8 +46,8 @@ export default function LandingPage() {
           />
         </div>
 
-        {/* Jobs Section */}
-        <JobsSection />
+        {/* AI Workspace Section */}
+        <AiWorkspaceSection />
 
         {/* Companies Section */}
         <CompaniesSection />
@@ -70,8 +70,8 @@ export default function LandingPage() {
           />
         </div>
 
-        {/* AI Workspace Section */}
-        <AiWorkspaceSection />
+        {/* Jobs Section */}
+        <JobsSection />
 
         {/* Pricing Cards Section */}
         <PricingCards />

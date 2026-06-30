@@ -283,42 +283,44 @@ export default function AiWorkspaceSection({ className }: { className?: string }
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.3 }}
-            className="rounded-3xl border border-bone/10 bg-char/80 backdrop-blur-xl p-0 shadow-2xl lg:col-span-2 overflow-hidden flex flex-col min-h-[400px] relative"
+            className="group relative rounded-3xl border border-bone/5 bg-void/60 backdrop-blur-2xl p-0 shadow-[0_8px_30px_rgb(0,0,0,0.4)] lg:col-span-2 overflow-hidden flex flex-col min-h-[450px] transition-all hover:border-bone/10 hover:bg-void/80"
           >
-            {/* Top decorative gradient */}
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-indigo-haze/50 to-transparent opacity-50" />
+            {/* Top decorative gradient glow */}
+            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-indigo-haze/30 to-transparent" />
             
-            <div className="flex items-center gap-3 p-5 border-b border-bone/10 bg-void/50 backdrop-blur-md z-10">
-              <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-haze/20 border border-indigo-haze/30 text-indigo-haze shadow-inner">
-                <Bot className="h-5 w-5 text-paper" />
-                <span className="absolute top-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-void animate-pulse" style={{ backgroundColor: "#22c55e" }} />
+            {/* Sleek Header */}
+            <div className="flex items-center gap-4 px-6 py-4 border-b border-bone/5 bg-char/20 z-10">
+              <div className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-haze/10 border border-indigo-haze/20 text-indigo-haze">
+                <Bot className="h-4 w-4" />
+                <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full border border-void bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
               </div>
-              <div>
-                <h2 className="text-lg font-semibold flex items-center gap-2 text-paper">
-                  Career Assistant <Sparkles className="h-3.5 w-3.5 text-indigo-haze" />
+              <div className="flex flex-col">
+                <h2 className="text-base font-medium flex items-center gap-1.5 text-paper tracking-wide">
+                  Career Assistant <Sparkles className="h-3 w-3 text-indigo-haze opacity-70" />
                 </h2>
-                <p className="text-xs text-mist">Powered by RAG & Gemini</p>
+                <p className="text-[11px] text-mist font-mono uppercase tracking-wider opacity-80">Powered by RAG & Gemini</p>
               </div>
             </div>
             
-            <div className="flex-1 p-6 overflow-y-auto space-y-6 max-h-[350px] bg-void/30 scroll-smooth">
+            {/* Chat History Area */}
+            <div className="flex-1 p-6 overflow-y-auto space-y-5 max-h-[400px] scroll-smooth custom-scrollbar">
               {messages.map((msg, idx) => (
                 <motion.div 
                   key={idx} 
-                  initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                  initial={{ opacity: 0, scale: 0.98, y: 5 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
-                  transition={{ duration: 0.3, ease: "easeOut" }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
                   className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                 >
                   {msg.role === "ai" && (
-                    <div className="flex-shrink-0 mt-1 flex h-8 w-8 items-center justify-center rounded-full bg-iron/50 border border-bone/10 text-paper">
-                      <Bot className="h-4 w-4" />
+                    <div className="flex-shrink-0 mt-0.5 flex h-7 w-7 items-center justify-center rounded-md bg-iron/30 border border-bone/5 text-mist">
+                      <Bot className="h-3.5 w-3.5" />
                     </div>
                   )}
-                  <div className={`max-w-[75%] px-5 py-3.5 text-[15px] leading-relaxed shadow-sm ${
+                  <div className={`max-w-[80%] px-4 py-3 text-[14px] leading-relaxed tracking-wide shadow-sm ${
                     msg.role === "user" 
-                      ? "bg-indigo-haze text-paper rounded-2xl rounded-tr-sm" 
-                      : "bg-iron/50 backdrop-blur-md border border-bone/10 text-bone rounded-2xl rounded-tl-sm"
+                      ? "bg-indigo-haze/90 text-white rounded-2xl rounded-tr-sm font-medium" 
+                      : "bg-char/30 backdrop-blur-md border border-bone/5 text-bone rounded-2xl rounded-tl-sm font-light"
                   }`}>
                     {msg.text}
                   </div>
@@ -331,34 +333,35 @@ export default function AiWorkspaceSection({ className }: { className?: string }
                   initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                   className="flex gap-3 justify-start"
                 >
-                  <div className="flex-shrink-0 mt-1 flex h-8 w-8 items-center justify-center rounded-full bg-iron/50 border border-bone/10 text-paper">
-                    <Bot className="h-4 w-4" />
+                  <div className="flex-shrink-0 mt-0.5 flex h-7 w-7 items-center justify-center rounded-md bg-iron/30 border border-bone/5 text-mist">
+                    <Bot className="h-3.5 w-3.5" />
                   </div>
-                  <div className="bg-iron/50 backdrop-blur-md border border-bone/10 rounded-2xl rounded-tl-sm px-5 py-4 flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-mist animate-bounce" style={{ animationDelay: "0ms" }} />
-                    <span className="w-1.5 h-1.5 rounded-full bg-mist animate-bounce" style={{ animationDelay: "150ms" }} />
-                    <span className="w-1.5 h-1.5 rounded-full bg-mist animate-bounce" style={{ animationDelay: "300ms" }} />
+                  <div className="bg-char/30 backdrop-blur-md border border-bone/5 rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-1.5 h-[46px]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-mist/60 animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-mist/60 animate-bounce" style={{ animationDelay: "150ms" }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-mist/60 animate-bounce" style={{ animationDelay: "300ms" }} />
                   </div>
                 </motion.div>
               )}
             </div>
 
-            <form onSubmit={handleChat} className="p-4 border-t border-bone/10 bg-char/80 backdrop-blur-md flex gap-3 items-center z-10">
-              <div className="flex flex-1 items-center gap-3 rounded-pill border border-bone/10 bg-[#1d1d1d] px-4 py-2 shadow-sm">
+            {/* Input Area */}
+            <form onSubmit={handleChat} className="p-4 border-t border-bone/5 bg-char/10 flex items-center z-10">
+              <div className="relative flex flex-1 items-center">
                 <Input 
                   placeholder="Ask about remote React roles, salaries, or specific skills..." 
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
-                  className="border-0 bg-[#1d1d1d] text-[14px] text-white placeholder:text-gray-400 focus-visible:ring-0 px-0 h-10 flex-1"
+                  className="w-full bg-void/50 border border-bone/10 focus-visible:border-indigo-haze/50 text-[14px] text-white placeholder:text-mist/50 focus-visible:ring-0 pl-4 pr-12 h-11 rounded-2xl transition-colors shadow-inner"
                   disabled={isChatTyping}
                 />
                 <Button 
                   type="submit" 
                   size="icon" 
                   disabled={!chatInput.trim() || isChatTyping}
-                  className="absolute right-1.5 top-1.5 h-9 w-9 rounded-xl bg-indigo-haze/20 text-indigo-haze hover:bg-indigo-haze hover:text-paper transition-colors disabled:opacity-50 disabled:bg-transparent"
+                  className="absolute right-1.5 top-1.5 h-8 w-8 rounded-xl bg-indigo-haze text-paper hover:bg-indigo-haze/80 hover:scale-105 transition-all disabled:opacity-30 disabled:hover:scale-100 disabled:bg-indigo-haze/30"
                 >
-                  <Send className="h-4 w-4" />
+                  <Send className="h-3.5 w-3.5 ml-0.5" />
                 </Button>
               </div>
             </form>

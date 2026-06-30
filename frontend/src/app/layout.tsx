@@ -1,29 +1,15 @@
 import type { Metadata } from "next";
-import { Inter, Space_Mono } from "next/font/google";
-import { ThemeProvider } from "@/components/ThemeProvider";
-import { Navbar } from "@/components/shared/Navbar";
-import "./globals.css";
+import { DM_Sans, Inter } from "next/font/google";
+import { Providers } from "./providers";
+import "@/styles.css";
 
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  display: "swap",
-});
-
-const spaceMono = Space_Mono({
-  variable: "--font-space-mono",
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  display: "swap",
-});
+const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-dm-sans" });
+const geist = Inter({ subsets: ["latin"], variable: "--font-geist" });
 
 export const metadata: Metadata = {
-  title: "Drew - Shape your digital presence",
-  description: "Next-generation career intelligence playground and workspace.",
+  title: "Dimension — The AI coworker that never sleeps",
+  description: "Dimension collates overnight updates from your connected integrations into a single briefing so you start your day with clarity.",
 };
-
-import { LenisProvider } from "@/components/dom/LenisProvider";
 
 export default function RootLayout({
   children,
@@ -31,16 +17,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${inter.variable} ${spaceMono.variable} antialiased w-screen min-h-screen overflow-x-hidden`}
-      >
-        <ThemeProvider>
-          <LenisProvider>
-            <Navbar />
-            {children}
-          </LenisProvider>
-        </ThemeProvider>
+    <html lang="en" className="dark">
+      <body className={`${dmSans.variable} ${geist.variable} font-sans bg-void text-bone antialiased selection:bg-indigo-haze/30`}>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

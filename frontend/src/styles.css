@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Dimension Colors */
+    --color-void: #0a0a0a;
+    --color-char: #1d1d1d;
+    --color-iron: #3d3d3d;
+    --color-slate: #505050;
+    --color-smoke: #797979;
+    --color-graphite: #161616;
+    --color-ink: #282828;
+    --color-fog: #686868;
+    --color-mist: #c2c2c2;
+    --color-ash: #b2b2b2;
+    --color-bone: #e5e5e5;
+    --color-paper: #ffffff;
+    --color-onyx: #000000;
+    --color-indigo-haze: #6b62f2;
+    --color-dawn-wash: #9cafb8;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "ss01" on, "cv11" on;
+  }
+}
+
+@layer components {
+  .eyebrow {
+    @apply text-sm font-semibold tracking-wide text-primary uppercase;
+  }
+  .container-page {
+    @apply container mx-auto px-4 sm:px-6 lg:px-8 max-w-[1200px];
+  }
+  
+  /* Dimension Glassmorphism Recipe */
+  .glass-card {
+    @apply bg-char/80 backdrop-blur-[20px] rounded-cards p-6 border border-bone/10;
+    box-shadow: 0 24px 48px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+
+  .floating-nav {
+    @apply bg-char/80 backdrop-blur-[20px] rounded-pill border border-bone/10;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  /* Dimension Hairline Divider */
+  .hairline {
+    @apply w-full h-[1px] bg-bone/[0.06];
+  }
+}
+
+.marquee-pause {
+  animation-play-state: paused;
+}
+
+.bg-dawn-wash {
+  background: linear-gradient(180deg, rgb(72,103,175) 0%, rgb(156,175,184) 50%, rgb(196,149,119) 100%);
+}
+
+.bg-radial-indigo {
+  background: radial-gradient(50% 50% at 50% 35%, rgba(107,98,242,0.565) 0%, rgba(255,255,255,0) 100%);
+}

@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { JobCard } from "@/components/site/job-card";
 import { api } from "@/services/api";
 import { Parallax } from "@/components/animation/parallax";
@@ -59,6 +60,68 @@ function JobsSectionContent() {
   const toggleTag = (t: string) => setTags((p) => p.includes(t) ? p.filter((x) => x !== t) : [...p, t]);
   const clearAll = () => { setTags([]); setRemote(false); setJobType(undefined); setLevel(undefined); setSalaryMin(0); setQuery(""); };
 
+  const FilterContent = (
+    <>
+      <div className="flex items-center gap-2 text-[16px] font-medium text-paper mb-2">
+        <SlidersHorizontal className="h-4 w-4" /> Filters
+      </div>
+
+      <div>
+        <div className="mb-3 text-[12px] font-medium uppercase tracking-wider text-fog">Stack</div>
+        <div className="flex flex-wrap gap-2">
+          {ALL_TAGS.map((t) => (
+            <button
+              key={t}
+              onClick={() => toggleTag(t)}
+              className={`rounded-pill px-3 py-1 text-[13px] transition-colors border ${tags.includes(t) ? "bg-paper text-void border-paper font-medium" : "bg-void text-mist border-bone/10 hover:bg-iron/50"}`}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <label className="flex items-center gap-3 text-[14px] text-bone cursor-pointer">
+        <Checkbox checked={remote} onCheckedChange={(v) => setRemote(!!v)} className="border-bone/20 data-[state=checked]:bg-paper data-[state=checked]:text-void" />
+        Remote only
+      </label>
+
+      <div>
+        <div className="mb-3 text-[12px] font-medium uppercase tracking-wider text-fog">Type</div>
+        <div className="flex flex-wrap gap-2">
+          {TYPES.map((t) => (
+            <button
+              key={t.v}
+              onClick={() => setJobType(jobType === t.v ? undefined : t.v)}
+              className={`rounded-pill px-3 py-1 text-[13px] border ${jobType === t.v ? "bg-paper text-void border-paper font-medium" : "bg-void text-mist border-bone/10 hover:bg-iron/50"}`}
+            >{t.label}</button>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <div className="mb-3 text-[12px] font-medium uppercase tracking-wider text-fog">Level</div>
+        <div className="flex flex-wrap gap-2">
+          {LEVELS.map((l) => (
+            <button
+              key={l}
+              onClick={() => setLevel(level === l ? undefined : l)}
+              className={`rounded-pill px-3 py-1 text-[13px] capitalize border ${level === l ? "bg-paper text-void border-paper font-medium" : "bg-void text-mist border-bone/10 hover:bg-iron/50"}`}
+            >{l}</button>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <div className="mb-3 flex items-center justify-between text-[12px] uppercase tracking-wider text-fog">
+          <span>Min salary</span>
+          <span className="text-bone">${salaryMin}k+</span>
+        </div>
+        <Slider value={[salaryMin]} onValueChange={(v) => setSalaryMin(v[0])} min={0} max={300} step={10} className="py-2" />
+      </div>
+    </>
+  );
+
   return (
     <div className="container-page relative z-10">
       <div className="mb-12 text-center">
@@ -70,82 +133,65 @@ function JobsSectionContent() {
         </p>
       </div>
 
-      <div className="mb-8 flex items-center gap-3 rounded-pill border border-bone/10 bg-[#1d1d1d]/60 px-4 py-2 backdrop-blur-md shadow-sm">
-        <Search className="h-5 w-5 text-mist" />
-        <Input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder='Search "react remote senior" or "ML internship"'
-          className="border-0 !bg-transparent text-[16px] text-bone placeholder:text-fog focus-visible:ring-0 px-0 h-10"
-          aria-label="Search jobs"
-          style={{ backgroundColor: "transparent" }}
-        />
-        {(query || tags.length || remote || jobType || level || salaryMin > 0) ? (
-          <Button variant="ghost" size="sm" onClick={clearAll} className="gap-1 rounded-pill text-mist hover:text-bone hover:bg-iron/50">
-            <X className="h-4 w-4" />Clear filters
-          </Button>
-        ) : null}
+      <div className="relative mx-auto rounded-2xl border border-bone/10 bg-[#121212]/50 shadow-2xl backdrop-blur-md overflow-hidden">
+        {/* Window Header */}
+        <div className="flex h-12 items-center border-b border-bone/10 bg-[#1a1a1a]/80 px-4">
+          <div className="flex gap-2">
+            <div className="h-3 w-3 rounded-full bg-red-500/80 border border-red-500/50" />
+            <div className="h-3 w-3 rounded-full bg-yellow-500/80 border border-yellow-500/50" />
+            <div className="h-3 w-3 rounded-full bg-green-500/80 border border-green-500/50" />
+          </div>
+          <div className="flex-1 pr-12 text-center text-[13px] font-medium text-fog font-geist tracking-wide">
+            job_search
+          </div>
+        </div>
+        
+        {/* Window Body */}
+        <div className="p-6 sm:p-8">
+          <div className="mb-8 flex flex-col sm:flex-row items-center gap-3 w-full">
+            <div className="flex flex-1 w-full items-center gap-3 rounded-pill border border-bone/10 bg-char px-4 py-2 shadow-sm">
+          <Search className="h-5 w-5 text-mist" />
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder='Search "react remote senior" or "ML internship"'
+            className="border-0 !bg-transparent text-[16px] text-bone placeholder:text-fog focus-visible:ring-0 px-0 h-10"
+            aria-label="Search jobs"
+            style={{ backgroundColor: "transparent" }}
+          />
+        </div>
+        
+        <div className="flex w-full sm:w-auto items-center justify-between sm:justify-end gap-2">
+          {/* Mobile Filter Trigger */}
+          <div className="xl:hidden">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" className="gap-2 bg-char text-bone border-bone/10 rounded-pill">
+                  <SlidersHorizontal className="h-4 w-4" /> Filters
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[300px] sm:w-[350px] bg-void border-r border-bone/10 p-6 overflow-y-auto">
+                <SheetHeader className="mb-6 text-left">
+                  <SheetTitle className="text-bone">Filter Roles</SheetTitle>
+                </SheetHeader>
+                <div className="space-y-8">
+                  {FilterContent}
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+          
+          {(query || tags.length || remote || jobType || level || salaryMin > 0) ? (
+            <Button variant="ghost" size="sm" onClick={clearAll} className="gap-1 rounded-pill text-mist hover:text-bone hover:bg-iron/50 whitespace-nowrap">
+              <X className="h-4 w-4" />Clear all
+            </Button>
+          ) : null}
+        </div>
       </div>
 
       <div className="grid gap-10 xl:grid-cols-[280px_1fr]">
-        <aside className="space-y-8 glass-card p-6 h-fit sticky top-24">
-          <div className="flex items-center gap-2 text-[16px] font-medium text-paper mb-2">
-            <SlidersHorizontal className="h-4 w-4" /> Filters
-          </div>
-
-          <div>
-            <div className="mb-3 text-[12px] font-medium uppercase tracking-wider text-fog">Stack</div>
-            <div className="flex flex-wrap gap-2">
-              {ALL_TAGS.map((t) => (
-                <button
-                  key={t}
-                  onClick={() => toggleTag(t)}
-                  className={`rounded-pill px-3 py-1 text-[13px] transition-colors border ${tags.includes(t) ? "bg-paper text-void border-paper font-medium" : "bg-void text-mist border-bone/10 hover:bg-iron/50"}`}
-                >
-                  {t}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <label className="flex items-center gap-3 text-[14px] text-bone cursor-pointer">
-            <Checkbox checked={remote} onCheckedChange={(v) => setRemote(!!v)} className="border-bone/20 data-[state=checked]:bg-paper data-[state=checked]:text-void" />
-            Remote only
-          </label>
-
-          <div>
-            <div className="mb-3 text-[12px] font-medium uppercase tracking-wider text-fog">Type</div>
-            <div className="flex flex-wrap gap-2">
-              {TYPES.map((t) => (
-                <button
-                  key={t.v}
-                  onClick={() => setJobType(jobType === t.v ? undefined : t.v)}
-                  className={`rounded-pill px-3 py-1 text-[13px] border ${jobType === t.v ? "bg-paper text-void border-paper font-medium" : "bg-void text-mist border-bone/10 hover:bg-iron/50"}`}
-                >{t.label}</button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <div className="mb-3 text-[12px] font-medium uppercase tracking-wider text-fog">Level</div>
-            <div className="flex flex-wrap gap-2">
-              {LEVELS.map((l) => (
-                <button
-                  key={l}
-                  onClick={() => setLevel(level === l ? undefined : l)}
-                  className={`rounded-pill px-3 py-1 text-[13px] capitalize border ${level === l ? "bg-paper text-void border-paper font-medium" : "bg-void text-mist border-bone/10 hover:bg-iron/50"}`}
-                >{l}</button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <div className="mb-3 flex items-center justify-between text-[12px] uppercase tracking-wider text-fog">
-              <span>Min salary</span>
-              <span className="text-bone">${salaryMin}k+</span>
-            </div>
-            <Slider value={[salaryMin]} onValueChange={(v) => setSalaryMin(v[0])} min={0} max={300} step={10} className="py-2" />
-          </div>
+        <aside className="hidden xl:block space-y-8 glass-card p-6 h-fit sticky top-24">
+          {FilterContent}
         </aside>
 
         <section>
@@ -169,6 +215,8 @@ function JobsSectionContent() {
             </div>
           )}
         </section>
+      </div>
+        </div>
       </div>
     </div>
   );

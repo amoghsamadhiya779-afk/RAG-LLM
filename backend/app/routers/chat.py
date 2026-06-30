@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
+from app.core.config import settings
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
@@ -18,7 +19,7 @@ async def chat_with_gemini(
     request: ChatRequest,
     db: AsyncSession = Depends(get_db)
 ):
-    api_key = os.environ.get("GEMINI_API_KEY")
+    api_key = settings.GEMINI_API_KEY or os.environ.get("GEMINI_API_KEY")
     if not api_key:
         # Fallback if no API key is provided
         return ChatResponse(response="Gemini API Key is missing on the server. Please configure it in .env.")

@@ -181,11 +181,11 @@ async def score_ats(
     if api_key:
         # Call Gemini using official SDK
         try:
-            from google import genai
             from google.genai import types
+            from app.core.gemini_client import get_gemini_client
             
-            model = settings.GEMINI_MODEL or "gemini-2.5-flash"
-            genai_client = genai.Client(api_key=api_key)
+            model = settings.GEMINI_MODEL
+            genai_client = get_gemini_client()
             
             config = types.GenerateContentConfig(
                 system_instruction="You are an ATS (Applicant Tracking System). Compare the resume against the job text. Output a strict JSON object: {\"match_percentage\": 85, \"keyword_coverage\": [\"React\"], \"missing_skills\": [\"Go\"], \"flags\": [\"Missing degree\"], \"suggestions\": [\"Add more metrics\"]}",

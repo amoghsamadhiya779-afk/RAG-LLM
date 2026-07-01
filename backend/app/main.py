@@ -20,11 +20,11 @@ async def lifespan(app: FastAPI):
         if not api_key:
             raise ValueError("GEMINI_API_KEY is not configured but required for startup.")
         
-        model_name = settings.GEMINI_MODEL or "gemini-2.5-flash"
+        model_name = settings.GEMINI_MODEL
         try:
-            from google import genai
-            client = genai.Client(api_key=api_key)
-            models_list = client.models.list()
+            from app.core.gemini_client import get_gemini_client
+            client = get_gemini_client()
+            models_list = await client.aio.models.list()
             model_names = [m.name for m in models_list]
             
             found = False
@@ -78,12 +78,21 @@ async def health_gemini():
     if not api_key:
         raise HTTPException(status_code=500, detail="Gemini API Key is not configured")
         
-    model_name = settings.GEMINI_MODEL or "gemini-2.5-flash"
+    model_name = settings.GEMINI_MODEL
     try:
-        from google import genai
-        client = genai.Client(api_key=api_key)
-        models_list = client.models.list()
-        _ = list(models_list)
+        from app.core.gemini_client import get_gemini_client
+        client = get_gemini_client()
+        models_list = await client.aio.models.list()
+        model_names = [m.name for m in models_list]
+        found = False
+        for name in model_names:
+            if model_name in name or name.split("/")[-1] == model_name:
+                found = True
+                break
+        if not found:
+            raise ValueError(
+                f"Configured GEMINI_MODEL '{model_name}' was not found in available models: {model_names}"
+            )
         return {"status": "healthy", "model": model_name}
     except Exception as e:
         logger.error(f"Gemini health check failed: {e}")

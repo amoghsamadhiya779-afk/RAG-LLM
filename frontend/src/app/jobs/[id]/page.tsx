@@ -71,7 +71,7 @@ export default function JobDetail() {
                   </Link>
                   <div className="mt-5 flex flex-wrap items-center gap-4 text-[14px] text-fog">
                     <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4 text-ash" />{job.remote ? "Remote" : job.location ?? "—"}</span>
-                    <span className="inline-flex items-center gap-1.5"><Briefcase className="h-4 w-4 text-ash" />{job.jobType.replace("_", "-")}</span>
+                    <span className="inline-flex items-center gap-1.5"><Briefcase className="h-4 w-4 text-ash" />{job.jobType?.replace("_", "-") ?? ""}</span>
                     <span className="capitalize">{job.level}</span>
                     {(job.salaryMin || job.salaryMax) && <span className="text-bone">${(job.salaryMin ?? 0).toLocaleString()}–${(job.salaryMax ?? 0).toLocaleString()}</span>}
                     {job.featured && <span className="inline-flex items-center gap-1 rounded-pill bg-indigo-haze/20 px-3 py-1 text-[12px] text-bone border border-indigo-haze/30"><Star className="h-3 w-3 fill-current" />Featured</span>}

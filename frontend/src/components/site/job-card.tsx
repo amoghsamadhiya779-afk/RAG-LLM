@@ -49,7 +49,7 @@ export function JobCard({ job, matchScore }: { job: JobWithCompany; matchScore?:
               </div>
               <div className="flex items-center gap-1.5">
                 <Briefcase className="h-4 w-4 text-ash" />
-                <span className="capitalize">{job.jobType.replace("_", " ")}</span>
+                <span className="capitalize">{job.jobType?.replace("_", " ") ?? ""}</span>
               </div>
               {salary && (
                 <div className="flex items-center gap-1.5">

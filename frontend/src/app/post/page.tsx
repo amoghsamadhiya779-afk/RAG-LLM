@@ -41,12 +41,6 @@ export default function PostJob() {
   const { session, loading: authLoading } = useAuth();
   const [step, setStep] = useState(0);
 
-  useEffect(() => {
-    if (!authLoading && !session) {
-      router.push("/auth?redirect=/post&mode=in");
-    }
-  }, [authLoading, session, router]);
-
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
@@ -111,7 +105,8 @@ export default function PostJob() {
   };
 
   if (authLoading) return <PostLoading />;
-  if (!session) return null;
+  // Temporarily disable Auth Guard for UI design
+  // if (!session) return null;
 
   return (
     <div className="container-page py-10 bg-void text-bone min-h-dvh">

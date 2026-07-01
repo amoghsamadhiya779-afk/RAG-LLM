@@ -29,12 +29,6 @@ function DashboardContent() {
   const searchParams = useSearchParams();
   const highlightParam = searchParams?.get("highlight") || "employer";
 
-  useEffect(() => {
-    if (!authLoading && !session) {
-      router.push("/");
-    }
-  }, [authLoading, session, router]);
-
   const [activeTab, setActiveTab] = useState(highlightParam);
   const [selectedJob, setSelectedJob] = useState<JobWithCompany | null>(null);
 
@@ -43,7 +37,8 @@ function DashboardContent() {
   }, [highlightParam]);
 
   if (authLoading) return <DashboardLoading />;
-  if (!session) return null;
+  // Temporarily disable Auth Guard for UI design
+  // if (!session) return null;
 
   const { data: jobs, isLoading } = useQuery({
     queryKey: ["jobs", "mine", session?.user?.id],

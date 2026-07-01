@@ -62,14 +62,10 @@ export function SiteHeader() {
           >
             AI Workspace
           </Link>
-          
-          <Link href="/dashboard" className="text-[14px] font-medium text-mist transition-colors hover:text-bone">
-            Dashboard
-          </Link>
         </nav>
         
         <div className="flex items-center gap-4">
-          <Link href="/post" className="inline-flex h-9 items-center justify-center rounded-pill bg-paper px-4 text-[14px] font-medium text-void transition-colors hover:bg-paper/90">
+          <Link href="/dashboard" className="inline-flex h-9 items-center justify-center rounded-pill bg-paper px-4 text-[14px] font-medium text-void transition-colors hover:bg-paper/90">
             Post a Job
           </Link>
         </div>

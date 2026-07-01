@@ -33,10 +33,19 @@ const schema = z.object({
   companyId: z.string(),
 });
 
+import { useAuth } from "@/hooks/use-auth";
+import PostLoading from "./loading";
+
 export default function PostJob() {
   const router = useRouter();
-
+  const { session, loading: authLoading } = useAuth();
   const [step, setStep] = useState(0);
+
+  useEffect(() => {
+    if (!authLoading && !session) {
+      router.push("/auth?redirect=/post&mode=in");
+    }
+  }, [authLoading, session, router]);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -100,6 +109,9 @@ export default function PostJob() {
     createdAt: new Date().toISOString(),
     company: companies?.find((c) => c.id === companyId) ?? { id: "c-stellar", slug: "stellar", name: "Your company", about: "", ownerId: "u-recruiter", logoUrl: null, location: null, size: null, website: null },
   };
+
+  if (authLoading) return <PostLoading />;
+  if (!session) return null;
 
   return (
     <div className="container-page py-10 bg-void text-bone min-h-dvh">

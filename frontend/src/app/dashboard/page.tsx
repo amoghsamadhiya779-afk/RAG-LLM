@@ -20,11 +20,20 @@ const STAGES: { v: ApplicationStage; label: string }[] = [
 ];
 
 import { Suspense } from "react";
+import DashboardLoading from "./loading";
+import { useRouter } from "next/navigation";
 
 function DashboardContent() {
-  const { session } = useAuth();
+  const { session, loading: authLoading } = useAuth();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const highlightParam = searchParams?.get("highlight") || "employer";
+
+  useEffect(() => {
+    if (!authLoading && !session) {
+      router.push("/");
+    }
+  }, [authLoading, session, router]);
 
   const [activeTab, setActiveTab] = useState(highlightParam);
   const [selectedJob, setSelectedJob] = useState<JobWithCompany | null>(null);
@@ -32,6 +41,9 @@ function DashboardContent() {
   useEffect(() => {
     if (highlightParam) setActiveTab(highlightParam);
   }, [highlightParam]);
+
+  if (authLoading) return <DashboardLoading />;
+  if (!session) return null;
 
   const { data: jobs, isLoading } = useQuery({
     queryKey: ["jobs", "mine", session?.user?.id],

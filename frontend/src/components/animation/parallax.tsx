@@ -16,6 +16,9 @@ export function Parallax({ children, speed = 0.5, className }: ParallaxProps) {
   const pathname = usePathname();
 
   useEffect(() => {
+    // Register GSAP plugins safely on client only
+    gsap.registerPlugin(ScrollTrigger);
+
     // Respect user's motion preferences
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const isDashboard = pathname?.startsWith("/dashboard");

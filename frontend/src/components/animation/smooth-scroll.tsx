@@ -13,6 +13,9 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
   const isDashboard = pathname?.startsWith("/dashboard");
 
   useEffect(() => {
+    // Register GSAP plugins safely on client only
+    gsap.registerPlugin(ScrollTrigger);
+
     // Respect user's motion preferences
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReducedMotion || isDashboard) {

@@ -16,7 +16,7 @@ import type {
   User,
 } from "@/types";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? "") || "http://localhost:8000";
 const SESSION_KEY = "jOBiON:session:v1";
 
 const isBrowser = typeof window !== "undefined";

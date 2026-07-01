@@ -39,7 +39,9 @@ function getToken() {
   }
 }
 
-async function fetchApi<T>(path: string, options?: RequestInit): Promise<T> {
+import { z } from "zod";
+
+async function fetchApi<T>(path: string, options?: RequestInit, schema?: z.ZodType<T>): Promise<T> {
   const token = getToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -53,7 +55,7 @@ async function fetchApi<T>(path: string, options?: RequestInit): Promise<T> {
 
   const res = await fetch(`${API_URL}${path}`, { ...options, headers });
   if (!res.ok) {
-    let msg = "API Error";
+    let msg = `API Error (${res.status})`;
     try {
       const err = await res.json();
       msg = err.detail || msg;
@@ -61,7 +63,19 @@ async function fetchApi<T>(path: string, options?: RequestInit): Promise<T> {
     throw new Error(msg);
   }
   if (res.status === 204) return {} as T;
-  return res.json();
+  
+  const data = await res.json();
+  
+  if (schema) {
+    const parsed = schema.safeParse(data);
+    if (!parsed.success) {
+      console.error("API Payload Validation Failed:", parsed.error);
+      throw new Error("Malformed data received from API");
+    }
+    return parsed.data;
+  }
+  
+  return data as T;
 }
 
 export const auth = {

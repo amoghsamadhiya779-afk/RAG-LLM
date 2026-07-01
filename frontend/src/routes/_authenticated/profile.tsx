@@ -10,6 +10,7 @@ import { SiteFooter } from "@/components/site/footer";
 import { JobCard } from "@/components/site/job-card";
 import { api } from "@/services/api";
 import { useAuth } from "@/hooks/use-auth";
+import { formatDate } from "@/lib/utils";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/profile")({
@@ -141,7 +142,7 @@ function Profile() {
                       <motion.li key={a.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="glass-card flex items-center justify-between p-4">
                         <div>
                           <div className="font-medium">{a.job?.title ?? "Job"}</div>
-                          <div className="text-xs text-muted-foreground">{a.job?.company?.name ?? "—"} · {new Date(a.createdAt).toLocaleDateString()}</div>
+                          <div className="text-xs text-muted-foreground">{a.job?.company?.name ?? "—"} · {formatDate(a.createdAt)}</div>
                         </div>
                         <span className="rounded-full bg-secondary px-2 py-0.5 text-xs capitalize">{a.stage}</span>
                       </motion.li>

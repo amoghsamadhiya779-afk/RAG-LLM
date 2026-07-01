@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { formatDistanceToNow } from "date-fns";
 import { MapPin, Briefcase, DollarSign, Clock, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { formatDistanceSafe } from "@/lib/utils";
 import type { JobWithCompany } from "@/types";
 import { motion } from "framer-motion";
 
@@ -59,7 +59,7 @@ export function JobCard({ job, matchScore }: { job: JobWithCompany; matchScore?:
               )}
               <div className="flex items-center gap-1.5 ml-auto text-[13px]">
                 <Clock className="h-3.5 w-3.5 text-ash" />
-                {formatDistanceToNow(new Date(job.createdAt), { addSuffix: true })}
+                {formatDistanceSafe(job.createdAt)}
               </div>
             </div>
             

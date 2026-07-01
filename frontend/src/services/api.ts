@@ -16,7 +16,15 @@ import type {
   User,
 } from "@/types";
 
-const API_URL = "https://1Amogh212-resume-intelligence.hf.space";
+let apiUrl = "http://localhost:8000";
+try {
+  if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) {
+    apiUrl = import.meta.env.VITE_API_URL;
+  } else if (typeof process !== 'undefined' && process.env && process.env.NEXT_PUBLIC_API_URL) {
+    apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  }
+} catch (e) {}
+const API_URL = apiUrl;
 const SESSION_KEY = "jOBiON:session:v1";
 
 const isBrowser = typeof window !== "undefined";

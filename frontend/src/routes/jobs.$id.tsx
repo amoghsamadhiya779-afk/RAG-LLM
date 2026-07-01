@@ -11,6 +11,7 @@ import { ApplyDialog } from "@/components/site/apply-dialog";
 import { api } from "@/services/api";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
+import { formatDate } from "@/lib/utils";
 
 export const Route = createFileRoute("/jobs/$id")({
   loader: async ({ params }) => {
@@ -129,7 +130,7 @@ function JobDetail() {
                 {isSaved ? <><BookmarkCheck className="h-4 w-4" /> Saved</> : <><Bookmark className="h-4 w-4" /> Save job</>}
               </Button>
               <div className="mt-6 space-y-2 text-xs text-muted-foreground">
-                <div>Posted {new Date(job.createdAt).toLocaleDateString()}</div>
+                <div>Posted {formatDate(job.createdAt)}</div>
                 <div>{job.views.toLocaleString()} views</div>
               </div>
             </div>

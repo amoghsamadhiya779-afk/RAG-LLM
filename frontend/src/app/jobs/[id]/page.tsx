@@ -11,6 +11,7 @@ import { JobCard } from "@/components/site/job-card";
 import { ApplyDialog } from "@/components/site/apply-dialog";
 import { api } from "@/services/api";
 import { toast } from "sonner";
+import { formatDate } from "@/lib/utils";
 
 export default function JobDetail() {
   const params = useParams();
@@ -108,7 +109,7 @@ export default function JobDetail() {
                 {isSaved ? <><BookmarkCheck className="h-4 w-4" /> Saved</> : <><Bookmark className="h-4 w-4" /> Save job</>}
               </Button>
               <div className="mt-8 space-y-3 pt-6 border-t border-bone/[0.06] text-[14px] text-fog text-center">
-                <div>Posted {new Date(job.createdAt).toLocaleDateString()}</div>
+                <div>Posted {formatDate(job.createdAt)}</div>
                 <div>{job.views.toLocaleString()} views</div>
               </div>
             </div>

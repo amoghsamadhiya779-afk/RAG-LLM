@@ -2,12 +2,20 @@ import uuid
 from datetime import datetime
 from typing import List, Optional, Any
 from pydantic import BaseModel, ConfigDict, Field
+from pydantic.alias_generators import to_camel
 
 from app.models.models import RoleEnum, JobStatusEnum, JobTypeEnum, JobLevelEnum, ApplicationStageEnum
 
+class CamelModel(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True
+    )
+
 # ----------------- Users & Profiles -----------------
 
-class UserBase(BaseModel):
+class UserBase(CamelModel):
     email: str
 
 class UserCreate(UserBase):
@@ -20,14 +28,14 @@ class UserResponse(UserBase):
     created_at: datetime
     model_config = ConfigDict(from_attributes=True)
 
-class ProfileBase(BaseModel):
+class ProfileBase(CamelModel):
     full_name: str
     headline: Optional[str] = None
     avatar_url: Optional[str] = None
     bio: Optional[str] = None
     role: RoleEnum
 
-class ProfileUpdate(BaseModel):
+class ProfileUpdate(CamelModel):
     full_name: Optional[str] = None
     headline: Optional[str] = None
     avatar_url: Optional[str] = None
@@ -37,18 +45,18 @@ class ProfileResponse(ProfileBase):
     id: uuid.UUID
     model_config = ConfigDict(from_attributes=True)
 
-class AuthSession(BaseModel):
+class AuthSession(CamelModel):
     user: UserResponse
     profile: ProfileResponse
     token: str
 
-class SignInRequest(BaseModel):
+class SignInRequest(CamelModel):
     email: str
     password: str
 
 # ----------------- Companies -----------------
 
-class CompanyBase(BaseModel):
+class CompanyBase(CamelModel):
     name: str
     website: Optional[str] = None
     logo_url: Optional[str] = None
@@ -59,7 +67,7 @@ class CompanyBase(BaseModel):
 class CompanyCreate(CompanyBase):
     slug: str
 
-class CompanyUpdate(BaseModel):
+class CompanyUpdate(CamelModel):
     name: Optional[str] = None
     website: Optional[str] = None
     logo_url: Optional[str] = None
@@ -76,7 +84,7 @@ class CompanyResponse(CompanyBase):
 
 # ----------------- Jobs -----------------
 
-class JobBase(BaseModel):
+class JobBase(CamelModel):
     title: str
     description: str
     requirements: List[str]
@@ -91,7 +99,7 @@ class JobBase(BaseModel):
 class JobCreate(JobBase):
     company_id: uuid.UUID
 
-class JobUpdate(BaseModel):
+class JobUpdate(CamelModel):
     title: Optional[str] = None
     description: Optional[str] = None
     requirements: Optional[List[str]] = None
@@ -105,7 +113,7 @@ class JobUpdate(BaseModel):
     status: Optional[JobStatusEnum] = None
     featured: Optional[bool] = None
 
-class JobFilters(BaseModel):
+class JobFilters(CamelModel):
     query: Optional[str] = None
     tags: Optional[List[str]] = None
     remote: Optional[bool] = None
@@ -130,7 +138,7 @@ class JobWithCompanyResponse(JobResponse):
 
 # ----------------- Resumes -----------------
 
-class ParsedResume(BaseModel):
+class ParsedResume(CamelModel):
     titles: List[str]
     seniority: str
     skills: List[str]
@@ -138,10 +146,10 @@ class ParsedResume(BaseModel):
     suggested_keywords: List[str]
     years_experience: int
 
-class KeywordsResponse(BaseModel):
+class KeywordsResponse(CamelModel):
     suggested_keywords: List[str]
 
-class ResumeResponse(BaseModel):
+class ResumeResponse(CamelModel):
     id: uuid.UUID
     user_id: uuid.UUID
     file_name: str
@@ -151,7 +159,7 @@ class ResumeResponse(BaseModel):
 
 # ----------------- Applications -----------------
 
-class ApplicationBase(BaseModel):
+class ApplicationBase(CamelModel):
     job_id: uuid.UUID
     cover_note: Optional[str] = None
     resume_id: Optional[uuid.UUID] = None
@@ -159,7 +167,7 @@ class ApplicationBase(BaseModel):
 class ApplicationCreate(ApplicationBase):
     pass
 
-class ApplicationUpdate(BaseModel):
+class ApplicationUpdate(CamelModel):
     stage: ApplicationStageEnum
 
 class ApplicationResponse(ApplicationBase):
@@ -169,14 +177,14 @@ class ApplicationResponse(ApplicationBase):
     created_at: datetime
     model_config = ConfigDict(from_attributes=True)
 
-class ProfileSnippet(BaseModel):
+class ProfileSnippet(CamelModel):
     id: uuid.UUID
     full_name: str
     avatar_url: Optional[str] = None
     headline: Optional[str] = None
     model_config = ConfigDict(from_attributes=True)
 
-class JobSnippet(BaseModel):
+class JobSnippet(CamelModel):
     id: uuid.UUID
     title: str
     company: Optional[dict] = None
@@ -192,22 +200,22 @@ class ApplicationWithRelationsResponse(ApplicationResponse):
 from typing import TypeVar, Generic
 T = TypeVar('T')
 
-class PaginatedResponse(BaseModel, Generic[T]):
+class PaginatedResponse(CamelModel, Generic[T]):
     items: List[T]
     total: int
     page: int
     page_size: int
 
-class SavedJobToggleResponse(BaseModel):
+class SavedJobToggleResponse(CamelModel):
     saved: bool
 
-class AdminStatsResponse(BaseModel):
+class AdminStatsResponse(CamelModel):
     total_jobs: int
     live: int
     pending: int
     applications: int
     companies: int
 
-class CheckoutSessionResponse(BaseModel):
+class CheckoutSessionResponse(CamelModel):
     url: str
     session_id: str

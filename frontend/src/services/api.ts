@@ -53,7 +53,7 @@ async function fetchApi<T>(path: string, options?: RequestInit, schema?: z.ZodTy
     delete headers["Content-Type"];
   }
 
-  const res = await fetch(`${API_URL}${path}`, { ...options, headers });
+  const res = await fetch(`${API_URL}${path}`, { credentials: "include", ...options, headers });
   if (!res.ok) {
     let msg = `API Error (${res.status})`;
     try {

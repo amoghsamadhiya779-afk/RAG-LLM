@@ -218,11 +218,11 @@ async def get_recommended_jobs(
     resume_context = json.dumps(resume.parsed)
     
     try:
-        from google import genai
         from google.genai import types
+        from app.core.gemini_client import get_gemini_client
         
-        model = settings.GEMINI_MODEL or "gemini-2.5-flash"
-        genai_client = genai.Client(api_key=api_key)
+        model = settings.GEMINI_MODEL
+        genai_client = get_gemini_client()
         
         config = types.GenerateContentConfig(
             system_instruction="You are an ATS Matching engine. You will be provided with a parsed resume (JSON) and a list of live jobs. Select the top 3 best matching JOB_IDs for this candidate. Output ONLY a strict JSON array of strings containing the 3 UUIDs. Example: [\"uuid1\", \"uuid2\", \"uuid3\"]",

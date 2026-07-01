@@ -293,8 +293,8 @@ class OpenAIAnswerGenerator(AnswerGenerator):
 
 class GeminiAnswerGenerator(AnswerGenerator):
     def __init__(self, api_key: str, model: str):
-        from google import genai
-        self.client = genai.Client(api_key=api_key)
+        from app.core.gemini_client import get_gemini_client
+        self.client = get_gemini_client()
         self.model = model
 
     def _call_gemini(self, prompt: str, json_mode: bool = False) -> str:
@@ -325,10 +325,24 @@ class GeminiAnswerGenerator(AnswerGenerator):
         return self._call_gemini(prompt)
 
     def answer_stream(self, question: str, contexts: list[SearchResult]) -> Iterator[str]:
-        full_answer = self.answer(question, contexts)
-        words = full_answer.split(" ")
-        for i, word in enumerate(words):
-            yield (word + " ") if i < len(words) - 1 else word
+        context_text = "\n\n".join(
+            f"Source: {result.chunk.source}\n{result.chunk.text}" for result in contexts
+        )
+        prompt = (
+            "You are a resume intelligence assistant. Answer only from the "
+            "provided context. Be specific, concise, and cite source names.\n\n"
+            f"Question: {question}\n\nContext:\n{context_text}"
+        )
+        from google.genai import types
+        config = types.GenerateContentConfig()
+        response_stream = self.client.models.generate_content_stream(
+            model=self.model,
+            contents=prompt,
+            config=config
+        )
+        for chunk in response_stream:
+            if chunk.text:
+                yield chunk.text
 
     def evaluate_match(
         self, role_title: str, job_description: str, contexts: list[SearchResult]
@@ -418,7 +432,7 @@ def build_answer_generator(settings: Settings) -> AnswerGenerator:
         from app.core.config import settings as core_settings
         api_key = core_settings.GEMINI_API_KEY or os.environ.get("GEMINI_API_KEY")
         if api_key:
-            model = core_settings.GEMINI_MODEL or settings.GEMINI_MODEL or "gemini-2.5-flash"
+            model = settings.GEMINI_MODEL or core_settings.GEMINI_MODEL
             return GeminiAnswerGenerator(api_key, model)
         else:
             logger.warning("GEMINI_API_KEY is not set. Falling back to LocalExtractiveGenerator.")

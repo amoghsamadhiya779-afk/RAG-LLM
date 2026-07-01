@@ -25,11 +25,11 @@ async def chat_with_gemini(
         return ChatResponse(response="Gemini API Key is missing on the server. Please configure it in .env.")
         
     try:
-        from google import genai
         from google.genai import types
+        from app.core.gemini_client import get_gemini_client
         
-        model = settings.GEMINI_MODEL or "gemini-2.5-flash"
-        genai_client = genai.Client(api_key=api_key)
+        model = settings.GEMINI_MODEL
+        genai_client = get_gemini_client()
         
         config = types.GenerateContentConfig(
             system_instruction="You are the jOBiON Career Assistant. You help users find jobs, give career advice, and summarize their skills. Be concise, professional, and encouraging.",

@@ -53,8 +53,8 @@ class OpenAIEmbedding(EmbeddingModel):
 
 class GeminiEmbeddingModel(EmbeddingModel):
     def __init__(self, api_key: str, model: str):
-        from google import genai
-        self.client = genai.Client(api_key=api_key)
+        from app.core.gemini_client import get_gemini_client
+        self.client = get_gemini_client()
         self.model = model
 
     def embed(self, texts: list[str]) -> list[list[float]]:
@@ -78,7 +78,7 @@ def build_embedding_model(settings: Settings) -> EmbeddingModel:
         api_key = core_settings.GEMINI_API_KEY or os.environ.get("GEMINI_API_KEY")
         if not api_key:
             return LocalHashEmbedding()
-        model = core_settings.GEMINI_EMBED_MODEL or settings.GEMINI_EMBED_MODEL or "text-embedding-004"
+        model = settings.GEMINI_EMBED_MODEL or core_settings.GEMINI_EMBED_MODEL
         return GeminiEmbeddingModel(api_key, model)
     if settings.embedding_provider == "openai":
         api_key = settings.openai_api_key or os.environ.get("OPENAI_API_KEY")

@@ -24,8 +24,8 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str = ""
     SERPER_API_KEY: str = ""
     GEMINI_API_KEY: str = ""
-    GEMINI_MODEL: str = ""
-    GEMINI_EMBED_MODEL: str = ""
+    GEMINI_MODEL: str = "gemini-2.5-flash"
+    GEMINI_EMBED_MODEL: str = "text-embedding-004"
     EMBEDDING_MODEL_NAME: str = "text-embedding-3-small"
     EMBEDDING_DIMENSION: int = 1536
     

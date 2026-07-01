@@ -49,11 +49,11 @@ async def get_skill_gap(
     resume_context = json.dumps(resume.parsed)
     
     try:
-        from google import genai
         from google.genai import types
+        from app.core.gemini_client import get_gemini_client
         
-        model = settings.GEMINI_MODEL or "gemini-2.5-flash"
-        genai_client = genai.Client(api_key=api_key)
+        model = settings.GEMINI_MODEL
+        genai_client = get_gemini_client()
         
         config = types.GenerateContentConfig(
             system_instruction="You are an expert Career Coach and AI Analyzer. You are provided with a user's parsed resume and a sample of live tech jobs. Identify 2 key technical skills the user lacks compared to these job requirements, but would have a high impact on their employability. Output a strict JSON array of objects. Format: [{\"skill\": \"Skill Name\", \"impact\": \"High Impact\", \"progress\": 20, \"description\": \"Short description of why it's needed\"}]",

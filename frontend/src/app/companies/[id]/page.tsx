@@ -49,7 +49,7 @@ export default function CompanyPage() {
                 <div className="mt-4 flex flex-wrap gap-4 text-xs text-muted-foreground">
                   {company.location && <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{company.location}</span>}
                   {company.size && <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{company.size}</span>}
-                  {company.website && <a href={company.website} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:text-foreground"><Globe className="h-3 w-3" />{company.website.replace(/^https?:\/\//, "")}</a>}
+                  {company.website && <a href={company.website} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:text-foreground"><Globe className="h-3 w-3" />{company.website?.replace(/^https?:\/\//, "") ?? ""}</a>}
                 </div>
               </div>
             </motion.div>

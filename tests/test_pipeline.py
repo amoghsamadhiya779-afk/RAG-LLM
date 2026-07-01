@@ -40,6 +40,9 @@ def mock_search_provider(monkeypatch):
         return await original_post(self, url, *args, **kwargs)
         
     monkeypatch.setattr("httpx.AsyncClient.post", mock_post)
+    from app.core.config import settings
+    monkeypatch.setattr(settings, "SERPER_API_KEY", "mock-serper-key")
+    monkeypatch.setenv("SERPER_API_KEY", "mock-serper-key")
 
 @pytest.mark.asyncio
 async def test_internet_search(mock_search_provider):

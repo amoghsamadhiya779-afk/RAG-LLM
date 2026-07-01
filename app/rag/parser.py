@@ -64,11 +64,11 @@ async def parse_resume_file(file_bytes: bytes, filename: str) -> dict:
         
         if api_key:
             try:
-                from google import genai
                 from google.genai import types
+                from app.core.gemini_client import get_gemini_client
                 
-                model = settings.GEMINI_MODEL or "gemini-2.5-flash"
-                genai_client = genai.Client(api_key=api_key)
+                model = settings.GEMINI_MODEL
+                genai_client = get_gemini_client()
                 
                 config = types.GenerateContentConfig(
                     system_instruction="You are a resume parser. Analyze the provided resume text and return a strict JSON object matching this schema: {\"titles\": [\"Software Engineer\"], \"seniority\": \"Senior\", \"skills\": [\"Python\", \"React\"], \"domains\": [\"Fintech\"], \"suggested_keywords\": [\"Backend\", \"FastAPI\"], \"years_experience\": 5}. DO NOT include any markdown formatting, only raw JSON.",

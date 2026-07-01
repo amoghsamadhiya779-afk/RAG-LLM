@@ -12,13 +12,17 @@ async def test_health_gemini_endpoint_success(monkeypatch):
         def __init__(self, name):
             self.name = name
 
-    class MockModelsService:
-        def list(self):
+    class MockAioModelsService:
+        async def list(self):
             return [MockModel("models/gemini-2.5-flash"), MockModel("models/text-embedding-004")]
+
+    class MockAioService:
+        def __init__(self):
+            self.models = MockAioModelsService()
 
     class MockClient:
         def __init__(self, api_key=None):
-            self.models = MockModelsService()
+            self.aio = MockAioService()
 
     import google.genai
     monkeypatch.setattr(google.genai, "Client", MockClient)
@@ -56,13 +60,17 @@ async def test_lifespan_verification_success(monkeypatch):
         def __init__(self, name):
             self.name = name
 
-    class MockModelsService:
-        def list(self):
+    class MockAioModelsService:
+        async def list(self):
             return [MockModel("models/gemini-2.5-flash"), MockModel("models/text-embedding-004")]
+
+    class MockAioService:
+        def __init__(self):
+            self.models = MockAioModelsService()
 
     class MockClient:
         def __init__(self, api_key=None):
-            self.models = MockModelsService()
+            self.aio = MockAioService()
 
     import google.genai
     monkeypatch.setattr(google.genai, "Client", MockClient)
@@ -112,13 +120,17 @@ async def test_lifespan_verification_fails_model_not_found(monkeypatch):
         def __init__(self, name):
             self.name = name
 
-    class MockModelsService:
-        def list(self):
+    class MockAioModelsService:
+        async def list(self):
             return [MockModel("models/some-other-model")]
+
+    class MockAioService:
+        def __init__(self):
+            self.models = MockAioModelsService()
 
     class MockClient:
         def __init__(self, api_key=None):
-            self.models = MockModelsService()
+            self.aio = MockAioService()
 
     import google.genai
     monkeypatch.setattr(google.genai, "Client", MockClient)

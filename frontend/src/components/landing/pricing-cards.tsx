@@ -114,7 +114,7 @@ export function PricingCards() {
 
        <div className="mt-8 pt-2">
         {t.cta.to ? (
-         <Link href={t.cta.to}>
+         <Link to={t.cta.to}>
           <Button
            className={`w-full rounded-full ${t.highlighted ? "" : "bg-foreground text-background hover:bg-foreground/90"}`}
            variant={t.highlighted ? "default" : "default"}

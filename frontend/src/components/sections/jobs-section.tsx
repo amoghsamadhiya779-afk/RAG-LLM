@@ -25,7 +25,7 @@ const LEVELS: JobLevel[] = ["intern", "junior", "mid", "senior", "staff", "princ
 
 function JobsSectionContent() {
  const searchParams = useSearch({ strict: false });
- const initialQ = searchParams["q"] || searchParams["search"] || "";
+ const initialQ = searchParams["q"] || (searchParams as Record<string, string>)["search"] || "";
  
  const [query, setQuery] = useState(initialQ);
  const [tags, setTags] = useState<string[]>([]);

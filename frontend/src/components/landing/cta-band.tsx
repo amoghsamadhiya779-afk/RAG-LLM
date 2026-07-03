@@ -27,12 +27,12 @@ export function CtaBand() {
       Join thousands of developers and dozens of hiring teams already on jOBiON.
      </motion.p>
      <motion.div variants={reveal} className="mt-9 flex flex-wrap items-center justify-center gap-3">
-      <Link href="/jobs">
+      <Link to="/jobs">
        <Button size="lg" className="rounded-full" variant="secondary">
         Browse open roles
        </Button>
       </Link>
-      <Link href="/post">
+      <Link to="/post">
        <Button size="lg" variant="outline" className="h-11 rounded-full border-border bg-transparent px-6 text-small font-ui">
         Post a job
        </Button>

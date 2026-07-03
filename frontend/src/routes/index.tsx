@@ -13,15 +13,17 @@ import {
 import { SiteHeader } from "@/components/site/header";
 import { SiteFooter } from "@/components/site/footer";
 import { Hero } from "@/components/landing/hero";
+import { GalaxyBackground } from "@/components/landing/GalaxyBackground";
 import { LogoMarquee } from "@/components/landing/logo-marquee";
 import { FeatureGrid } from "@/components/landing/feature-grid";
 import { SplitFeature } from "@/components/landing/split-feature";
 import { MatchVisual } from "@/components/landing/match-visual";
 import { PipelineVisual } from "@/components/landing/pipeline-visual";
 import { IntegrationsRow } from "@/components/landing/integrations-row";
-
+import { PricingCards } from "@/components/landing/pricing-cards";
 import { FAQ } from "@/components/landing/faq";
 import { CtaBand } from "@/components/landing/cta-band";
+import { BrandReveal } from "@/components/animation/brand-reveal";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -46,21 +48,16 @@ const featuresA = [
   { icon: Zap, title: "One-click apply", description: "Apply with your parsed profile and a personal note. No retyping, ever." },
 ];
 
-const featuresB = [
-  { icon: MessagesSquare, title: "AI assistant", description: "Chat with the open-roles index. Ask which jobs fit and why." },
-  { icon: Compass, title: "Personalized recs", description: "Daily picks ranked to your profile, not someone else's algorithm." },
-  { icon: GitBranch, title: "Skill-gap insights", description: "See which skills unlock the next tier of roles you want." },
-  { icon: Bell, title: "Smart job alerts", description: "Weekly digests for the exact roles you described, semantically matched." },
-];
-
 function LandingPage() {
   return (
-    <div className="min-h-dvh bg-background text-foreground">
+    <div className="min-h-dvh bg-void text-foreground relative">
+      <BrandReveal />
+      <GalaxyBackground />
       <SiteHeader />
-      <main>
+      
+      <main className="relative z-10">
         <Hero />
-        <LogoMarquee />
-
+        
         <FeatureGrid
           eyebrow="For candidates"
           title="Search that actually understands you."
@@ -68,43 +65,42 @@ function LandingPage() {
           features={featuresA}
         />
 
-        <SplitFeature
-          eyebrow="Candidate flow"
-          title="From search to offer."
-          body="Type what you want in plain English. We turn your query into a ranked feed of roles, pre-scored against your resume — then route you to one-click apply."
-          bullets={[
-            "Natural-language search across every live role",
-            "Match score visible before you click apply",
-            "Resume parsed once, reused everywhere",
-          ]}
-          ctaLabel="Try the search"
-          ctaTo="/jobs"
-          visual={<MatchVisual />}
-        />
+        <div id="features">
+          <SplitFeature
+            eyebrow="Candidate flow"
+            title="From search to offer."
+            body="Type what you want in plain English. We turn your query into a ranked feed of roles, pre-scored against your resume — then route you to one-click apply."
+            bullets={[
+              "Natural-language search across every live role",
+              "Match score visible before you click apply",
+              "Resume parsed once, reused everywhere",
+            ]}
+            ctaLabel="Try the search"
+            ctaTo="/jobs"
+            visual={<MatchVisual />}
+          />
+        </div>
 
-        <SplitFeature
-          reverse
-          eyebrow="For employers"
-          title="Post once, reach the right engineers."
-          body="Stop drowning in unqualified inbound. jOBiON scores every applicant against the role, surfaces the best fits first, and integrates with your existing ATS."
-          bullets={[
-            "Applicant ranking out of the box",
-            "Kanban pipeline with stage automation",
-            "Featured listings for high-priority roles",
-          ]}
-          ctaLabel="Post a job"
-          ctaTo="/post"
-          visual={<PipelineVisual />}
-        />
+        <div id="use-cases">
+          <SplitFeature
+            reverse
+            eyebrow="For employers"
+            title="Post once, reach the right engineers."
+            body="Stop drowning in unqualified inbound. jOBiON scores every applicant against the role, surfaces the best fits first, and integrates with your existing ATS."
+            bullets={[
+              "Applicant ranking out of the box",
+              "Kanban pipeline with stage automation",
+              "Featured listings for high-priority roles",
+            ]}
+            ctaLabel="Post a job"
+            ctaTo="/post"
+            visual={<PipelineVisual />}
+          />
+        </div>
 
-        <FeatureGrid
-          eyebrow="AI-native"
-          title="AI-native, candidate-first."
-          subhead="Every surface in jOBiON is designed around one question: does this role fit you, right now?"
-          features={featuresB}
-        />
-
+        <LogoMarquee />
         <IntegrationsRow />
+        <PricingCards />
         <FAQ />
         <CtaBand />
       </main>

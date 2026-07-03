@@ -34,34 +34,30 @@ export function SiteHeader() {
         </Link>
         
         <nav className="flex items-center gap-6">
-          <a 
-            href="#features" 
-            onClick={(e) => handleAnchorClick(e, "#features")}
+          <Link 
+            to="/features" 
             className="text-[14px] font-ui text-mist transition-colors hover:text-bone"
           >
             Features
-          </a>
-          <a 
-            href="#jobs" 
-            onClick={(e) => handleAnchorClick(e, "#jobs")}
+          </Link>
+          <Link 
+            to="/jobs" 
             className="text-[14px] font-ui text-mist transition-colors hover:text-bone"
           >
             Jobs
-          </a>
-          <a 
-            href="#companies" 
-            onClick={(e) => handleAnchorClick(e, "#companies")}
+          </Link>
+          <Link 
+            to="/companies" 
             className="text-[14px] font-ui text-mist transition-colors hover:text-bone"
           >
             Companies
-          </a>
-          <a 
-            href="#ai-workspace" 
-            onClick={(e) => handleAnchorClick(e, "#ai-workspace")}
+          </Link>
+          <Link 
+            to="/ai-workspace" 
             className="text-[14px] font-ui text-mist transition-colors hover:text-bone"
           >
             AI Workspace
-          </a>
+          </Link>
         </nav>
         
         <div className="flex items-center gap-4">

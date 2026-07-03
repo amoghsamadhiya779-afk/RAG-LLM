@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ResourcesRouteImport } from './routes/resources'
 import { Route as JobsRouteImport } from './routes/jobs'
+import { Route as FeaturesRouteImport } from './routes/features'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -35,6 +36,11 @@ const ResourcesRoute = ResourcesRouteImport.update({
 const JobsRoute = JobsRouteImport.update({
   id: '/jobs',
   path: '/jobs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeaturesRoute = FeaturesRouteImport.update({
+  id: '/features',
+  path: '/features',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -119,6 +125,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/blog': typeof BlogRouteWithChildren
   '/contact': typeof ContactRoute
+  '/features': typeof FeaturesRoute
   '/jobs': typeof JobsRouteWithChildren
   '/resources': typeof ResourcesRoute
   '/admin': typeof AuthenticatedAdminRoute
@@ -137,6 +144,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/blog': typeof BlogRouteWithChildren
   '/contact': typeof ContactRoute
+  '/features': typeof FeaturesRoute
   '/jobs': typeof JobsRouteWithChildren
   '/resources': typeof ResourcesRoute
   '/admin': typeof AuthenticatedAdminRoute
@@ -157,6 +165,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/blog': typeof BlogRouteWithChildren
   '/contact': typeof ContactRoute
+  '/features': typeof FeaturesRoute
   '/jobs': typeof JobsRouteWithChildren
   '/resources': typeof ResourcesRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
@@ -177,6 +186,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/blog'
     | '/contact'
+    | '/features'
     | '/jobs'
     | '/resources'
     | '/admin'
@@ -195,6 +205,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/blog'
     | '/contact'
+    | '/features'
     | '/jobs'
     | '/resources'
     | '/admin'
@@ -214,6 +225,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/blog'
     | '/contact'
+    | '/features'
     | '/jobs'
     | '/resources'
     | '/_authenticated/admin'
@@ -234,6 +246,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   BlogRoute: typeof BlogRouteWithChildren
   ContactRoute: typeof ContactRoute
+  FeaturesRoute: typeof FeaturesRoute
   JobsRoute: typeof JobsRouteWithChildren
   ResourcesRoute: typeof ResourcesRoute
   CompaniesIdRoute: typeof CompaniesIdRoute
@@ -254,6 +267,13 @@ declare module '@tanstack/react-router' {
       path: '/jobs'
       fullPath: '/jobs'
       preLoaderRoute: typeof JobsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/features': {
+      id: '/features'
+      path: '/features'
+      fullPath: '/features'
+      preLoaderRoute: typeof FeaturesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -409,6 +429,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   BlogRoute: BlogRouteWithChildren,
   ContactRoute: ContactRoute,
+  FeaturesRoute: FeaturesRoute,
   JobsRoute: JobsRouteWithChildren,
   ResourcesRoute: ResourcesRoute,
   CompaniesIdRoute: CompaniesIdRoute,

@@ -1,10 +1,7 @@
 @import '@fontsource-variable/inter';
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-@layer base {
-  :root {
+@theme {
   --font-sans: "Inter Variable", sans-serif;
   
   --text-display-xl: 64px;
@@ -48,12 +45,24 @@
   --font-weight-heading: 600;
   --font-weight-display: 700;
   
-  --color-text-primary: #E6E8EB;
-  --color-text-secondary: rgba(230, 232, 235, 0.64);
-  --color-text-tertiary: rgba(230, 232, 235, 0.44);
+  --color-foreground: #E6E8EB;
+  --color-primary: #E6E8EB;
+  --color-primary-foreground: #0B0C0E;
+  --color-secondary: rgba(230, 232, 235, 0.64);
+  --color-secondary-foreground: #E6E8EB;
+  --color-muted: #1A1C20;
+  --color-muted-foreground: rgba(230, 232, 235, 0.64);
+  --color-accent: #2A2D33;
+  --color-accent-foreground: #E6E8EB;
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+  --color-popover: #141518;
+  --color-popover-foreground: #E6E8EB;
+  --color-input: #2A2D33;
   
   --color-background: #0B0C0E;
   --color-card: #141518;
+  --color-card-foreground: #E6E8EB;
   --color-raised: #1A1C20;
   --color-border: #2A2D33;
   --color-divider: rgba(255, 255, 255, 0.08);
@@ -61,6 +70,11 @@
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
+  --radius-3xl: 40px;
+  --radius-cards: 24px;
+  --radius-pill: 9999px;
   --radius-full: 9999px;
   
   --shadow-float: 0 8px 24px rgba(0, 0, 0, 0.4);
@@ -89,8 +103,9 @@
     --color-onyx: #000000;
     --color-indigo-haze: #6b62f2;
     --color-dawn-wash: #9cafb8;
-  }
+}
 
+@layer base {
   * {
     @apply border-border;
   }

@@ -1,7 +1,10 @@
 @import '@fontsource-variable/inter';
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@theme {
+@layer base {
+  :root {
   --font-sans: "Inter Variable", sans-serif;
   
   --text-display-xl: 64px;
@@ -69,10 +72,7 @@
   --z-modal: 80;
   --z-toast: 90;
   --z-reveal: 100;
-}
 
-@layer base {
-  :root {
     /* Dimension Colors */
     --color-void: #0a0a0a;
     --color-char: #1d1d1d;

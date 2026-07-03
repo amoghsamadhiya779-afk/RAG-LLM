@@ -35,11 +35,10 @@ async def lifespan(app: FastAPI):
             
             if not found:
                 logger.error(f"Configured GEMINI_MODEL '{model_name}' was not found in available models: {model_names}")
-                sys.exit(1)
-            logger.info(f"Gemini startup check passed. Model '{model_name}' is available.")
+            else:
+                logger.info(f"Gemini startup check passed. Model '{model_name}' is available.")
         except Exception as e:
-            logger.error(f"Gemini configuration or verification failed: {e}")
-            sys.exit(1)
+            logger.warning(f"Gemini configuration or verification failed (API may be down or key invalid): {e}. Continuing boot.")
             
     yield
 

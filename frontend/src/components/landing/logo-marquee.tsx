@@ -20,7 +20,7 @@ function LogoChip({ slug }: { slug: string }) {
           <path d={icon.path} />
         </svg>
       </span>
-      <span className="text-[15px] font-medium tracking-tight text-muted-foreground/90">
+      <span className="text-[15px] font-ui tracking-tight text-secondary/90">
         {icon.title}
       </span>
     </div>

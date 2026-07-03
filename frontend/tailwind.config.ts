@@ -76,6 +76,17 @@ const config = {
         md: "4px",
         sm: "2px",
       },
+      extend: {
+        keyframes: {
+          "galaxy-fade-in": {
+            "0%": { opacity: "0" },
+            "100%": { opacity: "1" },
+          },
+        },
+        animation: {
+          "galaxy-fade-in": "galaxy-fade-in 0.8s ease-out forwards",
+        },
+      },
   },
   plugins: [require("tailwindcss-animate")],
 } satisfies Config;

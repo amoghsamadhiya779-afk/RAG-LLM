@@ -18,15 +18,15 @@ function NotFoundComponent() {
   return (
     <div className="flex min-h-dvh items-center justify-center px-4">
       <div className="max-w-md text-center">
-        <h1 className="font-display text-7xl font-bold brand-gradient-text">404</h1>
-        <h2 className="mt-4 text-xl font-semibold">Page not found</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <h1 className="font-display text-display-xl font-display brand-gradient-text">404</h1>
+        <h2 className="mt-4 text-body-lg font-heading">Page not found</h2>
+        <p className="mt-2 text-small text-secondary">
           That route doesn't exist. Head back to find a job.
         </p>
         <div className="mt-6">
           <Link
             to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
+            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-small font-ui text-primary-foreground transition-colors hover:opacity-90"
           >
             Browse jobs
           </Link>
@@ -45,16 +45,16 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   return (
     <div className="flex min-h-dvh items-center justify-center px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight">Something broke</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Try again or head home.</p>
+        <h1 className="text-body-lg font-heading tracking-tight">Something broke</h1>
+        <p className="mt-2 text-small text-secondary">Try again or head home.</p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => { router.invalidate(); reset(); }}
-            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+            className="rounded-md bg-primary px-4 py-2 text-small font-ui text-primary-foreground"
           >
             Try again
           </button>
-          <a href="/" className="rounded-md border border-input px-4 py-2 text-sm">Go home</a>
+          <a href="/" className="rounded-md border border-input px-4 py-2 text-small">Go home</a>
         </div>
       </div>
     </div>
@@ -72,12 +72,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:description", content: "Find tech jobs and internships matched to you." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "theme-color", content: "#0B0C0E" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" },
+      { rel: "icon", href: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='12' fill='%23e5e5e5'/><text x='50%' y='50%' font-family='sans-serif' font-size='14' font-weight='700' fill='%23000000' dominant-baseline='central' text-anchor='middle'>J</text></svg>" },
     ],
   }),
   shellComponent: RootShell,
@@ -98,21 +97,25 @@ function RootShell({ children }: { children: ReactNode }) {
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouterState } from "@tanstack/react-router";
 
+import DotFieldBackground from "@/components/landing/DotFieldBackground";
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const routerState = useRouterState();
+  const pathname = routerState.location.pathname;
   
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
+        {pathname !== "/" && <DotFieldBackground />}
         <AnimatePresence mode="wait">
           <motion.div
-            key={routerState.location.pathname}
+            key={pathname}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="flex-1 flex flex-col min-h-dvh"
+            className="flex-1 flex flex-col min-h-dvh relative z-10"
           >
             <Outlet />
           </motion.div>

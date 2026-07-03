@@ -4,7 +4,8 @@ import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import auth, jobs, companies, applications, resumes, admin, chat, insights
+from app.api.routes import auth, jobs, companies, applications, resumes, admin, chat, insights
+from app.services.rag.api import router as rag_router
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -16,7 +17,7 @@ async def lifespan(app: FastAPI):
     is_testing = os.environ.get("TESTING") in ("1", "true", "True")
     
     if not (is_pytest or is_testing):
-        api_key = settings.GEMINI_API_KEY or os.environ.get("GEMINI_API_KEY")
+        api_key = settings.GEMINI_API_KEY
         if not api_key:
             raise ValueError("GEMINI_API_KEY is not configured but required for startup.")
         
@@ -48,7 +49,7 @@ app = FastAPI(title=settings.PROJECT_NAME, lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[origin.strip().rstrip("/") for origin in settings.ALLOWED_ORIGINS.split(",") if origin.strip()],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -62,10 +63,44 @@ app.include_router(resumes.router)
 app.include_router(admin.router)
 app.include_router(chat.router)
 app.include_router(insights.router)
+app.include_router(rag_router)
 
 @app.get("/health")
 async def health():
     return {"status": "ok"}
+
+@app.get("/health/deep")
+async def health_deep(
+    request: Request,
+    api_key: str = Header(..., alias="X-API-Key")
+):
+    if api_key != settings.backend_api_key:
+        raise HTTPException(status_code=401, detail="Invalid API Key")
+        
+    from scripts.check_connections import run_checks
+    
+    # We can capture stdout or modify run_checks to return dict. 
+    # Let's modify check_connections.py later to return dict.
+    from scripts.check_connections import (
+        check_database, check_supabase_auth, check_jwks, check_gemini,
+        check_adzuna, check_upstash, check_resend, check_turnstile
+    )
+    
+    results = {
+        "database": await check_database(),
+        "supabase_auth": await check_supabase_auth(),
+        "supabase_jwks": await check_jwks(),
+        "gemini": await check_gemini(),
+        "adzuna": await check_adzuna(),
+        "redis": await check_upstash(),
+        "resend": await check_resend(),
+        "turnstile": await check_turnstile(),
+    }
+    
+    has_critical_failure = any(res[0] == "FAIL" for res in results.values())
+    status_code = 503 if has_critical_failure else 200
+    
+    return JSONResponse(status_code=status_code, content={"status": "fail" if has_critical_failure else "ok", "results": results})
 
 @app.get("/ready")
 async def ready():
@@ -74,7 +109,7 @@ async def ready():
 
 @app.get("/health/gemini")
 async def health_gemini():
-    api_key = settings.GEMINI_API_KEY or os.environ.get("GEMINI_API_KEY")
+    api_key = settings.GEMINI_API_KEY
     if not api_key:
         raise HTTPException(status_code=500, detail="Gemini API Key is not configured")
         

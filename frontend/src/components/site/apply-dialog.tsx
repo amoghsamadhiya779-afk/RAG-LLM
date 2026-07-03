@@ -74,8 +74,8 @@ export function ApplyDialog({ open, onOpenChange, jobId, jobTitle }: {
         <DialogContent>
           <div className="flex flex-col items-center py-6 text-center">
             <CheckCircle2 className="h-12 w-12 text-primary" />
-            <h3 className="mt-4 font-display text-xl font-semibold">Application sent</h3>
-            <p className="mt-2 text-sm text-muted-foreground">We've notified {jobTitle.split(" at ")[0]}. Track replies in your profile.</p>
+            <h3 className="mt-4 font-display text-body-lg font-heading">Application sent</h3>
+            <p className="mt-2 text-small text-secondary">We've notified {jobTitle.split(" at ")[0]}. Track replies in your profile.</p>
             <div className="mt-6 flex gap-2">
               <Button variant="outline" onClick={() => handleClose(false)}>Close</Button>
               <Button onClick={() => router.push("/profile")}>View applications</Button>
@@ -96,7 +96,7 @@ export function ApplyDialog({ open, onOpenChange, jobId, jobTitle }: {
 
         <div className="space-y-4">
           <label
-            className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-surface/40 px-6 py-8 text-center transition-colors hover:border-primary/50"
+            className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-md border border-dashed border-border bg-surface/40 px-6 py-8 text-center transition-colors hover:border-primary/50"
             onDragOver={(e) => e.preventDefault()}
             onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files?.[0]; if (f) setFile(f); }}
           >
@@ -104,14 +104,14 @@ export function ApplyDialog({ open, onOpenChange, jobId, jobTitle }: {
             {file ? (
               <>
                 <FileText className="h-6 w-6 text-primary" />
-                <div className="text-sm font-medium">{file.name}</div>
-                <div className="text-xs text-muted-foreground">Click or drop to replace</div>
+                <div className="text-small font-ui">{file.name}</div>
+                <div className="text-micro text-secondary">Click or drop to replace</div>
               </>
             ) : (
               <>
-                <UploadCloud className="h-6 w-6 text-muted-foreground" />
-                <div className="text-sm font-medium">Drop resume or click to upload</div>
-                <div className="text-xs text-muted-foreground">PDF, DOCX, or TXT</div>
+                <UploadCloud className="h-6 w-6 text-secondary" />
+                <div className="text-small font-ui">Drop resume or click to upload</div>
+                <div className="text-micro text-secondary">PDF, DOCX, or TXT</div>
               </>
             )}
           </label>

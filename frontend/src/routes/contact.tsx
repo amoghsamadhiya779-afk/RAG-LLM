@@ -38,8 +38,8 @@ function ContactPage() {
         <section className="container-page pt-24 pb-12">
           <motion.div initial="hidden" whileInView="show" viewport={viewportOnce} variants={revealStagger} className="max-w-2xl">
             <motion.p variants={reveal} className="eyebrow">Contact</motion.p>
-            <motion.h1 variants={reveal} className="h-display mt-4 text-5xl md:text-6xl">Let's talk.</motion.h1>
-            <motion.p variants={reveal} className="mt-5 text-lg text-muted-foreground">
+            <motion.h1 variants={reveal} className="h-display mt-4 text-display md:text-display">Let's talk.</motion.h1>
+            <motion.p variants={reveal} className="mt-5 text-body-lg text-secondary">
               Pitching a partnership, reporting a bug, or telling us a job listing sucks — we want to hear it.
             </motion.p>
           </motion.div>
@@ -53,7 +53,7 @@ function ContactPage() {
               viewport={viewportOnce}
               variants={reveal}
               onSubmit={(e) => { e.preventDefault(); setSent(true); }}
-              className="rounded-2xl border border-border bg-card p-8"
+              className="rounded-lg border border-border bg-card p-8"
             >
               <div className="grid gap-5">
                 <div className="grid gap-2">
@@ -80,15 +80,15 @@ function ContactPage() {
 
             <motion.div initial="hidden" whileInView="show" viewport={viewportOnce} variants={revealStagger} className="space-y-4">
               {channels.map((c) => (
-                <motion.div key={c.title} variants={reveal} className="rounded-2xl border border-border bg-card p-6">
+                <motion.div key={c.title} variants={reveal} className="rounded-lg border border-border bg-card p-6">
                   <div className="flex items-start gap-4">
-                    <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-indigo-500 via-violet-500 to-pink-500 text-white">
+                    <div className="grid h-10 w-10 place-items-center rounded-md bg-gradient-to-br from-indigo-500 via-violet-500 to-pink-500 text-white">
                       <c.icon className="h-5 w-5" />
                     </div>
                     <div>
-                      <div className="text-sm font-semibold">{c.title}</div>
-                      <div className="mt-1 text-sm">{c.value}</div>
-                      <div className="mt-1 text-xs text-muted-foreground">{c.hint}</div>
+                      <div className="text-small font-heading">{c.title}</div>
+                      <div className="mt-1 text-small">{c.value}</div>
+                      <div className="mt-1 text-micro text-secondary">{c.hint}</div>
                     </div>
                   </div>
                 </motion.div>

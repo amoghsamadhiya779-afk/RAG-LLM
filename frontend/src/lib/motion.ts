@@ -37,3 +37,8 @@ export const scrollEntranceProps = {
   whileInView: "visible",
   viewport: { once: true, margin: "-80px" },
 };
+
+// Legacy compatibility exports
+export const reveal = fadeRise;
+export const revealStagger = staggerContainer;
+export const viewportOnce = { once: true, margin: "-80px" };

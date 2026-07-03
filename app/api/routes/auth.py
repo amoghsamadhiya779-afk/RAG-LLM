@@ -1,12 +1,13 @@
+from app.core.idempotency import IdempotentRoute
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
 from app.schemas.schemas import AuthSession, SignInRequest, UserCreate
 from app.services.auth_service import AuthService
-from app.core.deps import get_current_user
+from app.core.deps import require_user
 from app.models.models import User
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter(route_class=IdempotentRoute, prefix="/auth", tags=["auth"])
 
 @router.post("/sign-up", response_model=AuthSession)
 async def sign_up(req: UserCreate, db: AsyncSession = Depends(get_db)):
@@ -25,6 +26,6 @@ async def sign_out():
     return None
 
 @router.get("/me", response_model=AuthSession)
-async def get_me(user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+async def get_me(user: User = Depends(require_user), db: AsyncSession = Depends(get_db)):
     service = AuthService(db)
     return await service.get_me(user)

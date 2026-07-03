@@ -75,13 +75,13 @@ class GeminiEmbeddingModel(EmbeddingModel):
 def build_embedding_model(settings: Settings) -> EmbeddingModel:
     if settings.embedding_provider == "gemini":
         from app.core.config import settings as core_settings
-        api_key = core_settings.GEMINI_API_KEY or os.environ.get("GEMINI_API_KEY")
+        api_key = core_settings.GEMINI_API_KEY
         if not api_key:
             return LocalHashEmbedding()
         model = settings.GEMINI_EMBED_MODEL or core_settings.GEMINI_EMBED_MODEL
         return GeminiEmbeddingModel(api_key, model)
     if settings.embedding_provider == "openai":
-        api_key = settings.openai_api_key or os.environ.get("OPENAI_API_KEY")
+        api_key = settings.openai_api_key
         if not api_key:
             raise ValueError("RESUME_RAG_OPENAI_API_KEY or OPENAI_API_KEY is required for OpenAI embeddings.")
         return OpenAIEmbedding(api_key, settings.openai_embedding_model)

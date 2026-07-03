@@ -1,3 +1,4 @@
+from app.core.idempotency import IdempotentRoute
 import uuid
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,10 +7,10 @@ from typing import List
 from app.db.session import get_db
 from app.schemas.schemas import CompanyCreate, CompanyUpdate, CompanyResponse
 from app.repositories.company_repo import CompanyRepository
-from app.core.deps import get_current_user, require_role
+from app.core.deps import require_user, require_role
 from app.models.models import User, RoleEnum
 
-router = APIRouter(prefix="/companies", tags=["companies"])
+router = APIRouter(route_class=IdempotentRoute, prefix="/companies", tags=["companies"])
 
 @router.get("", response_model=List[CompanyResponse])
 async def get_companies(db: AsyncSession = Depends(get_db)):

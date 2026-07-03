@@ -1,3 +1,4 @@
+from app.core.idempotency import IdempotentRoute
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -13,7 +14,7 @@ from app.models.models import Job, JobStatusEnum, Resume
 from app.repositories.resume_repo import ResumeRepository
 from app.core.config import settings
 
-router = APIRouter(prefix="/insights", tags=["insights"])
+router = APIRouter(route_class=IdempotentRoute, prefix="/insights", tags=["insights"])
 
 @router.get("/skill-gap")
 async def get_skill_gap(
@@ -27,7 +28,7 @@ async def get_skill_gap(
     if not resume or not resume.parsed:
         return {"error": "Resume not found or not parsed yet. Please upload a resume first."}
         
-    api_key = settings.GEMINI_API_KEY or os.environ.get("GEMINI_API_KEY")
+    api_key = settings.GEMINI_API_KEY
         
     # 2. Fetch some top live jobs as a target sample
     stmt = select(Job).where(Job.status == JobStatusEnum.live).limit(10)

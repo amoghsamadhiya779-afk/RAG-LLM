@@ -65,24 +65,24 @@ function Profile() {
       <main className="flex-1 container-page py-10">
         <header className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="font-display text-3xl font-bold">{session?.profile.fullName ?? "Your profile"}</h1>
-            <p className="mt-1 text-sm text-muted-foreground">{session?.profile.headline ?? session?.user.email}</p>
+            <h1 className="font-display text-h2 font-display">{session?.profile.fullName ?? "Your profile"}</h1>
+            <p className="mt-1 text-small text-secondary">{session?.profile.headline ?? session?.user.email}</p>
           </div>
         </header>
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[320px_1fr]">
           <aside className="space-y-4">
             <div className="glass-card p-5">
-              <h2 className="text-sm font-medium">Resume</h2>
+              <h2 className="text-small font-ui">Resume</h2>
               {latestResume ? (
                 <div className="mt-3">
-                  <div className="flex items-center gap-2 text-sm">
+                  <div className="flex items-center gap-2 text-small">
                     <FileText className="h-4 w-4 text-primary" />
                     <span className="truncate">{latestResume.fileName}</span>
                   </div>
                   {latestResume.parsed && (
                     <div className="mt-4">
-                      <div className="text-xs font-medium text-muted-foreground">Parsed skills</div>
+                      <div className="text-micro font-ui text-secondary">Parsed skills</div>
                       <div className="mt-2 flex flex-wrap gap-1.5">
                         {latestResume.parsed.skills.map((s) => (
                           <span key={s} className="rounded-md bg-secondary px-2 py-0.5 text-[11px]">{s}</span>
@@ -92,12 +92,12 @@ function Profile() {
                   )}
                 </div>
               ) : (
-                <p className="mt-3 text-xs text-muted-foreground">No resume yet. Upload one to get AI matches.</p>
+                <p className="mt-3 text-micro text-secondary">No resume yet. Upload one to get AI matches.</p>
               )}
               <label className="mt-4 flex cursor-pointer flex-col items-center gap-2 rounded-lg border border-dashed border-border p-4 text-center transition-colors hover:border-primary/50">
                 <input type="file" accept=".pdf,.doc,.docx,.txt" className="sr-only" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
-                <UploadCloud className="h-5 w-5 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">{file ? file.name : "Drop PDF / DOCX / TXT"}</span>
+                <UploadCloud className="h-5 w-5 text-secondary" />
+                <span className="text-micro text-secondary">{file ? file.name : "Drop PDF / DOCX / TXT"}</span>
               </label>
               <Button size="sm" className="mt-2 w-full" onClick={() => upload.mutate()} disabled={!file || upload.isPending}>
                 {upload.isPending ? "Parsing…" : latestResume ? "Replace resume" : "Upload"}
@@ -141,10 +141,10 @@ function Profile() {
                     {applications.map((a) => (
                       <motion.li key={a.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="glass-card flex items-center justify-between p-4">
                         <div>
-                          <div className="font-medium">{a.job?.title ?? "Job"}</div>
-                          <div className="text-xs text-muted-foreground">{a.job?.company?.name ?? "—"} · {formatDate(a.createdAt)}</div>
+                          <div className="font-ui">{a.job?.title ?? "Job"}</div>
+                          <div className="text-micro text-secondary">{a.job?.company?.name ?? "—"} · {formatDate(a.createdAt)}</div>
                         </div>
-                        <span className="rounded-full bg-secondary px-2 py-0.5 text-xs capitalize">{a.stage}</span>
+                        <span className="rounded-full bg-secondary px-2 py-0.5 text-micro capitalize">{a.stage}</span>
                       </motion.li>
                     ))}
                   </ul>
@@ -162,8 +162,8 @@ function Profile() {
 function Empty({ title, body }: { title: string; body: React.ReactNode }) {
   return (
     <div className="glass-card p-10 text-center">
-      <h3 className="font-medium">{title}</h3>
-      <p className="mt-1 text-sm text-muted-foreground">{body}</p>
+      <h3 className="font-ui">{title}</h3>
+      <p className="mt-1 text-small text-secondary">{body}</p>
     </div>
   );
 }

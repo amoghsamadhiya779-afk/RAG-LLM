@@ -36,13 +36,13 @@ function CompanyPage() {
           <div className="pointer-events-none absolute -top-20 left-1/3 h-[400px] w-[700px] rounded-full bg-primary/10 blur-[100px]" />
           <div className="container-page relative py-16">
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex items-start gap-6">
-              <div className="grid h-20 w-20 shrink-0 place-items-center rounded-2xl border border-border bg-surface text-2xl font-semibold">
+              <div className="grid h-20 w-20 shrink-0 place-items-center rounded-lg border border-border bg-surface text-h3 font-heading">
                 {company.name[0]?.toUpperCase()}
               </div>
               <div className="min-w-0 flex-1">
-                <h1 className="font-display text-4xl font-bold">{company.name}</h1>
-                <p className="mt-2 max-w-2xl text-muted-foreground">{company.about}</p>
-                <div className="mt-4 flex flex-wrap gap-4 text-xs text-muted-foreground">
+                <h1 className="font-display text-h1 font-display">{company.name}</h1>
+                <p className="mt-2 max-w-2xl text-secondary">{company.about}</p>
+                <div className="mt-4 flex flex-wrap gap-4 text-micro text-secondary">
                   {company.location && <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{company.location}</span>}
                   {company.size && <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{company.size}</span>}
                   {company.website && <a href={company.website} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:text-foreground"><Globe className="h-3 w-3" />{company.website.replace(/^https?:\/\//, "")}</a>}
@@ -53,9 +53,9 @@ function CompanyPage() {
         </section>
 
         <section className="container-page py-12">
-          <h2 className="font-display text-2xl font-semibold">Open roles ({withCompany.length})</h2>
+          <h2 className="font-display text-h3 font-heading">Open roles ({withCompany.length})</h2>
           {withCompany.length === 0 ? (
-            <div className="mt-6 glass-card p-10 text-center text-muted-foreground">
+            <div className="mt-6 glass-card p-10 text-center text-secondary">
               No open roles right now. <Link to="/jobs" className="underline">Browse other companies</Link>.
             </div>
           ) : (

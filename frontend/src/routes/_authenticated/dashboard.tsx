@@ -39,8 +39,8 @@ function Dashboard() {
       <main className="flex-1 container-page py-10">
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="font-display text-3xl font-bold">Dashboard</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Your posted roles and applicants.</p>
+            <h1 className="font-display text-h2 font-display">Dashboard</h1>
+            <p className="mt-1 text-small text-secondary">Your posted roles and applicants.</p>
           </div>
         </div>
 
@@ -48,7 +48,7 @@ function Dashboard() {
           <div className="mt-8 grid gap-4">{Array.from({ length: 3 }).map((_, i) => <div key={i} className="glass-card h-24 animate-pulse" />)}</div>
         ) : !jobs?.length ? (
           <div className="mt-12 glass-card p-10 text-center">
-            <p className="text-muted-foreground">No jobs posted yet.</p>
+            <p className="text-secondary">No jobs posted yet.</p>
             <Button className="mt-4" onClick={() => (window.location.href = "/post")}>Post your first job</Button>
           </div>
         ) : (
@@ -62,22 +62,22 @@ function Dashboard() {
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <h3 className="truncate font-medium">{j.title}</h3>
+                      <h3 className="truncate font-ui">{j.title}</h3>
                       <StatusBadge status={j.status} />
                       {j.featured && <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-1.5 py-0.5 text-[10px] text-primary"><Star className="h-2.5 w-2.5 fill-current" />Featured</span>}
                     </div>
-                    <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
+                    <div className="mt-1 flex items-center gap-3 text-micro text-secondary">
                       <span className="inline-flex items-center gap-1"><Eye className="h-3 w-3" />{j.views}</span>
                       <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" /><ApplicantCount jobId={j.id} /></span>
                     </div>
                   </div>
-                  <ChevronRight className="h-4 w-4 self-center text-muted-foreground" />
+                  <ChevronRight className="h-4 w-4 self-center text-secondary" />
                 </button>
               ))}
             </ul>
 
             {selectedJob ? <Kanban job={selectedJob} /> : (
-              <div className="glass-card grid place-items-center p-10 text-sm text-muted-foreground">
+              <div className="glass-card grid place-items-center p-10 text-small text-secondary">
                 Select a job to see applicants
               </div>
             )}
@@ -119,7 +119,7 @@ function Kanban({ job }: { job: JobWithCompany }) {
   return (
     <div>
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="font-display text-xl font-semibold">{job.title}</h2>
+        <h2 className="font-display text-body-lg font-heading">{job.title}</h2>
         {!job.featured && <Button size="sm" onClick={() => feature.mutate()} disabled={feature.isPending}><Star className="h-3.5 w-3.5" /> Feature this job</Button>}
       </div>
       <div className="grid gap-3 sm:grid-cols-4">
@@ -127,15 +127,15 @@ function Kanban({ job }: { job: JobWithCompany }) {
           const items = apps.filter((a) => a.stage === s.v);
           return (
             <div key={s.v} className="glass-card flex flex-col gap-2 p-3">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-medium">{s.label}</span>
-                <span className="rounded bg-secondary px-1.5 py-0.5 text-muted-foreground">{items.length}</span>
+              <div className="flex items-center justify-between text-micro">
+                <span className="font-ui">{s.label}</span>
+                <span className="rounded bg-secondary px-1.5 py-0.5 text-secondary">{items.length}</span>
               </div>
               <div className="space-y-2">
                 {items.map((a) => (
-                  <motion.div layoutId={a.id} key={a.id} className="rounded-md border border-border bg-surface/60 p-2 text-xs">
-                    <div className="font-medium">{a.applicant?.fullName ?? "Anonymous"}</div>
-                    <div className="text-muted-foreground">{a.applicant?.headline ?? "Applicant"}</div>
+                  <motion.div layoutId={a.id} key={a.id} className="rounded-md border border-border bg-surface/60 p-2 text-micro">
+                    <div className="font-ui">{a.applicant?.fullName ?? "Anonymous"}</div>
+                    <div className="text-secondary">{a.applicant?.headline ?? "Applicant"}</div>
                     <div className="mt-2 flex flex-wrap gap-1">
                       {STAGES.filter((x) => x.v !== a.stage).map((x) => (
                         <button
@@ -147,7 +147,7 @@ function Kanban({ job }: { job: JobWithCompany }) {
                     </div>
                   </motion.div>
                 ))}
-                {items.length === 0 && <div className="rounded border border-dashed border-border p-3 text-center text-[11px] text-muted-foreground">Empty</div>}
+                {items.length === 0 && <div className="rounded border border-dashed border-border p-3 text-center text-[11px] text-secondary">Empty</div>}
               </div>
             </div>
           );

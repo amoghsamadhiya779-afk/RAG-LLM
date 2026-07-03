@@ -79,19 +79,19 @@ function JobDetail() {
     <div className="min-h-dvh flex flex-col">
       <SiteHeader />
       <main className="flex-1 container-page py-10">
-        <Link to="/jobs" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"><ArrowLeft className="h-3.5 w-3.5" /> Back to jobs</Link>
+        <Link to="/jobs" className="inline-flex items-center gap-1 text-small text-secondary hover:text-foreground"><ArrowLeft className="h-3.5 w-3.5" /> Back to jobs</Link>
 
         <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_320px]">
           <motion.article initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
             <header className="glass-card p-6">
               <div className="flex items-start gap-4">
-                <div className="grid h-14 w-14 shrink-0 place-items-center rounded-xl bg-surface-elevated border border-border text-lg font-semibold text-muted-foreground">
+                <div className="grid h-14 w-14 shrink-0 place-items-center rounded-md bg-surface-elevated border border-border text-body-lg font-heading text-secondary">
                   {job.company.name[0]?.toUpperCase()}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h1 className="font-display text-3xl font-bold">{job.title}</h1>
-                  <Link to="/companies/$id" params={{ id: job.company.slug }} className="mt-1 inline-block text-sm text-muted-foreground hover:text-primary">{job.company.name}</Link>
-                  <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                  <h1 className="font-display text-h2 font-display">{job.title}</h1>
+                  <Link to="/companies/$id" params={{ id: job.company.slug }} className="mt-1 inline-block text-small text-secondary hover:text-primary">{job.company.name}</Link>
+                  <div className="mt-4 flex flex-wrap items-center gap-3 text-small text-secondary">
                     <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{job.remote ? "Remote" : job.location ?? "—"}</span>
                     <span className="inline-flex items-center gap-1"><Briefcase className="h-3.5 w-3.5" />{job.jobType.replace("_", "-")}</span>
                     <span className="capitalize">{job.level}</span>
@@ -103,13 +103,13 @@ function JobDetail() {
             </header>
 
             <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }} className="glass-card mt-6 p-6">
-              <h2 className="font-display text-xl font-semibold">About the role</h2>
-              <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">{job.description}</p>
+              <h2 className="font-display text-body-lg font-heading">About the role</h2>
+              <p className="mt-3 whitespace-pre-line text-small leading-relaxed text-secondary">{job.description}</p>
             </motion.section>
 
             <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.15 }} className="glass-card mt-6 p-6">
-              <h2 className="font-display text-xl font-semibold">What we're looking for</h2>
-              <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+              <h2 className="font-display text-body-lg font-heading">What we're looking for</h2>
+              <ul className="mt-3 space-y-2 text-small text-secondary">
                 {job.requirements.map((r: string) => (
                   <li key={r} className="flex gap-2"><span className="text-primary">•</span><span>{r}</span></li>
                 ))}
@@ -118,7 +118,7 @@ function JobDetail() {
 
             {job.tags.length > 0 && (
               <div className="mt-6 flex flex-wrap gap-1.5">
-                {job.tags.map((t: string) => <span key={t} className="rounded-md bg-secondary px-2 py-1 text-xs">{t}</span>)}
+                {job.tags.map((t: string) => <span key={t} className="rounded-md bg-secondary px-2 py-1 text-micro">{t}</span>)}
               </div>
             )}
           </motion.article>
@@ -129,7 +129,7 @@ function JobDetail() {
               <Button size="lg" variant="outline" className="mt-2 w-full gap-2" onClick={() => toggleSave.mutate()} disabled={toggleSave.isPending}>
                 {isSaved ? <><BookmarkCheck className="h-4 w-4" /> Saved</> : <><Bookmark className="h-4 w-4" /> Save job</>}
               </Button>
-              <div className="mt-6 space-y-2 text-xs text-muted-foreground">
+              <div className="mt-6 space-y-2 text-micro text-secondary">
                 <div>Posted {formatDate(job.createdAt)}</div>
                 <div>{job.views.toLocaleString()} views</div>
               </div>
@@ -139,7 +139,7 @@ function JobDetail() {
 
         {similar && similar.length > 0 && (
           <section className="mt-16">
-            <h2 className="mb-4 font-display text-2xl font-semibold">Similar roles</h2>
+            <h2 className="mb-4 font-display text-h3 font-heading">Similar roles</h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {similar.map((j) => <JobCard key={j.id} job={j} />)}
             </div>

@@ -44,10 +44,10 @@ function ResourcesPage() {
         <section className="container-page pt-24 pb-12">
           <motion.div initial="hidden" whileInView="show" viewport={viewportOnce} variants={revealStagger} className="max-w-3xl">
             <motion.p variants={reveal} className="eyebrow">Resources</motion.p>
-            <motion.h1 variants={reveal} className="h-display mt-4 text-5xl md:text-6xl">
+            <motion.h1 variants={reveal} className="h-display mt-4 text-display md:text-display">
               Free playbooks for <span className="brand-gradient-text">both sides of the hire.</span>
             </motion.h1>
-            <motion.p variants={reveal} className="mt-5 text-lg text-muted-foreground">
+            <motion.p variants={reveal} className="mt-5 text-body-lg text-secondary">
               Templates, rubrics, and guides we use ourselves. No email gate, no upsell.
             </motion.p>
           </motion.div>
@@ -55,16 +55,16 @@ function ResourcesPage() {
 
         {groups.map((group) => (
           <section key={group.title} className="container-page py-12">
-            <h2 className="text-2xl font-semibold tracking-tight">{group.title}</h2>
+            <h2 className="text-h3 font-heading tracking-tight">{group.title}</h2>
             <motion.div initial="hidden" whileInView="show" viewport={viewportOnce} variants={revealStagger} className="mt-8 grid gap-6 md:grid-cols-3">
               {group.items.map((item) => (
                 <motion.div key={item.title} variants={reveal}>
-                  <Link to={item.to} className="group block h-full rounded-2xl border border-border bg-card p-6 transition-colors hover:border-foreground/30">
-                    <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-indigo-500 via-violet-500 to-pink-500 text-white">
+                  <Link to={item.to} className="group block h-full rounded-lg border border-border bg-card p-6 transition-colors hover:border-foreground/30">
+                    <div className="grid h-10 w-10 place-items-center rounded-md bg-gradient-to-br from-indigo-500 via-violet-500 to-pink-500 text-white">
                       <item.icon className="h-5 w-5" />
                     </div>
-                    <h3 className="mt-5 text-base font-semibold tracking-tight">{item.title}</h3>
-                    <p className="mt-2 text-sm text-muted-foreground">{item.desc}</p>
+                    <h3 className="mt-5 text-body font-heading tracking-tight">{item.title}</h3>
+                    <p className="mt-2 text-small text-secondary">{item.desc}</p>
                   </Link>
                 </motion.div>
               ))}

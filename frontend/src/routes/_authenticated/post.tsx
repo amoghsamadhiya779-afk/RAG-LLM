@@ -119,16 +119,16 @@ function PostJob() {
       <SiteHeader />
       <main className="flex-1 container-page py-10">
         <div className="mx-auto max-w-3xl">
-          <h1 className="font-display text-3xl font-bold">Post a job</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Submit your role for review. Lives in under an hour.</p>
+          <h1 className="font-display text-h2 font-display">Post a job</h1>
+          <p className="mt-1 text-small text-secondary">Submit your role for review. Lives in under an hour.</p>
 
           <div className="mt-8 flex items-center gap-2">
             {STEPS.map((s, i) => (
               <div key={s} className="flex flex-1 items-center gap-2">
-                <div className={`grid h-7 w-7 place-items-center rounded-full text-xs font-medium ${i <= step ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"}`}>
+                <div className={`grid h-7 w-7 place-items-center rounded-full text-micro font-ui ${i <= step ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary"}`}>
                   {i < step ? <Check className="h-3.5 w-3.5" /> : i + 1}
                 </div>
-                <span className={`text-sm ${i === step ? "font-medium" : "text-muted-foreground"}`}>{s}</span>
+                <span className={`text-small ${i === step ? "font-ui" : "text-secondary"}`}>{s}</span>
                 {i < STEPS.length - 1 && <div className={`h-px flex-1 ${i < step ? "bg-primary" : "bg-border"}`} />}
               </div>
             ))}
@@ -160,7 +160,7 @@ function PostJob() {
                       <Label htmlFor="location">Location</Label>
                       <Input id="location" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="New York, Remote, etc." />
                     </div>
-                    <label className="mt-7 flex items-center gap-2 text-sm">
+                    <label className="mt-7 flex items-center gap-2 text-small">
                       <Checkbox checked={remote} onCheckedChange={(v) => setRemote(!!v)} /> Remote-friendly
                     </label>
                   </div>
@@ -212,7 +212,7 @@ function PostJob() {
                           key={t}
                           type="button"
                           onClick={() => setTags((p) => p.includes(t) ? p.filter((x) => x !== t) : [...p, t])}
-                          className={`rounded-md px-2 py-1 text-xs ${tags.includes(t) ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"}`}
+                          className={`rounded-md px-2 py-1 text-micro ${tags.includes(t) ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"}`}
                         >{t}</button>
                       ))}
                     </div>
@@ -234,7 +234,7 @@ function PostJob() {
 
               {step === 2 && (
                 <motion.div key="s2" initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -12 }}>
-                  <p className="mb-3 text-sm text-muted-foreground">Preview — this is how your role will appear to candidates.</p>
+                  <p className="mb-3 text-small text-secondary">Preview — this is how your role will appear to candidates.</p>
                   <JobCard job={preview} />
                 </motion.div>
               )}
@@ -252,7 +252,7 @@ function PostJob() {
             </div>
           </div>
 
-          <p className="mt-3 text-center text-xs text-muted-foreground">
+          <p className="mt-3 text-center text-micro text-secondary">
             Already have an account? <Link to="/auth" className="underline">Sign in</Link>.
           </p>
         </div>

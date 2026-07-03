@@ -1,26 +1,39 @@
-import type { Variants } from "framer-motion";
+import { Variants } from "framer-motion";
 
-const EASE = [0.16, 1, 0.3, 1] as const;
+export const EASE = [0.16, 1, 0.3, 1];
 
-export const reveal: Variants = {
-  hidden: { opacity: 0, y: 24 },
-  show: {
+export const DURATIONS = {
+  fast: 0.15,
+  base: 0.2,
+  slow: 0.3,
+  entrance: 0.5,
+};
+
+export const fadeRise: Variants = {
+  hidden: { opacity: 0, y: 8 },
+  visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.6, ease: EASE },
+    transition: {
+      duration: DURATIONS.entrance,
+      ease: EASE,
+    },
   },
 };
 
-export const revealStagger: Variants = {
-  hidden: {},
-  show: {
-    transition: { staggerChildren: 0.08, delayChildren: 0.05 },
+export const staggerContainer: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05,
+      delayChildren: 0.1,
+    },
   },
 };
 
-export const cardLift = {
-  rest: { y: 0, transition: { duration: 0.2, ease: EASE } },
-  hover: { y: -4, transition: { duration: 0.2, ease: EASE } },
+export const scrollEntranceProps = {
+  initial: "hidden",
+  whileInView: "visible",
+  viewport: { once: true, margin: "-80px" },
 };
-
-export const viewportOnce = { once: true, margin: "-80px" } as const;

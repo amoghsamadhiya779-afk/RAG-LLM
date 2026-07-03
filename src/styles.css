@@ -1,0 +1,311 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Design system definition.
+ *
+ * The @theme inline block maps CSS custom properties to Tailwind utility
+ * classes (e.g. --color-primary -> bg-primary, text-primary).
+ *
+ * The :root and .dark blocks define the actual color values using oklch.
+ * All colors MUST use oklch format.
+ *
+ * To add a new semantic color:
+ * 1. Add the variable to :root (light value) and .dark (dark value)
+ * 2. Register it in @theme inline as --color-<name>: var(--<name>)
+ */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+  --radius: 0.75rem;
+  /* Volt Graphite — light */
+  --background: oklch(0.985 0.002 260);       /* #FAFAFB */
+  --foreground: oklch(0.21 0.01 260);         /* #1A1D21 graphite ink */
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.21 0.01 260);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.21 0.01 260);
+  --primary: oklch(0.5 0.21 262);             /* electric blue #2557E6 — AA on white */
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.96 0.003 260);
+  --secondary-foreground: oklch(0.21 0.01 260);
+  --muted: oklch(0.96 0.003 260);
+  --muted-foreground: oklch(0.5 0.01 260);
+  --accent: oklch(0.5 0.21 262);              /* accent = primary (the only accent) */
+  --accent-foreground: oklch(0.99 0 0);
+  --success: oklch(0.6 0.13 160);
+  --warning: oklch(0.75 0.13 80);
+  --destructive: oklch(0.55 0.19 25);
+  --destructive-foreground: oklch(0.99 0 0);
+  --border: oklch(0.91 0.004 260);            /* #E4E5E8 hairline */
+  --input: oklch(0.91 0.004 260);
+  --ring: oklch(0.55 0.22 262);
+  --chart-1: oklch(0.5 0.21 262);             /* highlighted series — electric blue */
+  --chart-2: oklch(0.55 0.01 260);
+  --chart-3: oklch(0.7 0.008 260);
+  --chart-4: oklch(0.8 0.006 260);
+  --chart-5: oklch(0.4 0.012 260);
+  --sidebar: oklch(0.985 0.002 260);
+  --sidebar-foreground: oklch(0.21 0.01 260);
+  --sidebar-primary: oklch(0.5 0.21 262);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.96 0.003 260);
+  --sidebar-accent-foreground: oklch(0.21 0.01 260);
+  --sidebar-border: oklch(0.91 0.004 260);
+  --sidebar-ring: oklch(0.55 0.22 262);
+
+  /* jOBiON — Volt Graphite: silver ink + one electric-blue node */
+  --brand-ink: #E6E8EB;
+  --brand-graphite: #0B0C0E;
+  --brand-graphite-card: #141518;
+  --brand-hairline: #2A2D33;
+  --brand-volt: #2E6FFF;
+  --brand-volt-hi: #6AA2FF;
+  --gradient-brand: linear-gradient(135deg, #2E6FFF, #6AA2FF);   /* legacy alias — used ONLY by the logo node */
+  --gradient-brand-soft: linear-gradient(
+    135deg,
+    oklch(0.5 0.21 262 / 0.12),
+    oklch(0.5 0.21 262 / 0.04)
+  );
+
+  /* Surfaces — flat cards + hairlines */
+  --glass: var(--card);
+  --glass-border: var(--border);
+  --shadow-soft: 0 1px 2px oklch(0 0 0 / 0.04), 0 4px 16px oklch(0 0 0 / 0.06);
+  --shadow-elevated: 0 8px 40px oklch(0 0 0 / 0.10);
+}
+
+.dark {
+  /* Volt Graphite — dark */
+  --background: oklch(0.16 0.004 260);        /* #0B0C0E */
+  --foreground: oklch(0.92 0.004 260);        /* #E6E8EB silver */
+  --card: oklch(0.2 0.005 260);               /* #141518 */
+  --card-foreground: oklch(0.92 0.004 260);
+  --popover: oklch(0.2 0.005 260);
+  --popover-foreground: oklch(0.92 0.004 260);
+  --primary: oklch(0.62 0.19 262);            /* #4C82FF */
+  --primary-foreground: oklch(0.13 0.01 260);
+  --secondary: oklch(0.22 0.005 260);
+  --secondary-foreground: oklch(0.92 0.004 260);
+  --muted: oklch(0.22 0.005 260);
+  --muted-foreground: oklch(0.65 0.008 260);
+  --accent: oklch(0.62 0.19 262);
+  --accent-foreground: oklch(0.13 0.01 260);
+  --success: oklch(0.7 0.13 160);
+  --warning: oklch(0.78 0.13 80);
+  --destructive: oklch(0.62 0.22 25);
+  --destructive-foreground: oklch(0.99 0 0);
+  --border: oklch(0.27 0.006 260);            /* #2A2D33 hairline */
+  --input: oklch(0.27 0.006 260);
+  --ring: oklch(0.62 0.19 262);
+  --chart-1: oklch(0.62 0.19 262);
+  --chart-2: oklch(0.55 0.008 260);
+  --chart-3: oklch(0.7 0.006 260);
+  --chart-4: oklch(0.4 0.008 260);
+  --chart-5: oklch(0.82 0.006 260);
+  --sidebar: oklch(0.18 0.005 260);
+  --sidebar-foreground: oklch(0.92 0.004 260);
+  --sidebar-primary: oklch(0.62 0.19 262);
+  --sidebar-primary-foreground: oklch(0.13 0.01 260);
+  --sidebar-accent: oklch(0.22 0.005 260);
+  --sidebar-accent-foreground: oklch(0.92 0.004 260);
+  --sidebar-border: oklch(0.27 0.006 260);
+  --sidebar-ring: oklch(0.62 0.19 262);
+
+  --glass: var(--card);
+  --glass-border: var(--border);
+  --shadow-soft: 0 1px 2px oklch(0 0 0 / 0.3), 0 8px 24px oklch(0 0 0 / 0.4);
+  --shadow-elevated: 0 12px 48px oklch(0 0 0 / 0.55);
+}
+
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    font-family:
+      "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-feature-settings: "cv11", "ss01", "ss03";
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+  }
+}
+
+/* ---------- Landing animations ---------- */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee 40s linear infinite;
+}
+.group:hover .animate-marquee {
+  animation-play-state: paused;
+}
+
+@keyframes shine {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+.animate-shine {
+  background-size: 200% auto;
+  animation: shine 6s linear infinite;
+}
+
+@keyframes aurora-a {
+  0%, 100% { transform: translate(-50%, 0) scale(1); opacity: 0.55; }
+  50% { transform: translate(-48%, 20px) scale(1.06); opacity: 0.7; }
+}
+@keyframes aurora-b {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(20px, -14px) scale(1.06); }
+}
+@keyframes aurora-c {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-24px, 20px) scale(1.04); }
+}
+.aurora-a {
+  background: radial-gradient(closest-side, #2E6FFF 0%, transparent 70%);
+  animation: aurora-a 18s ease-in-out infinite;
+}
+.aurora-b {
+  background: radial-gradient(closest-side, #1A1D21 0%, transparent 70%);
+  animation: aurora-b 22s ease-in-out infinite;
+}
+.aurora-c {
+  background: radial-gradient(closest-side, #6AA2FF 0%, transparent 70%);
+  animation: aurora-c 24s ease-in-out infinite;
+}
+
+/* Gradient text — retired to plain foreground for Volt Graphite */
+.text-gradient-brand {
+  color: var(--foreground);
+  background-image: none;
+}
+@keyframes gradient-pan {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+.animate-gradient { animation: none; }
+
+/* Float + pulse-glow */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.animate-float { animation: float 4s ease-in-out infinite; }
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 color-mix(in oklch, var(--primary) 45%, transparent); }
+  50% { opacity: 0.9; box-shadow: 0 0 0 8px color-mix(in oklch, var(--primary) 0%, transparent); }
+}
+.animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+
+/* Grain overlay */
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.9'/></svg>");
+}
+
+/* Retired conic-gradient ring — flat hairline for Volt Graphite */
+.gradient-ring {
+  background: var(--border);
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee,
+  .animate-shine,
+  .animate-gradient,
+  .animate-float,
+  .animate-pulse-glow,
+  .aurora-a,
+  .aurora-b,
+  .aurora-c,
+  .gradient-ring {
+    animation: none;
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+/* Retired Tahoe gradient — plain heavy foreground */
+.tahoe-glass-text {
+  color: var(--foreground);
+  background: none;
+  -webkit-text-stroke: 0;
+  filter: none;
+  animation: none;
+}
+
+
+html.intro-seen #brand-reveal-overlay { display: none !important; }

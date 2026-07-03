@@ -15,10 +15,10 @@ export function IntegrationsRow() {
           className="mx-auto max-w-2xl text-center"
         >
           <motion.p variants={reveal} className="eyebrow">Integrations</motion.p>
-          <motion.h2 variants={reveal} className="h-section mt-3 text-3xl sm:text-4xl">
+          <motion.h2 variants={reveal} className="h-section mt-3 text-h2 sm:text-h1">
             Works with your hiring stack.
           </motion.h2>
-          <motion.p variants={reveal} className="mt-4 text-sm leading-relaxed text-muted-foreground sm:text-base">
+          <motion.p variants={reveal} className="mt-4 text-small leading-relaxed text-secondary sm:text-body">
             Plug jOBiON into your ATS, comms, and billing tools. Sync applicants, post jobs, and route candidates without leaving your workflow.
           </motion.p>
         </motion.div>
@@ -34,7 +34,7 @@ export function IntegrationsRow() {
             <motion.div
               key={name}
               variants={reveal}
-              className="rounded-full border border-border bg-card px-5 py-2.5 text-sm font-medium tracking-tight text-muted-foreground"
+              className="rounded-full border border-border bg-card px-5 py-2.5 text-small font-ui tracking-tight text-secondary"
             >
               {name}
             </motion.div>

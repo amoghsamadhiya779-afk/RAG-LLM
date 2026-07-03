@@ -37,7 +37,7 @@ export function FAQ() {
           className="mx-auto max-w-2xl text-center"
         >
           <motion.p variants={reveal} className="eyebrow">FAQ</motion.p>
-          <motion.h2 variants={reveal} className="h-section mt-3 text-4xl sm:text-5xl">
+          <motion.h2 variants={reveal} className="h-section mt-3 text-h1 sm:text-display">
             Questions, answered.
           </motion.h2>
         </motion.div>
@@ -54,12 +54,12 @@ export function FAQ() {
               <AccordionItem
                 key={f.q}
                 value={`item-${i}`}
-                className="rounded-2xl border border-border bg-card px-6"
+                className="rounded-lg border border-border bg-card px-6"
               >
-                <AccordionTrigger className="py-5 text-left text-base font-medium hover:no-underline">
+                <AccordionTrigger className="py-5 text-left text-body font-ui hover:no-underline">
                   {f.q}
                 </AccordionTrigger>
-                <AccordionContent className="pb-5 text-sm leading-relaxed text-muted-foreground">
+                <AccordionContent className="pb-5 text-small leading-relaxed text-secondary">
                   {f.a}
                 </AccordionContent>
               </AccordionItem>

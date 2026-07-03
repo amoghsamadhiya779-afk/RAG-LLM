@@ -5,10 +5,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 
 from app.db.session import get_db
-from app.schemas.schemas import CompanyCreate, CompanyUpdate, CompanyResponse
-from app.repositories.company_repo import CompanyRepository
+from app.db.schemas import CompanyCreate, CompanyUpdate, CompanyResponse
+from app.db.company_repo import CompanyRepository
 from app.core.deps import require_user, require_role
-from app.models.models import User, RoleEnum
+from app.db.models import User, RoleEnum
 
 router = APIRouter(route_class=IdempotentRoute, prefix="/companies", tags=["companies"])
 

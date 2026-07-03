@@ -5,6 +5,7 @@ from typing import List, Optional, Any
 
 from sqlalchemy import String, Boolean, Integer, Float, ForeignKey, DateTime, Enum, JSON, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from pgvector.sqlalchemy import Vector
 
 from app.db.base import Base
 
@@ -94,7 +95,7 @@ class Job(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), index=True)
     
     # embedding
-    embedding = mapped_column(JSON, nullable=True)
+    embedding = mapped_column(Vector(768), nullable=True)
 
     company: Mapped["Company"] = relationship("Company", back_populates="jobs")
 
@@ -117,7 +118,7 @@ class Resume(Base):
     parsed: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
     
     # embedding
-    embedding = mapped_column(JSON, nullable=True)
+    embedding = mapped_column(Vector(768), nullable=True)
 
 class SavedJob(Base):
     __tablename__ = "saved_jobs"

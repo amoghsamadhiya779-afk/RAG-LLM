@@ -2,7 +2,7 @@ from sqlalchemy import select, and_, or_, cast, String
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.dialects.postgresql import insert
 from typing import List, Optional, Dict, Any
-from app.db.models import Job, AuditLog, ResumeMetadata
+from app.db.models import Job, AuditLog
 
 class JobRepository:
     def __init__(self, session: AsyncSession):

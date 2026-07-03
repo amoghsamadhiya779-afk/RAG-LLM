@@ -1,9 +1,9 @@
-from app.rag.config import Settings
-from app.rag.embeddings import EmbeddingModel
-from app.rag.llm import AnswerGenerator
-from app.rag.schemas import MatchResponse, SourceSnippet
-from app.rag.vector_store import SQLiteVectorStore, SearchResult
-from app.rag.services.query import _to_source
+from app.services.rag.config import Settings
+from app.services.rag.embeddings import EmbeddingModel
+from app.services.rag.llm import AnswerGenerator
+from app.services.rag.schemas import MatchResponse, SourceSnippet
+from app.services.rag.vector_store import SQLiteVectorStore, SearchResult
+from app.services.rag.services.query import _to_source
 
 class MatchService:
     def __init__(

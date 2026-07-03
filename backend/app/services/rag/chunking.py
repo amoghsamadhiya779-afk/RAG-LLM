@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from hashlib import sha256
 
-from app.rag.schemas import DocumentIn
+from app.services.rag.schemas import DocumentIn
 
 
 @dataclass(frozen=True)

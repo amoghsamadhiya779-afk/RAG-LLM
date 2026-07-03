@@ -5,10 +5,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 
 from app.db.session import get_db
-from app.schemas.schemas import JobCreate, JobUpdate, JobResponse, JobWithCompanyResponse, PaginatedResponse, JobFilters
-from app.repositories.job_repo import JobRepository
+from app.db.schemas import JobCreate, JobUpdate, JobResponse, JobWithCompanyResponse, PaginatedResponse, JobFilters
+from app.db.job_repo import JobRepository
 from app.core.deps import require_user, require_role, get_current_profile
-from app.models.models import User, Profile, RoleEnum
+from app.db.models import User, Profile, RoleEnum
 from app.core.config import settings
 
 router = APIRouter(route_class=IdempotentRoute, prefix="/jobs", tags=["jobs"])
@@ -76,38 +76,35 @@ async def search_jobs_with_internet(
     results = []
     
     serper_api_key = settings.SERPER_API_KEY
-    if serper_api_key and query_str:
-        serper_endpoint = "https://google.serper.dev/search"
-        try:
-            async with httpx.AsyncClient(follow_redirects=False, timeout=10.0) as client:
-                resp = await client.post(
-                    serper_endpoint,
-                    headers={
-                        "X-API-KEY": serper_api_key,
-                        "Content-Type": "application/json"
-                    },
-                    json={"q": query_str + " jobs"},
-                    timeout=10.0
-                )
-                if resp.status_code == 200:
-                    data = resp.json()
-                    items = data.get("organic", [])
-                    
-                    for item in items:
-                        results.append({
-                            "id": str(uuid.uuid4()),
-                            "title": item.get("title", "Unknown Role"),
-                            "description": item.get("snippet") or "",
-                            "url": item.get("link", ""),
-                            "source": "Web Search",
-                        })
-        except Exception as e:
-            print(f"Serper API Error: {e}")
-            
-    if not serper_api_key:
-        raise HTTPException(status_code=400, detail="SERPER_API_KEY is not configured on the backend.")
+    try:
+        serper_endpoint = settings.SERPER_API_URL
+        if not settings.SERPER_API_KEY:
+            raise HTTPException(status_code=400, detail="SERPER_API_KEY is not configured on the backend.")
+        async with httpx.AsyncClient(follow_redirects=False, timeout=10.0) as client:
+            resp = await client.post(
+                serper_endpoint,
+                headers={
+                    "X-API-KEY": serper_api_key,
+                    "Content-Type": "application/json"
+                },
+                json={"q": query_str + " jobs"},
+                timeout=10.0
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                items = data.get("organic", [])
+                
+                for item in items:
+                    results.append({
+                        "id": str(uuid.uuid4()),
+                        "title": item.get("title", "Unknown Role"),
+                        "description": item.get("snippet") or "",
+                        "url": item.get("link", ""),
+                        "source": "Web Search",
+                    })
+    except Exception as e:
+        print(f"Serper API Error: {e}")
         
-    return results
     return results
 
 @router.get("/search/semantic", response_model=List[JobWithCompanyResponse])
@@ -123,7 +120,7 @@ async def search_jobs_semantic(
 ):
     from sqlalchemy import select
     from sqlalchemy.orm import selectinload
-    from app.models.models import Job, JobStatusEnum
+    from app.db.models import Job, JobStatusEnum
     
     stmt = select(Job).options(selectinload(Job.company)).where(Job.status == JobStatusEnum.live)
     if location:
@@ -155,10 +152,10 @@ async def search_jobs_semantic(
     ]
     
     try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
+        async with httpx.AsyncClient() as client:
             resp = await client.post(
-                "https://api.langsearch.com/v1/rerank",
-                headers={"Authorization": f"Bearer {langsearch_api_key}"},
+                settings.LANGSEARCH_API_URL,
+                headers={"Authorization": f"Bearer {settings.SERPER_API_KEY}"},
                 json={"query": q, "documents": documents},
                 timeout=10.0
             )
@@ -181,7 +178,7 @@ async def search_jobs_semantic(
     return [JobWithCompanyResponse.model_validate(j) for j in jobs]
 
 import json
-from app.repositories.resume_repo import ResumeRepository
+from app.db.resume_repo import ResumeRepository
 
 @router.get("/recommended", response_model=List[JobWithCompanyResponse])
 async def get_recommended_jobs(

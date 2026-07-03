@@ -4,8 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, desc
 from sqlalchemy.orm import selectinload
 
-from app.models.models import Application, Job, Profile, Company
-from app.schemas.schemas import ApplicationCreate, ApplicationUpdate
+from app.db.models import Application, Job, Profile, Company
+from app.db.schemas import ApplicationCreate, ApplicationUpdate
 
 class ApplicationRepository:
     def __init__(self, db: AsyncSession):

@@ -7,8 +7,8 @@ import sqlite3
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
-from app.rag.chunking import Chunk
-from app.rag.embeddings import EmbeddingModel, cosine_similarity
+from app.services.rag.chunking import Chunk
+from app.services.rag.embeddings import EmbeddingModel, cosine_similarity
 
 
 @dataclass

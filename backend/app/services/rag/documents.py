@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from pypdf import PdfReader
 
-from app.rag.schemas import DocumentIn
+from app.services.rag.schemas import DocumentIn
 
 
 def load_document(path: Path, doc_type: str = "general") -> DocumentIn:

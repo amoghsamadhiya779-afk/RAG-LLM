@@ -7,7 +7,7 @@ import re
 from abc import ABC, abstractmethod
 from collections import Counter
 
-from app.rag.config import Settings
+from app.services.rag.config import Settings
 
 TOKEN_RE = re.compile(r"[a-zA-Z][a-zA-Z0-9+#.-]{1,}")
 

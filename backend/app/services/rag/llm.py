@@ -5,9 +5,9 @@ import os
 from abc import ABC, abstractmethod
 from collections.abc import Iterator
 
-from app.rag.config import Settings
-from app.rag.vector_store import SearchResult
-from app.rag.utils.text_analysis import _extract_gaps, _extract_signal, _keyword_coverage
+from app.services.rag.config import Settings
+from app.services.rag.vector_store import SearchResult
+from app.services.rag.utils.text_analysis import _extract_gaps, _extract_signal, _keyword_coverage
 
 
 logger = logging.getLogger(__name__)
@@ -82,7 +82,7 @@ class LocalExtractiveGenerator(AnswerGenerator):
         queries = [question]
         lower_q = question.lower()
         
-        from app.rag.rag import _keywords
+        from app.services.rag.rag import _keywords
         keywords = _keywords(question)
         if keywords:
             queries.append(" ".join(keywords))
@@ -107,7 +107,7 @@ class LocalExtractiveGenerator(AnswerGenerator):
 
     def grade_documents(self, question: str, contexts: list[SearchResult]) -> list[SearchResult]:
         # Simple local document grader (CRAG concept)
-        from app.rag.rag import _keywords
+        from app.services.rag.rag import _keywords
         q_keywords = _keywords(question)
         if not q_keywords:
             return contexts

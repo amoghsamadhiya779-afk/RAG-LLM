@@ -1,21 +1,21 @@
 from collections.abc import Iterator
 
-from app.rag.analyzer import ResumeAnalyzer
-from app.rag.config import Settings
-from app.rag.embeddings import EmbeddingModel
-from app.rag.llm import AnswerGenerator
-from app.rag.schemas import (
+from app.services.rag.analyzer import ResumeAnalyzer
+from app.services.rag.config import Settings
+from app.services.rag.embeddings import EmbeddingModel
+from app.services.rag.llm import AnswerGenerator
+from app.services.rag.schemas import (
     DocumentIn,
     IngestResponse,
     MatchResponse,
     QueryResponse,
     SourceSnippet,
 )
-from app.rag.vector_store import SQLiteVectorStore
-from app.rag.services.ingest import IngestService
-from app.rag.services.query import QueryService
-from app.rag.services.match import MatchService
-from app.rag.services.career import CareerIntelligenceService
+from app.services.rag.vector_store import SQLiteVectorStore
+from app.services.rag.services.ingest import IngestService
+from app.services.rag.services.query import QueryService
+from app.services.rag.services.match import MatchService
+from app.services.rag.services.career import CareerIntelligenceService
 
 class ResumeRagService:
     def __init__(

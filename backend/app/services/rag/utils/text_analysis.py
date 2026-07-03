@@ -1,5 +1,5 @@
 import re
-from app.rag.vector_store import SearchResult
+from app.services.rag.vector_store import SearchResult
 
 
 def _extract_signal(results: list[SearchResult], limit: int) -> list[str]:

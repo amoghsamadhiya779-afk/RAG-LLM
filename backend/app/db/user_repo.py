@@ -3,8 +3,8 @@ from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from app.models.models import User, Profile
-from app.schemas.schemas import UserCreate
+from app.db.models import User, Profile
+from app.db.schemas import UserCreate
 from app.core.security import get_password_hash
 
 class UserRepository:

@@ -3,8 +3,8 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from app.rag.documents import load_document
-from app.rag.factory import get_service
+from app.services.rag.documents import load_document
+from app.services.rag.factory import get_service
 
 
 def main() -> None:

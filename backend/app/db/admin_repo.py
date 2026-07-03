@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 
-from app.models.models import Job, Application, Company, JobStatusEnum
+from app.db.models import Job, Application, Company, JobStatusEnum
 
 class AdminRepository:
     def __init__(self, db: AsyncSession):

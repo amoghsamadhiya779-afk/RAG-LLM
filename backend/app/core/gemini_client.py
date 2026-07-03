@@ -12,7 +12,7 @@ def get_gemini_client() -> genai.Client:
         "pytest" in sys.modules or 
         "_pytest" in sys.modules or 
         "unittest" in sys.modules or 
-        os.environ.get("TESTING") in ("1", "true", "True")
+        settings.TESTING
     )
     if is_testing:
         api_key = settings.GEMINI_API_KEY

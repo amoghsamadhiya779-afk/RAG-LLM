@@ -4,8 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, desc
 from sqlalchemy.orm import selectinload
 
-from app.models.models import Job, Company, JobStatusEnum
-from app.schemas.schemas import JobCreate, JobUpdate, JobFilters
+from app.db.models import Job, Company, JobStatusEnum
+from app.db.schemas import JobCreate, JobUpdate, JobFilters
 
 class JobRepository:
     def __init__(self, db: AsyncSession):

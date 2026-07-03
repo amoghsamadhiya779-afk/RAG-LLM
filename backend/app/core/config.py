@@ -2,6 +2,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "jOBiON API"
+    TESTING: bool = False
     
     # Supabase / DB
     SUPABASE_URL: str
@@ -28,6 +29,11 @@ class Settings(BaseSettings):
     TURNSTILE_SECRET_KEY: str
     SENTRY_DSN: str
     CRON_SECRET: str
+    ADZUNA_API_URL: str = "https://api.adzuna.com/v1/api/jobs"
+    SERPER_API_URL: str = "https://google.serper.dev/search"
+    LANGSEARCH_API_URL: str = "https://api.langsearch.com/v1/rerank"
+    TURNSTILE_API_URL: str = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
+    RESEND_API_URL: str = "https://api.resend.com/emails"
     
     # Security / CORS
     ALLOWED_ORIGINS: str = "http://localhost:5173,http://localhost:5174,https://rag-llm-iota.vercel.app"

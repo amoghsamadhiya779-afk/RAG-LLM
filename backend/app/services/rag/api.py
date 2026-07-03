@@ -2,6 +2,16 @@ from app.core.idempotency import IdempotentRoute
 import json
 import os
 
+from fastapi import APIRouter, Request, Header, UploadFile, File, HTTPException
+from fastapi.responses import StreamingResponse
+from app.services.rag.deps import SettingsDep, ServiceDep, GuestAuthDep
+from app.services.rag.schemas import IngestResponse, DocumentIn, QueryResponse, QueryRequest, MatchResponse, MatchRequest, ResumeAnalyzeResponse, ResumeAnalyzeRequest, AtsMatchRequest, MatchedJob, UpgradeResponse, UpgradeRequest, InterviewResponse, InterviewRequest
+from app.services.rag.parser import parse_document
+from app.services.rag.seeder import seed_jobs
+from app.core.limits import limiter
+
+router = APIRouter(route_class=IdempotentRoute, tags=["rag"])
+
 @router.get("/health")
 def health(settings: SettingsDep, service: ServiceDep) -> dict[str, str | int]:
     return {

@@ -32,7 +32,7 @@ async def fetch_adzuna_jobs() -> List[Dict[str, Any]]:
             logger.warning("adzuna_budget_exhausted")
             return []
             
-    url = f"https://api.adzuna.com/v1/api/jobs/us/search/1?app_id={settings.ADZUNA_APP_ID}&app_key={settings.ADZUNA_APP_KEY}&results_per_page=20"
+    url = f"{settings.ADZUNA_API_URL}/us/search/1?app_id={settings.ADZUNA_APP_ID}&app_key={settings.ADZUNA_APP_KEY}&results_per_page=20"
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.get(url, timeout=15.0)

@@ -8,11 +8,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 
 from app.db.session import get_db, AsyncSessionLocal
-from app.schemas.schemas import ResumeResponse, ParsedResume
-from app.repositories.resume_repo import ResumeRepository
+from app.db.schemas import ResumeResponse, ParsedResume
+from app.db.resume_repo import ResumeRepository
 from app.core.deps import require_user, require_role
-from app.models.models import User, RoleEnum
-from app.rag.parser import parse_resume_file
+from app.db.models import User, RoleEnum
+from app.services.rag.parser import parse_resume_file
 from app.core.config import settings
 
 router = APIRouter(route_class=IdempotentRoute, prefix="/resumes", tags=["resumes"])

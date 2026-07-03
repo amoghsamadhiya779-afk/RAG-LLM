@@ -1,11 +1,11 @@
 from functools import lru_cache
 
-from app.rag.analyzer import ResumeAnalyzer
-from app.rag.config import get_settings
-from app.rag.embeddings import build_embedding_model
-from app.rag.llm import build_answer_generator
-from app.rag.rag import ResumeRagService
-from app.rag.vector_store import SQLiteVectorStore
+from app.services.rag.analyzer import ResumeAnalyzer
+from app.services.rag.config import get_settings
+from app.services.rag.embeddings import build_embedding_model
+from app.services.rag.llm import build_answer_generator
+from app.services.rag.rag import ResumeRagService
+from app.services.rag.vector_store import SQLiteVectorStore
 
 
 @lru_cache

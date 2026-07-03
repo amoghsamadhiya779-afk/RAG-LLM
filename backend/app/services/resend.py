@@ -12,7 +12,7 @@ async def send_email(to_email: str, subject: str, html_body: str) -> bool:
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.post(
-                "https://api.resend.com/emails",
+                settings.RESEND_API_URL,
                 headers={"Authorization": f"Bearer {settings.RESEND_API_KEY}"},
                 json={
                     "from": "onboarding@resend.dev",

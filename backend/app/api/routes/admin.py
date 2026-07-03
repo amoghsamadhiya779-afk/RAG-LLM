@@ -5,11 +5,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 
 from app.db.session import get_db
-from app.schemas.schemas import JobWithCompanyResponse, JobResponse, AdminStatsResponse, JobUpdate
-from app.repositories.job_repo import JobRepository
-from app.repositories.admin_repo import AdminRepository
+from app.db.schemas import JobWithCompanyResponse, JobResponse, AdminStatsResponse, JobUpdate
+from app.db.job_repo import JobRepository
+from app.db.admin_repo import AdminRepository
 from app.core.deps import require_user, require_role
-from app.models.models import User, RoleEnum, JobStatusEnum
+from app.db.models import User, RoleEnum, JobStatusEnum
 
 router = APIRouter(route_class=IdempotentRoute, prefix="/admin", tags=["admin"])
 
@@ -19,7 +19,7 @@ async def get_pending_jobs(
     user: User = Depends(require_role([RoleEnum.admin])),
     db: AsyncSession = Depends(get_db)
 ):
-    from app.schemas.schemas import JobFilters
+    from app.db.schemas import JobFilters
     repo = JobRepository(db)
     
     # Using the standard JobRepository filter

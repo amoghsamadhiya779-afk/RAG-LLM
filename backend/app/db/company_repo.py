@@ -3,8 +3,8 @@ from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from app.models.models import Company
-from app.schemas.schemas import CompanyCreate, CompanyUpdate
+from app.db.models import Company
+from app.db.schemas import CompanyCreate, CompanyUpdate
 
 class CompanyRepository:
     def __init__(self, db: AsyncSession):

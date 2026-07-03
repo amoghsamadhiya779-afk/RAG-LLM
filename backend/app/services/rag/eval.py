@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from app.rag.rag import ResumeRagService
+from app.services.rag.rag import ResumeRagService
 
 
 @dataclass(frozen=True)

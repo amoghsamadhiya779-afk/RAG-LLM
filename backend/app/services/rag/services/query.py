@@ -1,10 +1,10 @@
 import json
 from collections.abc import Iterator
-from app.rag.config import Settings
-from app.rag.embeddings import EmbeddingModel
-from app.rag.llm import AnswerGenerator
-from app.rag.schemas import QueryResponse, SourceSnippet
-from app.rag.vector_store import SQLiteVectorStore, SearchResult
+from app.services.rag.config import Settings
+from app.services.rag.embeddings import EmbeddingModel
+from app.services.rag.llm import AnswerGenerator
+from app.services.rag.schemas import QueryResponse, SourceSnippet
+from app.services.rag.vector_store import SQLiteVectorStore, SearchResult
 
 
 def _to_source(result: SearchResult) -> SourceSnippet:

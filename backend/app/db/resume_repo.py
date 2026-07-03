@@ -3,7 +3,7 @@ from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, desc
 
-from app.models.models import Resume
+from app.db.models import Resume
 
 class ResumeRepository:
     def __init__(self, db: AsyncSession):

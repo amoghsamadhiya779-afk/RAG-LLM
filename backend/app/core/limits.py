@@ -20,7 +20,7 @@ async def verify_turnstile(token: str) -> bool:
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.post(
-                "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+                settings.TURNSTILE_API_URL,
                 data={
                     "secret": settings.TURNSTILE_SECRET_KEY,
                     "response": token

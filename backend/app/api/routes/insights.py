@@ -10,8 +10,8 @@ import httpx
 import json
 
 from app.db.session import get_db
-from app.models.models import Job, JobStatusEnum, Resume
-from app.repositories.resume_repo import ResumeRepository
+from app.db.models import Job, JobStatusEnum, Resume
+from app.db.resume_repo import ResumeRepository
 from app.core.config import settings
 
 router = APIRouter(route_class=IdempotentRoute, prefix="/insights", tags=["insights"])

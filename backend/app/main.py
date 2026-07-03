@@ -2,10 +2,9 @@ import sys
 import os
 import logging
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Header, Request
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes import auth, jobs, companies, applications, resumes, admin, chat, insights
-from app.services.rag.api import router as rag_router
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -14,7 +13,7 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     # Startup check
     is_pytest = "pytest" in sys.modules
-    is_testing = os.environ.get("TESTING") in ("1", "true", "True")
+    is_testing = settings.TESTING
     
     if not (is_pytest or is_testing):
         api_key = settings.GEMINI_API_KEY
@@ -35,13 +34,12 @@ async def lifespan(app: FastAPI):
                     break
             
             if not found:
-                raise ValueError(
-                    f"Configured GEMINI_MODEL '{model_name}' was not found in available models: {model_names}"
-                )
+                logger.error(f"Configured GEMINI_MODEL '{model_name}' was not found in available models: {model_names}")
+                sys.exit(1)
             logger.info(f"Gemini startup check passed. Model '{model_name}' is available.")
         except Exception as e:
-            logger.error(f"Gemini startup verification failed: {e}")
-            raise ValueError(f"Gemini configuration or verification failed: {e}") from e
+            logger.error(f"Gemini configuration or verification failed: {e}")
+            sys.exit(1)
             
     yield
 
@@ -63,7 +61,6 @@ app.include_router(resumes.router)
 app.include_router(admin.router)
 app.include_router(chat.router)
 app.include_router(insights.router)
-app.include_router(rag_router)
 
 @app.get("/health")
 async def health():

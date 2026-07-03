@@ -4,7 +4,7 @@ from typing import List, Optional, Any
 from pydantic import BaseModel, ConfigDict, Field
 from pydantic.alias_generators import to_camel
 
-from app.models.models import RoleEnum, JobStatusEnum, JobTypeEnum, JobLevelEnum, ApplicationStageEnum
+from app.db.models import RoleEnum, JobStatusEnum, JobTypeEnum, JobLevelEnum, ApplicationStageEnum
 
 class CamelModel(BaseModel):
     model_config = ConfigDict(

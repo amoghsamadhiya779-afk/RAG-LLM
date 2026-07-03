@@ -2,10 +2,10 @@ from app.core.idempotency import IdempotentRoute
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
-from app.schemas.schemas import AuthSession, SignInRequest, UserCreate
+from app.db.schemas import AuthSession, SignInRequest, UserCreate
 from app.services.auth_service import AuthService
 from app.core.deps import require_user
-from app.models.models import User
+from app.db.models import User
 
 router = APIRouter(route_class=IdempotentRoute, prefix="/auth", tags=["auth"])
 

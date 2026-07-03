@@ -2,9 +2,9 @@ import json
 import os
 import re
 
-from app.rag.config import Settings
-from app.rag.embeddings import EmbeddingModel
-from app.rag.vector_store import SQLiteVectorStore
+from app.services.rag.config import Settings
+from app.services.rag.embeddings import EmbeddingModel
+from app.services.rag.vector_store import SQLiteVectorStore
 
 COMMON_SKILLS = [
     "python", "go", "golang", "java", "javascript", "typescript", "c++", "c#", "rust", "scala",

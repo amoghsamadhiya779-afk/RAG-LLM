@@ -1,3 +1,4 @@
+from app.core.idempotency import IdempotentRoute
 import uuid
 import os
 import re
@@ -9,12 +10,12 @@ from typing import List
 from app.db.session import get_db, AsyncSessionLocal
 from app.schemas.schemas import ResumeResponse, ParsedResume
 from app.repositories.resume_repo import ResumeRepository
-from app.core.deps import get_current_user, require_role
+from app.core.deps import require_user, require_role
 from app.models.models import User, RoleEnum
 from app.rag.parser import parse_resume_file
 from app.core.config import settings
 
-router = APIRouter(prefix="/resumes", tags=["resumes"])
+router = APIRouter(route_class=IdempotentRoute, prefix="/resumes", tags=["resumes"])
 
 MAX_FILE_SIZE = 5 * 1024 * 1024 # 5 MB
 ALLOWED_MIMES = {
@@ -168,7 +169,7 @@ async def score_ats(
         
     resume_text = resume.parsed if resume.parsed else "No resume data"
     
-    api_key = settings.GEMINI_API_KEY or os.environ.get("GEMINI_API_KEY") # local fallback if no HF space
+    api_key = settings.GEMINI_API_KEY # local fallback if no HF space
     
     report_data = {
         "match_percentage": 0,

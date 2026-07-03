@@ -1,3 +1,4 @@
+from app.core.idempotency import IdempotentRoute
 import uuid
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,11 +7,11 @@ from typing import List, Optional
 from app.db.session import get_db
 from app.schemas.schemas import JobCreate, JobUpdate, JobResponse, JobWithCompanyResponse, PaginatedResponse, JobFilters
 from app.repositories.job_repo import JobRepository
-from app.core.deps import get_current_user, require_role, get_current_profile
+from app.core.deps import require_user, require_role, get_current_profile
 from app.models.models import User, Profile, RoleEnum
 from app.core.config import settings
 
-router = APIRouter(prefix="/jobs", tags=["jobs"])
+router = APIRouter(route_class=IdempotentRoute, prefix="/jobs", tags=["jobs"])
 
 @router.get("", response_model=PaginatedResponse[JobWithCompanyResponse])
 async def get_jobs(
@@ -78,7 +79,7 @@ async def search_jobs_with_internet(
     if serper_api_key and query_str:
         serper_endpoint = "https://google.serper.dev/search"
         try:
-            async with httpx.AsyncClient(follow_redirects=False) as client:
+            async with httpx.AsyncClient(follow_redirects=False, timeout=10.0) as client:
                 resp = await client.post(
                     serper_endpoint,
                     headers={
@@ -144,7 +145,7 @@ async def search_jobs_semantic(
     if not jobs:
         return []
         
-    langsearch_api_key = os.environ.get("LANGSEARCH_API_KEY")
+    langsearch_api_key = settings.ADZUNA_APP_KEY
     if not langsearch_api_key:
         return [JobWithCompanyResponse.model_validate(j) for j in jobs]
         
@@ -154,7 +155,7 @@ async def search_jobs_semantic(
     ]
     
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=10.0) as client:
             resp = await client.post(
                 "https://api.langsearch.com/v1/rerank",
                 headers={"Authorization": f"Bearer {langsearch_api_key}"},
@@ -206,7 +207,7 @@ async def get_recommended_jobs(
         return []
         
     # 3. Gemini ATS Evaluation
-    api_key = settings.GEMINI_API_KEY or os.environ.get("GEMINI_API_KEY")
+    api_key = settings.GEMINI_API_KEY
     if not api_key:
         return [JobWithCompanyResponse.model_validate(j) for j in jobs[:3]] # Fallback if no API key
         

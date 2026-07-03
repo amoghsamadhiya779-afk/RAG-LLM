@@ -430,7 +430,7 @@ class GeminiAnswerGenerator(AnswerGenerator):
 def build_answer_generator(settings: Settings) -> AnswerGenerator:
     if settings.llm_provider == "gemini":
         from app.core.config import settings as core_settings
-        api_key = core_settings.GEMINI_API_KEY or os.environ.get("GEMINI_API_KEY")
+        api_key = core_settings.GEMINI_API_KEY
         if api_key:
             model = settings.GEMINI_MODEL or core_settings.GEMINI_MODEL
             return GeminiAnswerGenerator(api_key, model)
@@ -438,7 +438,7 @@ def build_answer_generator(settings: Settings) -> AnswerGenerator:
             logger.warning("GEMINI_API_KEY is not set. Falling back to LocalExtractiveGenerator.")
     
     if settings.llm_provider == "openai":
-        api_key = settings.openai_api_key or os.environ.get("OPENAI_API_KEY")
+        api_key = settings.openai_api_key
         if api_key:
             return OpenAIAnswerGenerator(api_key, settings.openai_chat_model)
         else:

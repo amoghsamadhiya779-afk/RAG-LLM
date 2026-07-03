@@ -1,3 +1,4 @@
+from app.core.idempotency import IdempotentRoute
 import uuid
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -7,10 +8,10 @@ from app.db.session import get_db
 from app.schemas.schemas import JobWithCompanyResponse, JobResponse, AdminStatsResponse, JobUpdate
 from app.repositories.job_repo import JobRepository
 from app.repositories.admin_repo import AdminRepository
-from app.core.deps import get_current_user, require_role
+from app.core.deps import require_user, require_role
 from app.models.models import User, RoleEnum, JobStatusEnum
 
-router = APIRouter(prefix="/admin", tags=["admin"])
+router = APIRouter(route_class=IdempotentRoute, prefix="/admin", tags=["admin"])
 
 @router.get("/jobs", response_model=List[JobWithCompanyResponse])
 async def get_pending_jobs(

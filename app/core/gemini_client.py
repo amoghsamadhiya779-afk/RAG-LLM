@@ -15,10 +15,10 @@ def get_gemini_client() -> genai.Client:
         os.environ.get("TESTING") in ("1", "true", "True")
     )
     if is_testing:
-        api_key = settings.GEMINI_API_KEY or os.environ.get("GEMINI_API_KEY")
+        api_key = settings.GEMINI_API_KEY
         return genai.Client(api_key=api_key)
         
     if _client is None:
-        api_key = settings.GEMINI_API_KEY or os.environ.get("GEMINI_API_KEY")
+        api_key = settings.GEMINI_API_KEY
         _client = genai.Client(api_key=api_key)
     return _client

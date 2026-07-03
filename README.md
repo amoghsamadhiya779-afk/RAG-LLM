@@ -7,106 +7,121 @@ sdk: docker
 pinned: false
 ---
 
-# jOBiON: AI-Native Tech Job Board
+# 🚀 jOBiON: AI-Native Tech Job Board
 
-jOBiON is a production-grade, AI-native career intelligence platform built for modern engineers. It features a premium, vibe-coded SaaS UI with lightning-fast routing, real-time matching, and an ultra-resilient FastAPI backend.
+**Lead Developer:** Amogh Samadhiya (@amoghsamadhiya779)
+
+jOBiON is a production-grade, AI-native career intelligence platform engineered for the modern tech landscape. It combines a premium, hardware-accelerated SaaS interface with an ultra-resilient FastAPI backend to deliver lightning-fast job routing, intelligent resume matching, and deep career insights.
 
 ---
 
 ## 🌟 Key Features
 
-1. **Premium Volt Graphite UI**: A stunning, hardware-accelerated interface engineered with strict 4px grid discipline, tabular typography, and subtle reactive motion.
-2. **AI-Native Matching**: Powered by **Google Gemini 1.5 Flash** for high-speed resume inference and bulk vector generation to sidestep rate limits.
-3. **Resilient Local Fallback**: The backend intelligently detects if your `GEMINI_API_KEY` is missing and gracefully falls back to a local NLP extraction engine.
-4. **Interactive Keyword Refiner**: Dynamically add, remove, and refine skills extracted from top matched jobs.
-5. **Supabase Integration**: Robust authentication and real-time database management through Supavisor and SQLAlchemy.
+1. **Premium Volt Graphite UI**: A stunning, high-performance interface engineered with strict grid discipline, tabular typography, and subtle reactive motion using Framer Motion.
+2. **AI-Native Matching Engine**: Powered by **Google Gemini 1.5 Flash** for high-speed resume inference, skills extraction, and intelligent job matching.
+3. **Resilient Local Fallback**: The backend intelligently detects missing AI provider keys and gracefully degrades, ensuring the core platform remains functional without crash-looping.
+4. **Interactive Keyword Refiner**: Dynamically add, remove, and refine skills extracted from top matched jobs to tailor your search.
+5. **Real-time Infrastructure**: Built on Supabase PostgreSQL for robust authentication and high-performance vector operations (PGVector).
 
 ---
 
 ## 🛠 Technical Stack
 
-### Frontend
+### Frontend (Web UI)
 - **Framework**: TanStack Start (Vite + React Router)
 - **Language**: TypeScript (Strict type checks)
-- **Styling**: Tailwind CSS v4 with premium custom `@theme` tokens, locked typography scales (Inter Variable), and glassmorphism panels.
-- **Animations**: Framer Motion with locked ease curves (no bouncy physics), subtle fade-rises, and React Bits `DotField` ambient backgrounds.
-- **Components**: Shadcn UI (retuned for absolute minimalism and tight radii).
+- **Styling**: Tailwind CSS v4 with custom `@theme` tokens and glassmorphism UI components.
+- **Animations**: Framer Motion with locked ease curves and ambient backgrounds (React Bits).
+- **Components**: Shadcn UI (optimized for absolute minimalism).
 
-### Backend
-- **Core Runtime**: Python 3.11+
-- **API Framework**: FastAPI with typed Pydantic validation
-- **Database**: Supabase PostgreSQL with Supavisor connection pooling (Statement Cache = 0)
-- **AI Models**: Google Gemini API (`gemini-1.5-flash`)
-- **Vector Operations**: SQLite Vector Store, SentenceTransformer
+### Backend (API)
+- **Core Runtime**: Python 3.12+
+- **API Framework**: FastAPI with strictly typed Pydantic validation.
+- **Database**: Supabase PostgreSQL (via asyncpg connection pooling with SQLAlchemy).
+- **AI Models**: Google Gemini API (`gemini-1.5-flash`).
+- **Data Integrations**: Adzuna Job Search API, Serper.dev, Langsearch.
 
 ---
 
 ## 🚀 Local Development Setup
 
-### Backend API Setup
+### 1. Backend Setup
 
-1. Create and activate a Python virtual environment:
-   ```powershell
-   python -m venv .venv
-   .\.venv\Scripts\Activate.ps1
-   ```
+Navigate to the `backend` directory and set up your Python environment:
 
-2. Install backend dependencies:
-   ```powershell
-   pip install -r requirements.txt
-   ```
+```powershell
+cd backend
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
 
-3. Initialize environment configuration:
-   Create a `.env` file in the root and set your required variables. Missing variables will fail loudly on startup.
-   ```
-   GEMINI_API_KEY=your-gemini-api-key-here
-   DATABASE_URL=your-supabase-url-here
-   ```
+Install backend dependencies:
 
-4. Run the FastAPI development server:
-   ```powershell
-   uvicorn src.resume_rag.api:app --reload
-   ```
+```powershell
+pip install -r requirements.txt
+```
+
+Initialize environment configuration:
+Create a `.env` file in the `backend/` directory and configure your credentials (see `.env.dummy` for reference).
+```env
+GEMINI_API_KEY=your-gemini-api-key-here
+DATABASE_URL=postgresql+asyncpg://postgres:your-password@db.supabase.co:5432/postgres
+```
+
+Run the FastAPI development server:
+
+```powershell
+py -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+The API will be available at `http://localhost:8000`.
 
 ---
 
-### Frontend Setup
+### 2. Frontend Setup
 
-1. Navigate to the frontend workspace folder:
-   ```powershell
-   cd frontend
-   ```
+Navigate to the `frontend` directory:
 
-2. Install dependencies:
-   ```powershell
-   npm install
-   ```
+```powershell
+cd frontend
+```
 
-3. Start the development server:
-   ```powershell
-   npm run dev
-   ```
-   The interactive interface will be accessible at `http://localhost:3000`.
+Install node dependencies:
+
+```powershell
+npm install
+```
+
+Configure your environment:
+Create a `.env` file in the `frontend/` directory:
+```env
+VITE_API_URL=http://localhost:8000
+```
+
+Start the Vite development server:
+
+```powershell
+npm run dev
+```
+The interactive web app will be accessible at `http://localhost:5173`.
 
 ---
 
 ## 🌐 Production Deployment Architecture
 
-This project is built for a split-stack deployment using Edge CDNs and containerized environments.
+jOBiON is designed for a split-stack deployment across Edge CDNs and containerized platforms.
 
-### 1. Backend: Hugging Face Spaces (or Railway)
-- Deployed via Docker container on Hugging Face Spaces.
-- Uses `production-deploy` branch to maintain a clean git history and comply with platform limits.
-- Set the `GEMINI_API_KEY` under the Space Secrets.
-- Hugging Face automatically exposes the internal API on port `7860`.
+### 1. Frontend: Vercel (Edge CDN)
+- **Framework Preset**: Vercel Native via TanStack Start.
+- **Root Directory**: `frontend`
+- **Build Command**: `vite build`
+- Vercel automatically compiles the Nitro node-server output and deploys it globally.
 
-- Import your GitHub repository on **Vercel**.
-- **Crucial step:** In the Vercel project configuration, set the **"Root Directory"** to `frontend`.
-- Add an environment variable:
-  - `NEXT_PUBLIC_API_URL` set to your public Hugging Face backend URL (e.g., `https://username-spacename.hf.space`).
-- Deploy! Vercel compiles the static pages and serves the web UI at a global edge CDN.
+### 2. Backend: Docker / Hugging Face Spaces
+- **Containerization**: Deployed via Docker container on Hugging Face Spaces (or Render/Railway).
+- **Port Mapping**: Exposes the internal FastAPI app on port `7860` (Hugging Face default) or `8000`.
+- **Environment**: Managed securely via platform-specific secrets (e.g., Space Secrets).
 
 ---
 
-## Acknowledgments
-Designed and crafted to demonstrate production-ready integration between modern AI models and fluid user interfaces, with a robust self-healing architecture.
+## 🙌 Acknowledgments
+Architected and developed by **Amogh Samadhiya**. Designed to demonstrate production-ready integration between modern AI models and fluid user interfaces, with a robust self-healing deployment pipeline.

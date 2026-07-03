@@ -1,9 +1,9 @@
 import { useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { useLocation } from "@tanstack/react-router";
 import { useLenis } from "./use-lenis";
 
 export function useHighlightSection() {
-  const pathname = usePathname();
+  const pathname = useLocation().pathname;
   const lenis = useLenis();
 
   useEffect(() => {

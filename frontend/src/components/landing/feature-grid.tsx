@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
 import { reveal, revealStagger, viewportOnce } from "@/lib/motion";
-import Link from "next/link";
+import { Link } from "@tanstack/react-router";
 export type Feature = {
  icon: LucideIcon;
  title: string;

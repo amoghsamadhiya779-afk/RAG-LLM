@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import Link from "next/link";
+import { Link } from "@tanstack/react-router";
 import { api } from "@/services/api";
 
 export default function CompaniesSection({ className }: { className?: string }) {

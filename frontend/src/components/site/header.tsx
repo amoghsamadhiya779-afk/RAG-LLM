@@ -1,11 +1,11 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link } from "@tanstack/react-router";
+import { useLocation } from "@tanstack/react-router";
 import { useLenis } from "@/hooks/use-lenis";
 
 export function SiteHeader() {
-  const pathname = usePathname();
+  const pathname = useLocation().pathname;
   const lenis = useLenis();
 
   const handleAnchorClick = (e: React.MouseEvent<HTMLAnchorElement>, hash: string) => {

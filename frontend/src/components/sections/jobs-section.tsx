@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState, Suspense } from "react";
 import { Search, SlidersHorizontal, X } from "lucide-react";
-import { useSearchParams } from "next/navigation";
+import { useSearch } from "@tanstack/react-router";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -24,8 +24,8 @@ const TYPES: { v: JobType; label: string }[] = [
 const LEVELS: JobLevel[] = ["intern", "junior", "mid", "senior", "staff", "principal"];
 
 function JobsSectionContent() {
- const searchParams = useSearchParams();
- const initialQ = searchParams.get("q") || searchParams.get("search") || "";
+ const searchParams = useSearch({ strict: false });
+ const initialQ = searchParams["q"] || searchParams["search"] || "";
  
  const [query, setQuery] = useState(initialQ);
  const [tags, setTags] = useState<string[]>([]);

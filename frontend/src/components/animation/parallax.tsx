@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, ReactNode } from "react";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
-import { usePathname } from "next/navigation";
+import { useLocation } from "@tanstack/react-router";
 
 interface ParallaxProps {
   children: ReactNode;
@@ -13,7 +13,7 @@ interface ParallaxProps {
 export function Parallax({ children, speed = 0.5, className }: ParallaxProps) {
   const triggerRef = useRef<HTMLDivElement>(null);
   const targetRef = useRef<HTMLDivElement>(null);
-  const pathname = usePathname();
+  const pathname = useLocation().pathname;
 
   useEffect(() => {
     // Register GSAP plugins safely on client only

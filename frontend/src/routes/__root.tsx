@@ -7,7 +7,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { Toaster } from "sonner";
 
 import appCss from "../styles.css?url";
@@ -104,26 +104,10 @@ function RootComponent() {
   const routerState = useRouterState();
   const pathname = routerState.location.pathname;
   
-  const [shouldRenderDotField, setShouldRenderDotField] = useState(false);
-
-  useEffect(() => {
-    if (pathname === "/") {
-      setShouldRenderDotField(false);
-      return;
-    }
-    const mql = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const isMobile = window.matchMedia("(max-width: 768px)").matches;
-    if (mql.matches || isMobile) {
-      setShouldRenderDotField(false);
-    } else {
-      setShouldRenderDotField(true);
-    }
-  }, [pathname]);
-
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        {shouldRenderDotField && <DotFieldBackground />}
+        {pathname !== "/" && <DotFieldBackground />}
         <AnimatePresence mode="wait">
           <motion.div
             key={pathname}

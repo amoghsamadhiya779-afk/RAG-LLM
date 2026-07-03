@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { ArrowRight, Search, Sparkles, FileText, Zap } from "lucide-react";
 import { reveal, revealStagger } from "@/lib/motion";

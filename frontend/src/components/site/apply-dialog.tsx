@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { UploadCloud, FileText, CheckCircle2 } from "lucide-react";
 import confetti from "canvas-confetti";
@@ -23,7 +23,7 @@ export function ApplyDialog({ open, onOpenChange, jobId, jobTitle }: {
   jobTitle: string;
 }) {
   const { session } = useAuth();
-  const router = useRouter();
+  const navigate = useNavigate();
   const [file, setFile] = useState<File | null>(null);
   const [coverNote, setCoverNote] = useState("");
   const [done, setDone] = useState(false);
@@ -61,7 +61,7 @@ export function ApplyDialog({ open, onOpenChange, jobId, jobTitle }: {
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => handleClose(false)}>Cancel</Button>
-            <Button onClick={() => router.push("/auth")}>Sign in</Button>
+            <Button onClick={() => navigate({ to: "/auth" })}>Sign in</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -78,7 +78,7 @@ export function ApplyDialog({ open, onOpenChange, jobId, jobTitle }: {
             <p className="mt-2 text-small text-secondary">We've notified {jobTitle.split(" at ")[0]}. Track replies in your profile.</p>
             <div className="mt-6 flex gap-2">
               <Button variant="outline" onClick={() => handleClose(false)}>Close</Button>
-              <Button onClick={() => router.push("/profile")}>View applications</Button>
+              <Button onClick={() => navigate({ to: "/profile" })}>View applications</Button>
             </div>
           </div>
         </DialogContent>

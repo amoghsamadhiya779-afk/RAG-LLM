@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { Search, Sparkles, FileText, Zap, UploadCloud, Bot, Send } from "lucide-react";
 import { useState, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { JobCard } from "@/components/site/job-card";
@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import type { JobWithCompany } from "@/types";
 
 export default function AiWorkspaceSection({ className }: { className?: string }) {
- const router = useRouter();
+ const navigate = useNavigate();
 
  // Semantic Search
  const [searchQuery, setSearchQuery] = useState("");
@@ -249,7 +249,7 @@ export default function AiWorkspaceSection({ className }: { className?: string }
      <p className="text-small text-secondary line-clamp-1 mb-4">{job.company?.name}</p>
      
      <div className="mt-auto">
-      <Button className="w-full gap-2" variant="default" onClick={() => router.push(`/jobs/${job.id}`)}>
+      <Button className="w-full gap-2" variant="default" onClick={() => navigate({ to: `/jobs/${job.id}` })}>
       <Zap className="h-4 w-4 fill-current" />
       One-click Apply
       </Button>

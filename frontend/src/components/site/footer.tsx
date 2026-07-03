@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@tanstack/react-router";
 import { Github, Twitter, Linkedin } from "lucide-react";
 
 const cols = [

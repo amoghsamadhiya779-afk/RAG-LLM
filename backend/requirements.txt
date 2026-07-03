@@ -22,3 +22,16 @@ requests>=2.31.0
 slowapi>=0.1.9
 python-magic>=0.4.27
 google-genai>=0.1.1
+
+# Missing / recently added dependencies
+asyncpg>=0.31.0
+pgvector>=0.4.2
+upstash-redis>=1.7.0
+sentry-sdk[fastapi]>=2.64.0
+resend>=2.32.2
+pyjwt[crypto]>=2.13.0
+structlog>=26.1.0
+supabase>=2.31.0
+tenacity>=9.1.4
+PyMuPDF>=1.28.0
+bleach>=6.4.0

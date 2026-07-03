@@ -3,7 +3,7 @@ from sqlalchemy.pool import NullPool
 from app.core.config import settings
 
 engine = create_async_engine(
-    settings.DATABASE_URL, 
+    settings.async_database_url, 
     echo=False,
     poolclass=NullPool,
     connect_args={

@@ -35,7 +35,7 @@ export function SiteFooter() {
       <div className="container-page py-16">
         <div className="grid gap-12 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div>
-            <Link href="/" className="flex items-center gap-2 text-body font-heading tracking-tight">
+            <Link to="/" className="flex items-center gap-2 text-body font-heading tracking-tight">
               <span className="grid h-7 w-7 place-items-center rounded-lg bg-foreground text-background text-[11px] font-display">D</span>
               <span>jOBiON</span>
             </Link>
@@ -62,7 +62,7 @@ export function SiteFooter() {
                 {col.links.map((l) => (
                   <li key={l.label}>
                     {"to" in l && l.to ? (
-                      <Link href={l.to} className="text-secondary transition-colors hover:text-foreground">{l.label}</Link>
+                      <Link to={l.to} className="text-secondary transition-colors hover:text-foreground">{l.label}</Link>
                     ) : (
                       <a href={l.href} className="text-secondary transition-colors hover:text-foreground">{l.label}</a>
                     )}

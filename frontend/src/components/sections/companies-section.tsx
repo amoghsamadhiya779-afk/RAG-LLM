@@ -45,7 +45,7 @@ export default function CompaniesSection({ className }: { className?: string }) 
         className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both"
         style={{ animationDelay: `${i * 100}ms` }}
        >
-        <Link href={`/companies/${c.slug || c.id}`} className="block p-6 rounded-lg bg-[#1d1d1d]/80 backdrop-blur-md border border-[#e5e5e5]/10 transition-colors hover:border-[#6b62f2]/50">
+        <Link to="/companies/$id" params={{ id: c.slug || c.id }} className="block p-6 rounded-lg bg-[#1d1d1d]/80 backdrop-blur-md border border-[#e5e5e5]/10 transition-colors hover:border-[#6b62f2]/50">
          <div className="flex items-center gap-3">
           <div className="grid h-12 w-12 place-items-center rounded-md border border-[#e5e5e5]/10 bg-[#3d3d3d]/50 text-white font-heading -inner">
            {c.name[0]}

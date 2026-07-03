@@ -62,7 +62,7 @@ export function FeatureGrid({
         <p className="mt-2 text-small leading-relaxed text-secondary">{f.description}</p>
        </motion.div>
       );
-      return f.href ? <Link href={f.href} key={f.title} className="block">{Card}</Link> : <div key={f.title}>{Card}</div>;
+      return f.href ? <Link to={f.href} key={f.title} className="block">{Card}</Link> : <div key={f.title}>{Card}</div>;
      })}
     </motion.div>
    </div>

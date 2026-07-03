@@ -75,7 +75,7 @@ export function JobCard({ job, matchScore }: { job: JobWithCompany; matchScore?:
    </div>
   </div>
   <div className="mt-4 pt-3 border-t border-bone/[0.06] flex justify-end">
-   <Link href={job.url || `/jobs/${job.id}`} target={job.url ? "_blank" : undefined} rel={job.url ? "noopener noreferrer" : undefined} className="text-small font-ui text-indigo-400 hover:text-indigo-300 transition-colors inline-flex items-center gap-1">
+   <Link to={job.url || `/jobs/${job.id}`} target={job.url ? "_blank" : undefined} rel={job.url ? "noopener noreferrer" : undefined} className="text-small font-ui text-indigo-400 hover:text-indigo-300 transition-colors inline-flex items-center gap-1">
    View Job Details &rarr;
    </Link>
   </div>

@@ -51,13 +51,12 @@ export function Hero() {
      </motion.div>
 
      <motion.div variants={reveal} className="mt-10">
-      <Link
-       href="#jobs"
+      <a href="#jobs"
        className="inline-flex h-10 items-center justify-center gap-2 rounded-pill bg-paper px-5 text-[15px] font-ui text-void transition-colors hover:bg-paper/90"
       >
        Start Searching
        <ArrowRight className="h-3.5 w-3.5" />
-      </Link>
+      </a>
      </motion.div>
 
      {/* Left Column: Numbered Feature List */}

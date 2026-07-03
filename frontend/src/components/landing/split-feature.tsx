@@ -46,7 +46,7 @@ export function SplitFeature({
        ))}
       </ul>
       <Link
-       href={ctaTo}
+       to={ctaTo}
        className="group mt-8 inline-flex items-center gap-1.5 text-small font-ui text-foreground"
       >
        {ctaLabel}

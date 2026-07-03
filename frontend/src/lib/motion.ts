@@ -1,6 +1,6 @@
 import { Variants } from "framer-motion";
 
-export const EASE = [0.16, 1, 0.3, 1];
+export const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 export const DURATIONS = {
   fast: 0.15,

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node -e \"require('fs').mkdirSync('dist', {recursive:true})\"",
+    "build": "vite build",
     "start": "vite preview",
     "lint": "eslint .",
     "postinstall": "node patch.cjs",

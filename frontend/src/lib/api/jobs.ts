@@ -5,14 +5,14 @@ function toQuery(filters: JobFilters = {}): string {
   const p = new URLSearchParams();
   if (filters.q) p.set("q", filters.q);
   if (filters.remote !== undefined) p.set("remote", String(filters.remote));
+  if (filters.salary_min !== undefined) p.set("salaryMin", String(filters.salary_min));
   
-  const limit = filters.limit ?? 20;
+  const page_size = filters.page_size ?? 20;
   const page = filters.page ?? 1;
-  const offset = (page - 1) * limit;
-  p.set("limit", String(limit));
-  p.set("offset", String(offset));
+  p.set("page_size", String(page_size));
+  p.set("page", String(page));
 
-  filters.tags?.forEach((t) => p.append("tag", t));
+  filters.tags?.forEach((t) => p.append("tags", t));
   filters.seniority?.forEach((s) => p.append("seniority", s));
   filters.employment_type?.forEach((e) => p.append("employment_type", e));
   const qs = p.toString();

@@ -108,6 +108,7 @@ class JobFilters(CamelModel):
     location: Optional[str] = None
     remote: Optional[bool] = None
     seniority: Optional[str] = None
+    employment_type: Optional[List[str]] = None
     tags: Optional[List[str]] = None
     salary_min: Optional[float] = None
 

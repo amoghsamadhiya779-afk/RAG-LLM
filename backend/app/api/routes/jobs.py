@@ -20,6 +20,7 @@ async def get_jobs(
     location: Optional[str] = None,
     remote: Optional[bool] = None,
     seniority: Optional[str] = None,
+    employment_type: Optional[List[str]] = Query(None),
     tags: Optional[List[str]] = Query(None),
     salaryMin: Optional[float] = None,
     db: AsyncSession = Depends(get_db)
@@ -31,6 +32,7 @@ async def get_jobs(
         location=location,
         remote=remote,
         seniority=seniority,
+        employment_type=employment_type,
         tags=tags,
         salary_min=salaryMin,
     )

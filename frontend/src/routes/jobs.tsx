@@ -1,17 +1,25 @@
 import { GuestBanner } from "@/components/auth/GuestBanner";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { infiniteQueryOptions, keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
-import { Search, Loader2 } from "lucide-react";
+import { infiniteQueryOptions, keepPreviousData, useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { Search, Loader2, Filter } from "lucide-react";
 import { z } from "zod";
 import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Skeleton, EmptyState, ErrorState, Reveal } from "@/components/ui-ext";
 import { JobCard } from "@/components/jobs/JobCard";
 import { JobFilters, type JobFilterValue } from "@/components/jobs/JobFilters";
 import { listJobs } from "@/lib/api/jobs";
+import { searchWeb } from "@/lib/api/search";
 import type { EmploymentType, Job, Paginated, Seniority } from "@/lib/api/types";
 import { BackButton } from "@/components/layout/BackButton";
 
@@ -41,8 +49,9 @@ function jobsListQueryFn(search: JobsSearch, page: number) {
     employment_type: search.type.length ? search.type : undefined,
     seniority: search.level.length ? search.level : undefined,
     tags: search.tags.length ? search.tags : undefined,
+    salary_min: search.salary || undefined,
     page,
-    limit: PAGE_SIZE,
+    page_size: PAGE_SIZE,
   });
 }
 
@@ -94,7 +103,7 @@ function JobsPage() {
   useEffect(() => {
     const t = setTimeout(() => {
       if (qDraft !== search.q)
-        navigate({ search: (p: typeof search) => ({ ...p, q: qDraft }) });
+        navigate({ search: (p: typeof search) => ({ ...p, q: qDraft }), replace: true });
     }, 800);
     return () => clearTimeout(t);
   }, [qDraft, search.q, navigate]);
@@ -111,12 +120,18 @@ function JobsPage() {
   );
 
   const query = useInfiniteQuery(jobsListInfiniteOptions(search));
+  const webQuery = useQuery({
+    queryKey: ["jobs", "web", search.q],
+    queryFn: () => searchWeb(search.q || ""),
+    enabled: !!search.q && search.q.length >= 2,
+    staleTime: 60_000,
+  });
 
   const items = useMemo(() => {
-    const all = query.data?.pages.flatMap((p) => p.items) ?? [];
-    if (!search.salary) return all;
-    return all.filter((j) => (j.salary_min ?? 0) >= search.salary);
-  }, [query.data, search.salary]);
+    return query.data?.pages.flatMap((p) => p.items) ?? [];
+  }, [query.data]);
+
+  const webItems = webQuery.data?.items ?? [];
 
   const total = query.data?.pages[0]?.total ?? 0;
 
@@ -137,6 +152,7 @@ function JobsPage() {
 
   function updateFilters(next: Partial<JobFilterValue>) {
     navigate({
+      replace: true,
       search: (p: typeof search) => ({
         ...p,
         remote: "remote" in next ? next.remote : p.remote,
@@ -149,7 +165,7 @@ function JobsPage() {
   }
 
   function resetFilters() {
-    navigate({ search: () => ({ q: "", type: [], level: [], tags: [], salary: 0 }) });
+    navigate({ search: () => ({ q: "", type: [], level: [], tags: [], salary: 0 }), replace: true });
   }
 
   return (
@@ -176,10 +192,28 @@ function JobsPage() {
               className="h-12 rounded-xl border-border/70 bg-card/50 pl-10 text-base backdrop-blur"
             />
           </div>
+          
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="h-12 w-12 rounded-xl lg:hidden border-border/70 bg-card/50 backdrop-blur shrink-0 p-0">
+                <Filter className="h-5 w-5 text-muted-foreground" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px] overflow-y-auto max-h-[90vh] bg-background">
+              <DialogHeader>
+                <DialogTitle>Filters</DialogTitle>
+              </DialogHeader>
+              <div className="mt-4 pb-6">
+                <JobFilters value={filterValue} onChange={updateFilters} onReset={resetFilters} />
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
 
         <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
-          <JobFilters value={filterValue} onChange={updateFilters} onReset={resetFilters} />
+          <div className="hidden lg:block">
+            <JobFilters value={filterValue} onChange={updateFilters} onReset={resetFilters} />
+          </div>
 
           <section>
             {query.isLoading ? (
@@ -194,7 +228,7 @@ function JobsPage() {
                 error={query.error}
                 onRetry={() => { query.refetch(); }}
               />
-            ) : items.length === 0 ? (
+            ) : items.length === 0 && webItems.length === 0 ? (
               <EmptyState
                 title="No jobs match your filters"
                 description="Try clearing filters or a broader search."
@@ -202,6 +236,27 @@ function JobsPage() {
               />
             ) : (
               <>
+                {webItems.length > 0 && (
+                  <div className="mb-10">
+                    <h2 className="mb-6 flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+                      <span>From the web</span>
+                      <div className="h-px flex-1 bg-border/60" />
+                    </h2>
+                    <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                      {webItems.map((job) => (
+                        <JobCard key={job.id} job={job} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {items.length > 0 && webItems.length > 0 && (
+                  <h2 className="mb-6 flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+                    <span>Curated Roles</span>
+                    <div className="h-px flex-1 bg-border/60" />
+                  </h2>
+                )}
+
                 <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
                   {items.map((job) => (
                     <JobCard key={job.id} job={job} />

@@ -70,6 +70,9 @@ class JobsRepository:
         if filters.salary_min is not None:
             stmt = stmt.where(Job.salary_min >= filters.salary_min)
             
+        if filters.employment_type:
+            stmt = stmt.where(Job.tags.overlap(filters.employment_type))
+            
         if filters.tags:
             stmt = stmt.where(Job.tags.overlap(filters.tags))
             

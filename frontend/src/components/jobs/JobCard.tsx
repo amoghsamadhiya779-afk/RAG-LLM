@@ -201,12 +201,24 @@ function CollapsedTile({
           </div>
 
           <h3 className="mt-5 flex items-start justify-between gap-3 text-lg leading-snug">
-            <Link to="/jobs/$id" params={{ id: job.id }} className="line-clamp-2 hover:underline decoration-primary/50">
-              {job.title}
-            </Link>
-            <Link to="/jobs/$id" params={{ id: job.id }} className="focus:outline-none">
-              <ArrowUpRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-            </Link>
+            {job.source === "serper_web" ? (
+              <a href={job.apply_url || "#"} target="_blank" rel="noopener noreferrer" className="line-clamp-2 hover:underline decoration-primary/50">
+                {job.title}
+              </a>
+            ) : (
+              <Link to="/jobs/$id" params={{ id: job.id }} className="line-clamp-2 hover:underline decoration-primary/50">
+                {job.title}
+              </Link>
+            )}
+            {job.source === "serper_web" ? (
+              <a href={job.apply_url || "#"} target="_blank" rel="noopener noreferrer" className="focus:outline-none">
+                <ArrowUpRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+              </a>
+            ) : (
+              <Link to="/jobs/$id" params={{ id: job.id }} className="focus:outline-none">
+                <ArrowUpRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+              </Link>
+            )}
           </h3>
 
           <div className="mt-4 flex flex-wrap gap-1.5">
@@ -220,7 +232,7 @@ function CollapsedTile({
             ))}
           </div>
 
-          <div className="mt-5 flex items-center justify-between text-xs text-muted-foreground">
+          <div className="mt-5 flex flex-wrap items-center justify-between gap-4 text-xs text-muted-foreground">
             <div className="flex flex-col gap-1">
               <span className="capitalize">
                 {job.seniority || job.level || "Any level"} · {(job.employment_type || job.job_type || "").replace("_", " ")}
@@ -236,7 +248,7 @@ function CollapsedTile({
                   href={job.apply_url} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="inline-flex h-8 items-center justify-center rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground shadow hover:bg-primary/90 transition-colors"
+                  className="inline-flex min-h-[44px] items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90 transition-colors"
                 >
                   Apply external
                 </a>

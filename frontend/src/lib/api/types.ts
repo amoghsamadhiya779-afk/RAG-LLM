@@ -23,6 +23,7 @@ export type EmploymentType = "full_time" | "part_time" | "contract" | "internshi
 
 export interface Job {
   id: string;
+  source: string;
   title: string;
   company: Company | string;
   location: string;
@@ -50,14 +51,15 @@ export interface JobFilters {
   seniority?: Seniority[];
   employment_type?: EmploymentType[];
   page?: number;
-  limit?: number;
+  page_size?: number;
+  salary_min?: number;
 }
 
 export interface Paginated<T> {
   items: T[];
   total: number;
   page: number;
-  limit: number;
+  pageSize: number;
 }
 
 export type ApplicationStatus = "submitted" | "in_review" | "interview" | "rejected" | "hired";

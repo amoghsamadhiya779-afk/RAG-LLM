@@ -56,7 +56,7 @@ export function ApplyDialog({ job, size = "default" }: ApplyDialogProps) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {size === "sm" ? (
-          <Button className="h-8 px-3 text-xs" onClick={(e) => e.stopPropagation()}>
+          <Button className="min-h-[44px] px-4 text-sm" onClick={(e) => e.stopPropagation()}>
             Apply now
           </Button>
         ) : (

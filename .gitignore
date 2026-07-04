@@ -50,3 +50,20 @@ hf-fast-deploy/
 
 frontend/node_modules/
 frontend/dist/
+
+# Agent scaffolding
+.agents/
+ .agents/
+.lovable/
+
+# Python build artifacts
+build/
+*.egg-info/
+
+# Test cache
+.pytest_cache/
+
+# Frontend build output (Nitro/Vite)
+frontend/.output/
+frontend/.vinxi/
+frontend/.wrangler/

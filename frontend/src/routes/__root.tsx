@@ -7,12 +7,16 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Toaster } from "sonner";
+import { AnimatePresence, motion } from "framer-motion";
+import { useRouterState } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "@/hooks/use-auth";
+import DotFieldBackground from "@/components/landing/DotFieldBackground";
+import { ThemeProvider } from "@/components/theme-provider";
 
 function NotFoundComponent() {
   return (
@@ -94,34 +98,52 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
-import { AnimatePresence, motion } from "framer-motion";
-import { useRouterState } from "@tanstack/react-router";
-
-import DotFieldBackground from "@/components/landing/DotFieldBackground";
-
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const routerState = useRouterState();
   const pathname = routerState.location.pathname;
   
+  const [shouldRenderDotField, setShouldRenderDotField] = useState(false);
+
+  useEffect(() => {
+    if (pathname === "/") {
+      setShouldRenderDotField(false);
+      return;
+    }
+    const mql = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const isMobile = window.matchMedia("(max-width: 768px)").matches;
+    if (mql.matches || isMobile) {
+      setShouldRenderDotField(false);
+    } else {
+      setShouldRenderDotField(true);
+    }
+  }, [pathname]);
+
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        {pathname !== "/" && <DotFieldBackground />}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={pathname}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="flex-1 flex flex-col min-h-dvh relative z-10"
-          >
-            <Outlet />
-          </motion.div>
-        </AnimatePresence>
-        <Toaster position="top-right" />
-      </AuthProvider>
+      <ThemeProvider defaultTheme="dark" storageKey="jobion:theme">
+        <AuthProvider>
+          {shouldRenderDotField && <DotFieldBackground />}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={pathname}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="flex-1 flex flex-col min-h-dvh relative z-10"
+            >
+              <Outlet />
+            </motion.div>
+          </AnimatePresence>
+          <Toaster 
+            position="top-center"
+            toastOptions={{
+              className: 'font-ui text-small bg-void border border-bone/10 text-bone',
+            }} 
+          />
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

@@ -32,7 +32,7 @@ export function CtaBand() {
         Browse open roles
        </Button>
       </Link>
-      <Link to="/post">
+      <Link to="/dashboard">
        <Button size="lg" variant="outline" className="h-11 rounded-full border-border bg-transparent px-6 text-small font-ui">
         Post a job
        </Button>

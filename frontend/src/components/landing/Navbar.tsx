@@ -39,7 +39,7 @@ export function Navbar() {
   const isDark = resolvedTheme === "dark";
 
   return (
-    <header className="pointer-events-none sticky top-0 z-40">
+    <header className="pointer-events-none fixed top-0 w-full z-40">
       <div className="mx-auto flex max-w-7xl items-start justify-between gap-3 px-4 pt-3">
         <div className="flex-1">
           <PillNav

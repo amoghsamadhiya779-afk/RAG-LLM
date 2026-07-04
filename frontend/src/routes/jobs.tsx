@@ -155,7 +155,7 @@ function JobsPage() {
   return (
     <div className="min-h-screen bg-transparent text-foreground">
       <Navbar />
-      <main className="mx-auto max-w-7xl px-6 py-12">
+      <main className="mx-auto max-w-7xl px-6 pt-24 pb-12">
         <GuestBanner />
         <BackButton fallback="/" className="mb-6" />
         <Reveal className="mb-10">

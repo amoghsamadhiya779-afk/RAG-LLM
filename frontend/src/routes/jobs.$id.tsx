@@ -68,7 +68,7 @@ function PageShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-transparent text-foreground">
       <Navbar />
-      <main className="mx-auto max-w-5xl px-6 py-12">
+      <main className="mx-auto max-w-5xl px-6 pt-24 pb-12">
         <BackButton fallback="/jobs" className="mb-6" />{children}</main>
       <Footer />
     </div>

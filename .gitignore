@@ -68,3 +68,5 @@ frontend/.output/
 frontend/.vinxi/
 frontend/.wrangler/
 
+backend/test_venv/
+.bin/

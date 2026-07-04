@@ -43,6 +43,7 @@ export default function DotFieldBackground() {
           style={{
             filter: isDark ? "invert(0) hue-rotate(0deg)" : "invert(1) hue-rotate(180deg)",
             opacity: isDark ? 1 : 0.2,
+            transition: "filter 500ms ease, opacity 500ms ease",
           }}
           bulgeOnly={true}
           bulgeStrength={48}

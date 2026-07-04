@@ -49,8 +49,16 @@ export function PixelHero({
   const [isLoaded] = useState(true);
   const reducedMotion = useReducedMotion();
   const { resolvedTheme } = useTheme();
+  const [isMobile, setIsMobile] = useState(false);
 
-  useEffect(() => {}, [reducedMotion]);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(max-width: 768px)");
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
 
   const isDark = resolvedTheme === "dark";
   const c1 = isDark ? "#284f73" : "#dbeafe";
@@ -58,7 +66,13 @@ export function PixelHero({
 
   return (
     <section className="relative isolate flex min-h-[100dvh] w-full items-center justify-center overflow-hidden px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
-      <div className="absolute inset-0 -z-10 [mask-image:linear-gradient(to_bottom,black_60%,transparent_100%)]">
+      <div 
+        className="absolute inset-0 -z-10" 
+        style={{ 
+          WebkitMaskImage: "linear-gradient(to bottom, black 60%, transparent 100%)",
+          maskImage: "linear-gradient(to bottom, black 60%, transparent 100%)"
+        }}
+      >
         <Suspense fallback={null}>
           <LightPillar
             topColor={c1}
@@ -70,7 +84,7 @@ export function PixelHero({
             pillarHeight={0.4}
             noiseIntensity={isDark ? 0.5 : 0.2}
             pillarRotation={0}
-            interactive={true}
+            interactive={!isMobile}
             mixBlendMode="normal"
             quality="high"
           />

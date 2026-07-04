@@ -19,12 +19,16 @@ export function AntigravitySection() {
   }, []);
 
   return (
-    <section className="relative w-full overflow-hidden bg-background min-h-[100dvh] flex flex-col items-center justify-center">
+    <section className="relative w-full overflow-hidden bg-background min-h-[100dvh] flex flex-col items-center justify-center z-10">
 
       {/* Absolute Background Layer */}
       <div className="absolute inset-0 z-0">
         <Suspense fallback={null}>
-          <Antigravity color="#6aa2ff" />
+          <Antigravity 
+            color="#6aa2ff" 
+            count={isMobile ? 150 : 300} 
+            autoAnimate={isMobile}
+          />
         </Suspense>
       </div>
 

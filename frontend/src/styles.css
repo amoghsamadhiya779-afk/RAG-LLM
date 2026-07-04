@@ -191,9 +191,14 @@
   [data-no-transition],
   [data-no-transition] *,
   .pill *,
-  .hover-circle,
-  canvas {
+  .hover-circle {
     transition-property: none !important;
+  }
+
+  canvas {
+    transition-property: filter, opacity !important;
+    transition-duration: 500ms;
+    transition-timing-function: ease;
   }
 
   body {

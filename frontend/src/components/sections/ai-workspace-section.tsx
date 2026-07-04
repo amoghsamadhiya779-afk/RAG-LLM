@@ -103,7 +103,7 @@ export default function AiWorkspaceSection({ className }: { className?: string }
   <div className="container-page">
   <div className="mb-12 text-center">
    <h2 className="text-h1 font-display font-display tracking-tight sm:text-display">
-   AI <span className="text-gradient-accent">Workspace</span>
+   AI <span className="text-primary font-bold">Workspace</span>
    </h2>
    <p className="mt-4 text-body-lg text-secondary max-w-2xl mx-auto">
    Experience the power of semantic search, instant resume parsing, and personalized AI matching all in one place.
@@ -285,10 +285,10 @@ export default function AiWorkspaceSection({ className }: { className?: string }
    whileInView={{ opacity: 1, y: 0 }}
    viewport={{ once: true }}
    transition={{ delay: 0.3 }}
-   className="group relative rounded-lg border border-bone/5 bg-void/60 backdrop-blur-2xl p-0 -[0_8px_30px_rgb(0,0,0,0.4)] lg:col-span-2 overflow-hidden flex flex-col min-h-[450px] transition-colors hover:border-bone/10 hover:bg-void/80"
+   className="group relative rounded-lg border border-border bg-card p-0 shadow-[0_8px_30px_rgba(0,0,0,0.12)] lg:col-span-2 overflow-hidden flex flex-col min-h-[450px] transition-colors hover:border-foreground/20"
    >
    {/* Top decorative gradient glow */}
-   <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-indigo-haze/30 to-transparent" />
+   <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
    
    {/* Sleek Header */}
    <div className="flex items-center gap-4 px-6 py-4 border-b border-bone/5 bg-char/20 z-10">
@@ -322,7 +322,7 @@ export default function AiWorkspaceSection({ className }: { className?: string }
      <div className={`max-w-[80%] px-4 py-3 text-[14px] leading-relaxed tracking-wide ${
      msg.role === "user" 
       ? "bg-indigo-haze/90 text-white rounded-lg rounded-tr-sm font-ui" 
-      : "bg-char/30 backdrop-blur-md border border-bone/5 text-bone rounded-lg rounded-tl-sm font-body"
+      : "bg-card border border-border text-foreground rounded-lg rounded-tl-sm font-body"
      }`}>
      {msg.text}
      </div>
@@ -338,7 +338,7 @@ export default function AiWorkspaceSection({ className }: { className?: string }
      <div className="flex-shrink-0 mt-0.5 flex h-7 w-7 items-center justify-center rounded-md bg-iron/30 border border-bone/5 text-mist">
      <Bot className="h-3.5 w-3.5" />
      </div>
-     <div className="bg-char/30 backdrop-blur-md border border-bone/5 rounded-lg rounded-tl-sm px-4 py-3 flex items-center gap-1.5 h-[46px]">
+     <div className="bg-card border border-border rounded-lg rounded-tl-sm px-4 py-3 flex items-center gap-1.5 h-[46px]">
      <span className="w-1.5 h-1.5 rounded-full bg-mist/60 " style={{ animationDelay: "0ms" }} />
      <span className="w-1.5 h-1.5 rounded-full bg-mist/60 " style={{ animationDelay: "150ms" }} />
      <span className="w-1.5 h-1.5 rounded-full bg-mist/60 " style={{ animationDelay: "300ms" }} />

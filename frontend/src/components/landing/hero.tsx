@@ -9,11 +9,11 @@ export function Hero() {
   <section className="relative overflow-hidden pt-24 pb-28 sm:pt-32 sm:pb-40">
    {/* Dimension Gradient Backdrop & WebGL Galaxy */}
    <GalaxyBackground />
-   <div aria-hidden className="absolute inset-0 -z-20 bg-dawn-wash" />
-   <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(120,119,198,0.15),transparent)]" />
+
+   <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-radial-graphite" />
    
-   {/* Bottom fade to void */}
-   <div aria-hidden className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-b from-transparent to-void" />
+   {/* Bottom fade */}
+   <div aria-hidden className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-background to-transparent" />
 
    <motion.div
     variants={revealStagger}
@@ -84,7 +84,7 @@ export function Hero() {
       {/* The Glass Product Mockup */}
       <div className="glass-card absolute inset-0 overflow-hidden flex flex-col p-8 lg:p-12">
        <div className="mb-8">
-        <div className="inline-flex items-center gap-2 rounded-full border border-bone/10 bg-iron/40 px-3 py-1.5 backdrop-blur-md">
+        <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5">
          <span className="h-1.5 w-1.5 rounded-full bg-indigo-haze/80" />
          <span className="text-[13px] text-bone">Matching your profile <span className="text-mist">with live roles →</span></span>
         </div>
@@ -102,7 +102,7 @@ export function Hero() {
          { title: "Frontend Developer", company: "Linear", match: "92" },
          { title: "Full Stack Engineer", company: "Stripe", match: "87" },
         ].map((job, i) => (
-         <div key={i} className="flex h-16 items-center justify-between rounded-lg bg-ink/60 p-4 backdrop-blur-lg border border-bone/[0.04]">
+         <div key={i} className="flex h-16 items-center justify-between rounded-lg bg-card p-4 border border-border">
           <div>
            <h4 className="font-geist text-[15px] font-ui text-bone">{job.title}</h4>
            <p className="text-[13px] text-mist">{job.company}</p>

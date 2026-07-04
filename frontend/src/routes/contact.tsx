@@ -82,7 +82,7 @@ function ContactPage() {
               {channels.map((c) => (
                 <motion.div key={c.title} variants={reveal} className="rounded-lg border border-border bg-card p-6">
                   <div className="flex items-start gap-4">
-                    <div className="grid h-10 w-10 place-items-center rounded-md bg-gradient-to-br from-indigo-500 via-violet-500 to-pink-500 text-white">
+                    <div className="grid h-10 w-10 place-items-center rounded-md bg-primary text-primary-foreground">
                       <c.icon className="h-5 w-5" />
                     </div>
                     <div>

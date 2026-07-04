@@ -99,7 +99,7 @@ def require_role(allowed_roles: list[RoleEnum]):
         user: User = Depends(require_user),
         profile: Profile = Depends(get_current_profile)
     ):
-        if user.role not in allowed_roles:
+        if profile.role not in allowed_roles:
             raise APIError("forbidden", f"Insufficient permissions. Required roles: {[r.value for r in allowed_roles]}", 403)
         return user
     return role_checker

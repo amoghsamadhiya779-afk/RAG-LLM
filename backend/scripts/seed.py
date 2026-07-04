@@ -2,7 +2,7 @@ import asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 from app.db.session import engine, AsyncSessionLocal
-from app.models.models import User, Profile, Company, Job, RoleEnum, JobTypeEnum, JobLevelEnum, JobStatusEnum
+from app.db.models import User, Profile, Company, Job, RoleEnum, JobTypeEnum, JobLevelEnum, JobStatusEnum
 from app.core.security import get_password_hash
 from app.db.base import Base
 
@@ -88,7 +88,7 @@ Key Responsibilities:
                 salary_max=250000,
                 tags=["ruby", "go", "backend", "fintech"],
                 status=JobStatusEnum.live,
-                embedding=[0.01] * 1536 
+                embedding=[0.01] * 768 
             ),
             Job(
                 company_id=vercel.id,
@@ -104,7 +104,7 @@ You will work on features like Server Components, Turbopack, and advanced routin
                 salary_max=190000,
                 tags=["react", "typescript", "nextjs", "frontend"],
                 status=JobStatusEnum.live,
-                embedding=[0.02] * 1536
+                embedding=[0.02] * 768
             ),
             Job(
                 company_id=openai.id,
@@ -120,7 +120,7 @@ Experience with large scale distributed training (PyTorch, Triton) and deep lear
                 salary_max=350000,
                 tags=["python", "pytorch", "ml", "ai", "llm"],
                 status=JobStatusEnum.live,
-                embedding=[0.03] * 1536
+                embedding=[0.03] * 768
             ),
             Job(
                 company_id=linear.id,
@@ -136,7 +136,7 @@ Our stack is React, TypeScript, GraphQL, Node.js, and PostgreSQL. We deploy mult
                 salary_max=220000,
                 tags=["typescript", "react", "graphql", "fullstack"],
                 status=JobStatusEnum.live,
-                embedding=[0.04] * 1536
+                embedding=[0.04] * 768
             )
         ]
         

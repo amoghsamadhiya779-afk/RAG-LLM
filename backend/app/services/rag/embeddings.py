@@ -60,11 +60,13 @@ class GeminiEmbeddingModel(EmbeddingModel):
     def embed(self, texts: list[str]) -> list[list[float]]:
         results = []
         batch_size = 100
+        from app.core.config import settings as core_settings
         for i in range(0, len(texts), batch_size):
             batch_texts = texts[i:i + batch_size]
             response = self.client.models.embed_content(
                 model=self.model,
                 contents=batch_texts,
+                config={'output_dimensionality': core_settings.GEMINI_EMBED_DIMS}
             )
             for item in response.embeddings:
                 results.append(item.values)

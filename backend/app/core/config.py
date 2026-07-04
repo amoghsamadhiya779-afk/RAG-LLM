@@ -9,12 +9,17 @@ class Settings(BaseSettings):
     SUPABASE_SERVICE_ROLE_KEY: str
     SUPABASE_JWT_SECRET: str | None = None
     DATABASE_URL: str
+    JWT_SECRET: str = "secret"
+    JWT_ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
     
     # AI
     GEMINI_API_KEY: str
     HF_TOKEN: str | None = None
     DAILY_AI_BUDGET: int = 200
     GEMINI_MODEL: str = "gemini-2.5-flash"
+    GEMINI_EMBED_MODEL: str = "gemini-embedding-2"
+    GEMINI_EMBED_DIMS: int = 768
     
     # Job Sources
     ADZUNA_APP_ID: str
@@ -50,4 +55,13 @@ class Settings(BaseSettings):
             return self.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
         return self.DATABASE_URL
 
-settings = Settings()
+import sys
+from pydantic import ValidationError
+
+try:
+    settings = Settings()
+except ValidationError as e:
+    errors = e.errors()
+    missing_fields = [err.get("loc", ["Unknown"])[0] for err in errors]
+    print(f"CRITICAL: Configuration validation failed. Invalid or missing fields: {', '.join(map(str, missing_fields))}")
+    sys.exit(1)

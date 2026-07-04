@@ -35,4 +35,5 @@ class UserRepository:
         
         await self.db.commit()
         await self.db.refresh(user)
+        await self.db.refresh(profile)
         return user

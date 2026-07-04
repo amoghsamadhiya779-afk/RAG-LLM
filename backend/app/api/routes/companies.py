@@ -29,7 +29,7 @@ async def get_company(identifier: str, db: AsyncSession = Depends(get_db)):
 @router.post("", response_model=CompanyResponse)
 async def create_company(
     company_in: CompanyCreate,
-    user: User = Depends(require_role([RoleEnum.employer])),
+    user: User = Depends(require_role([RoleEnum.recruiter])),
     db: AsyncSession = Depends(get_db)
 ):
     repo = CompanyRepository(db)
@@ -40,7 +40,7 @@ async def create_company(
 async def update_company(
     company_id: uuid.UUID,
     company_in: CompanyUpdate,
-    user: User = Depends(require_role([RoleEnum.employer, RoleEnum.admin])),
+    user: User = Depends(require_role([RoleEnum.recruiter, RoleEnum.admin])),
     db: AsyncSession = Depends(get_db)
 ):
     repo = CompanyRepository(db)

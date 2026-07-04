@@ -1,84 +1,96 @@
-from app.core.idempotency import IdempotentRoute
-from fastapi import APIRouter, Header, Depends
-import httpx
+import logging
 import bleach
-import uuid
-from typing import List, Dict, Any
+from fastapi import APIRouter, Header, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.session import get_db
-from app.db.repositories import JobRepository
-from app.services.embeddings import generate_embedding
+from typing import List, Dict
+
 from app.core.config import settings
-from app.core.errors import APIError
-from app.core.limits import redis
-import structlog
+from app.db.session import get_db
+from app.db.repositories.jobs_repo import JobsRepository
+from app.services.adzuna import fetch_adzuna
+from app.services.arbeitnow import fetch_arbeitnow
+from app.services.embeddings import embed_text
+from app.core.limits import check_rate_limit
+from app.db.schemas import RawJob
 
-logger = structlog.get_logger(__name__)
+logger = logging.getLogger(__name__)
 
-router = APIRouter(route_class=IdempotentRoute, prefix="/internal/ingest", tags=["ingest"])
+router = APIRouter(prefix="/internal/ingest", tags=["internal"])
 
-async def verify_cron_secret(x_cron_secret: str = Header(...)):
-    if x_cron_secret != settings.CRON_SECRET:
-        raise APIError("unauthorized", "Invalid cron secret.", 401)
-    return True
-
-async def fetch_adzuna_jobs() -> List[Dict[str, Any]]:
-    # Adzuna rate limit protection
-    if redis:
-        current = redis.incr("adzuna_daily_calls")
-        if current == 1:
-            redis.expire("adzuna_daily_calls", 86400)
-        if current > 200:
-            logger.warning("adzuna_budget_exhausted")
-            return []
-            
-    url = f"{settings.ADZUNA_API_URL}/us/search/1?app_id={settings.ADZUNA_APP_ID}&app_key={settings.ADZUNA_APP_KEY}&results_per_page=20"
-    try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            response = await client.get(url, timeout=15.0)
-            response.raise_for_status()
-            data = response.json()
-            return data.get("results", [])
-    except Exception as e:
-        logger.error("adzuna_fetch_failed", error=str(e))
-        return []
-
-def sanitize_html(html: str) -> str:
-    if not html:
+def sanitize_html(html_text: str) -> str:
+    if not html_text:
         return ""
-    allowed_tags = ['p', 'b', 'i', 'u', 'em', 'strong', 'ul', 'ol', 'li', 'br']
-    return bleach.clean(html, tags=allowed_tags, strip=True)
+    allowed_tags = ['b', 'i', 'u', 'strong', 'em', 'p', 'br', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'a']
+    allowed_attrs = {'a': ['href', 'title']}
+    return bleach.clean(html_text, tags=allowed_tags, attributes=allowed_attrs)
 
-@router.post("/run", dependencies=[Depends(verify_cron_secret)])
-async def run_ingestion(db: AsyncSession = Depends(get_db)):
-    adzuna_results = await fetch_adzuna_jobs()
-    
-    normalized_jobs = []
-    for aj in adzuna_results:
-        description = sanitize_html(aj.get("description", ""))
-        
-        # Generate embedding
-        embedding_text = f"{aj.get('title', '')} {aj.get('company', {}).get('display_name', '')} {description}"
+def get_plain_text(html_text: str) -> str:
+    if not html_text:
+        return ""
+    return bleach.clean(html_text, tags=[], attributes={}, strip=True)
+
+@router.post("/run")
+async def run_ingestion(
+    x_cron_secret: str = Header(None, alias="X-Cron-Secret"),
+    db: AsyncSession = Depends(get_db)
+):
+    if not x_cron_secret or x_cron_secret != settings.CRON_SECRET:
+        raise HTTPException(status_code=401, detail="Invalid CRON Secret")
+
+    raw_jobs = []
+
+    # 1. Fetch Adzuna (with rate limit check)
+    try:
+        # 250 calls per day for Adzuna
+        await check_rate_limit("adzuna_daily_calls", 250, 86400)
+        adzuna_jobs = await fetch_adzuna(what="developer", country="gb", pages=1)
+        raw_jobs.extend(adzuna_jobs)
+        logger.info(f"Fetched {len(adzuna_jobs)} jobs from Adzuna")
+    except Exception as e:
+        logger.error(f"Failed to fetch Adzuna jobs: {e}")
+        # Proceed even if Adzuna fails, e.g. rate limit
+
+    # 2. Fetch Arbeitnow
+    try:
+        arbeitnow_jobs = await fetch_arbeitnow()
+        raw_jobs.extend(arbeitnow_jobs)
+        logger.info(f"Fetched {len(arbeitnow_jobs)} jobs from Arbeitnow")
+    except Exception as e:
+        logger.error(f"Failed to fetch Arbeitnow jobs: {e}")
+
+    if not raw_jobs:
+        return {"ingested": 0, "message": "No jobs fetched"}
+
+    # 3. Normalize & Deduplicate
+    unique_jobs: Dict[str, RawJob] = {}
+    for job in raw_jobs:
+        key = f"{job.source}:{job.external_id}"
+        if key not in unique_jobs:
+            job.description_html = sanitize_html(job.description_html)
+            unique_jobs[key] = job
+
+    normalized_jobs = list(unique_jobs.values())
+
+    # 4. Generate embeddings
+    for job in normalized_jobs:
+        plain_desc = get_plain_text(job.description_html)
+        text_for_embedding = f"{job.title} {job.company or ''} {plain_desc}"
         try:
-            embedding = await generate_embedding(embedding_text)
-        except Exception:
-            embedding = None
-            
-        normalized_jobs.append({
-            "id": f"adz_{aj.get('id')}",
-            "title": aj.get("title"),
-            "company": aj.get("company", {}).get("display_name", "Unknown"),
-            "location": aj.get("location", {}).get("display_name"),
-            "remote": False, # Basic assumption if not specified
-            "description": description,
-            "url": aj.get("redirect_url"),
-            "source": "adzuna",
-            "external_id": str(aj.get("id")),
-            "embedding": embedding
-        })
-        
-    if normalized_jobs:
-        repo = JobRepository(db)
+            job.embedding = await embed_text(text_for_embedding)
+        except Exception as e:
+            logger.error(f"Failed to embed job {job.source}:{job.external_id}: {e}")
+            # If embedding fails, we can assign a zero vector or skip. 
+            # `embed_text` returns zero vector if empty, but we might want to skip.
+            # Let's just use the fallback in embed_text or let it raise if critical.
+            # Since `embed_text` raises on APIError, we'll catch and set to zeros.
+            job.embedding = [0.0] * 768
+
+    # 5. Upsert into database
+    repo = JobsRepository(db)
+    try:
         await repo.upsert_jobs(normalized_jobs)
-        
-    return {"status": "success", "ingested": len(normalized_jobs)}
+    except Exception as e:
+        logger.error(f"Failed to upsert jobs: {e}")
+        raise HTTPException(status_code=500, detail="Database upsert failed")
+
+    return {"ingested": len(normalized_jobs)}

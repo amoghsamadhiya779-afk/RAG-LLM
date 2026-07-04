@@ -59,7 +59,7 @@ async def check_ai_budget(tokens: int = 1):
         
     if current > settings.DAILY_AI_BUDGET:
         logger.error("ai_budget_exhausted", current=current, limit=settings.DAILY_AI_BUDGET)
-        raise APIError("ai_budget_exhausted", "Daily AI budget exhausted.", 503)
+        raise APIError("ai_budget_exhausted", "Daily AI budget exhausted.", 429)
     return True
 
 async def check_guest_turnstile(request: Request):

@@ -94,7 +94,7 @@ async def parse_resume_file(file_bytes: bytes, filename: str) -> dict:
                 
         # Generate an embedding for the parsed keywords
         embedding_text = " ".join(parsed_data["skills"] + parsed_data["suggested_keywords"]) or text[:1000]
-        embedding = [0.0] * 1536  # pgvector requires 1536 for standard openai/gemini models
+        embedding = [0.0] * 768  # pgvector requires 1536 for standard openai/gemini models, but DB is 768
         
         return {
             "parsed": parsed_data,
@@ -104,7 +104,7 @@ async def parse_resume_file(file_bytes: bytes, filename: str) -> dict:
     except Exception as e:
         logger.error(f"Error parsing resume: {e}")
         return {
-            "parsed": {"error": "Failed to parse resume"},
+            "parsed": None,
             "raw_text": "",
-            "embedding": [0.0] * 1536
+            "embedding": [0.0] * 768
         }

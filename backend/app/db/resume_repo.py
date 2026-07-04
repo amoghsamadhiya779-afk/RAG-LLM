@@ -23,10 +23,12 @@ class ResumeRepository:
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def create(self, user_id: uuid.UUID, file_name: str) -> Resume:
+    async def create(self, user_id: uuid.UUID, file_name: str, storage_path: str = "", size_bytes: int = 0) -> Resume:
         resume = Resume(
             user_id=user_id,
-            file_name=file_name
+            file_name=file_name,
+            storage_path=storage_path,
+            size_bytes=size_bytes
         )
         self.db.add(resume)
         await self.db.commit()
@@ -45,3 +47,20 @@ class ResumeRepository:
         await self.db.commit()
         await self.db.refresh(resume)
         return resume
+
+    async def delete(self, resume_id: uuid.UUID) -> bool:
+        resume = await self.get_by_id(resume_id)
+        if not resume:
+            return False
+            
+        from sqlalchemy import update
+        from app.db.models import Application
+        await self.db.execute(
+            update(Application)
+            .where(Application.resume_id == resume_id)
+            .values(resume_id=None)
+        )
+            
+        await self.db.delete(resume)
+        await self.db.commit()
+        return True

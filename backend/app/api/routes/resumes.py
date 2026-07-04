@@ -49,47 +49,75 @@ async def process_resume_bg(resume_id: uuid.UUID, file_bytes: bytes, filename: s
         repo = ResumeRepository(db)
         await repo.update_parsed(resume_id, result["parsed"], result["embedding"])
 
+from pydantic import BaseModel
+
+class ResumeUploadRequest(BaseModel):
+    filename: str
+    storage_path: str
+
+async def download_from_supabase(storage_path: str) -> bytes:
+    from supabase import create_client, Client
+    supabase: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_ROLE_KEY)
+    response = supabase.storage.from_("resumes").download(storage_path)
+    return response
+
 @router.post("", response_model=ResumeResponse)
 async def upload_resume(
+    payload: ResumeUploadRequest,
     background_tasks: BackgroundTasks,
-    file: UploadFile = File(...),
     user: User = Depends(require_role([RoleEnum.seeker])),
     db: AsyncSession = Depends(get_db)
 ):
-    # 1. Read and check size
-    file_bytes = await file.read()
+    # 1. Enforce IDOR check
+    if not payload.storage_path.startswith(f"{user.id}/"):
+        raise HTTPException(status_code=403, detail="Invalid storage path ownership")
+        
+    # 2. Download from Supabase
+    try:
+        file_bytes = await download_from_supabase(payload.storage_path)
+    except Exception as e:
+        raise HTTPException(status_code=404, detail="Could not download file from storage")
+
+    # 3. Check size
     if len(file_bytes) > MAX_FILE_SIZE:
         raise HTTPException(status_code=413, detail="File too large. Maximum size is 5MB.")
     
-    # 2. Check MIME type
-    mime_type = file.content_type
-    if not mime_type:
-        mime_type, _ = mimetypes.guess_type(file.filename or "")
-    if not mime_type:
-        mime_type = "application/octet-stream"
+    # 4. Magic byte sniff (PDF or DOCX)
+    is_pdf = file_bytes.startswith(b"%PDF")
+    is_docx = file_bytes.startswith(b"PK\x03\x04")
+    # Also allow simple txt if it's utf-8 decodable and doesn't contain null bytes
+    is_txt = False
+    if not (is_pdf or is_docx):
+        try:
+            file_bytes.decode('utf-8')
+            if b"\x00" not in file_bytes:
+                is_txt = True
+        except UnicodeDecodeError:
+            pass
+            
+    if not (is_pdf or is_docx or is_txt):
+        raise HTTPException(status_code=415, detail="Unsupported file type. Allowed: PDF, DOCX, TXT.")
         
-    if mime_type not in ALLOWED_MIMES:
-        raise HTTPException(status_code=415, detail=f"Unsupported file type: {mime_type}. Allowed: PDF, DOCX, TXT.")
-        
-    # 3. Sanitize filename
-    safe_filename = sanitize_filename(file.filename or "unknown.pdf")
+    # 5. Sanitize filename
+    safe_filename = sanitize_filename(payload.filename or "unknown.pdf")
     
-    # 4. Malware scan
+    # 6. Malware scan
     is_safe = await scan_for_malware(file_bytes)
     if not is_safe:
         raise HTTPException(status_code=400, detail="Malware detected. Upload rejected.")
-        
-    # 5. Encrypted storage
-    storage_key = await store_encrypted_object(user.id, file_bytes)
     
     repo = ResumeRepository(db)
-    resume = await repo.create(user.id, safe_filename)
+    resume = await repo.create(user.id, safe_filename, payload.storage_path, len(file_bytes))
     
     # Process synchronously to avoid race conditions with frontend
     await process_resume_bg(resume.id, file_bytes, safe_filename)
     
-    # Reload resume to get parsed data
+    # Update size and storage_path in DB
     resume = await repo.get_by_id(resume.id)
+    resume.size_bytes = len(file_bytes)
+    resume.storage_path = payload.storage_path
+    await db.commit()
+    await db.refresh(resume)
     
     return ResumeResponse.model_validate(resume)
 
@@ -101,6 +129,51 @@ async def get_my_resumes(
     repo = ResumeRepository(db)
     resumes = await repo.get_mine(user.id)
     return [ResumeResponse.model_validate(r) for r in resumes]
+
+@router.get("/{resume_id}", response_model=ResumeResponse)
+async def get_resume(
+    resume_id: uuid.UUID,
+    user: User = Depends(require_role([RoleEnum.seeker, RoleEnum.recruiter])),
+    db: AsyncSession = Depends(get_db)
+):
+    repo = ResumeRepository(db)
+    resume = await repo.get_by_id(resume_id)
+    if not resume:
+        raise HTTPException(status_code=404, detail="Resume not found")
+    # Basic authorization: seekers can only view their own resumes
+    if user.profile.role == RoleEnum.seeker and resume.user_id != user.id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    return ResumeResponse.model_validate(resume)
+
+@router.get("/{resume_id}/analysis", response_model=dict)
+async def get_resume_analysis(
+    resume_id: uuid.UUID,
+    user: User = Depends(require_role([RoleEnum.seeker, RoleEnum.recruiter])),
+    db: AsyncSession = Depends(get_db)
+):
+    repo = ResumeRepository(db)
+    resume = await repo.get_by_id(resume_id)
+    if not resume:
+        raise HTTPException(status_code=404, detail="Resume not found")
+    if user.profile.role == RoleEnum.seeker and resume.user_id != user.id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    if not resume.parsed:
+        # Mock analysis if parsing is not complete
+        return {
+            "status": "pending",
+            "extracted_skills": [],
+            "seniority_estimate": "Unknown",
+            "suggestions": []
+        }
+    
+    # Map parsed schema to what the frontend expects
+    return {
+        "status": "completed",
+        "extracted_skills": resume.parsed.get("skills", []),
+        "seniority_estimate": resume.parsed.get("seniority", "Unknown"),
+        "suggestions": resume.parsed.get("suggested_keywords", [])
+    }
 
 @router.post("/{resume_id}/parse", response_model=ParsedResume)
 async def parse_resume(

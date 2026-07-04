@@ -1,19 +1,18 @@
-from google import genai
+import structlog
 from typing import List
 from app.core.config import settings
 from app.core.errors import APIError
+from app.core.gemini_client import get_gemini_client
 from app.core.limits import check_ai_budget
-import structlog
 
 logger = structlog.get_logger(__name__)
 
-try:
-    client = genai.Client(api_key=settings.GEMINI_API_KEY)
-except Exception as e:
-    logger.error("gemini_init_failed", error=str(e))
-    client = None
-
-async def generate_embedding(text: str) -> List[float]:
+async def embed_text(text: str) -> List[float]:
+    """Generates an embedding for the given text using text-embedding-004."""
+    if not text or not text.strip():
+        return [0.0] * 768
+        
+    client = get_gemini_client()
     if not client:
         raise APIError("gemini_unavailable", "AI service is currently unavailable.", 503)
         
@@ -21,10 +20,13 @@ async def generate_embedding(text: str) -> List[float]:
     
     try:
         response = await client.aio.models.embed_content(
-            model='text-embedding-004',
-            contents=text
+            model=settings.GEMINI_EMBED_MODEL,
+            contents=text,
+            config={'output_dimensionality': settings.GEMINI_EMBED_DIMS}
         )
-        return response.embeddings[0].values
+        embedding = response.embeddings[0].values
+        assert len(embedding) == settings.GEMINI_EMBED_DIMS, f"Embedding length {len(embedding)} is not {settings.GEMINI_EMBED_DIMS}"
+        return embedding
     except Exception as e:
         logger.error("embedding_failed", error=str(e))
         raise APIError("gemini_error", f"Failed to generate embedding: {e}", 500)

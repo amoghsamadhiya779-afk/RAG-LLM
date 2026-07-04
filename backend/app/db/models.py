@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from enum import Enum as PyEnum
 from typing import List, Optional, Any
 
-from sqlalchemy import String, Boolean, Integer, Float, ForeignKey, DateTime, Enum, JSON, Uuid
+from sqlalchemy import String, Boolean, Integer, Float, ForeignKey, DateTime, Enum, JSON, Uuid, ARRAY
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from pgvector.sqlalchemy import Vector
 
@@ -11,7 +11,7 @@ from app.db.base import Base
 
 class RoleEnum(str, PyEnum):
     seeker = "seeker"
-    employer = "employer"
+    recruiter = "recruiter"
     admin = "admin"
 
 class JobStatusEnum(str, PyEnum):
@@ -39,6 +39,7 @@ class ApplicationStageEnum(str, PyEnum):
     interview = "interview"
     offer = "offer"
     rejected = "rejected"
+    withdrawn = "withdrawn"
 
 class User(Base):
     __tablename__ = "users"
@@ -58,6 +59,10 @@ class Profile(Base):
     avatar_url: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     bio: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
+    @property
+    def id(self):
+        return self.user_id
+
     user: Mapped["User"] = relationship("User", back_populates="profile")
 
 class Company(Base):
@@ -73,31 +78,26 @@ class Company(Base):
     size: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
-    jobs: Mapped[List["Job"]] = relationship("Job", back_populates="company")
-
 class Job(Base):
     __tablename__ = "jobs"
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
-    company_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey("companies.id"), nullable=False)
+    source: Mapped[str] = mapped_column(String, nullable=False)
+    external_id: Mapped[str] = mapped_column(String, nullable=False)
     title: Mapped[str] = mapped_column(String, nullable=False)
-    description: Mapped[str] = mapped_column(String, nullable=False)
-    requirements: Mapped[List[str]] = mapped_column(JSON, nullable=False)
+    company: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     location: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     remote: Mapped[bool] = mapped_column(Boolean, default=False)
-    job_type: Mapped[JobTypeEnum] = mapped_column(Enum(JobTypeEnum), nullable=False)
-    level: Mapped[JobLevelEnum] = mapped_column(Enum(JobLevelEnum), nullable=False)
+    seniority: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    tags: Mapped[List[str]] = mapped_column(ARRAY(String), default=list)
     salary_min: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     salary_max: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    tags: Mapped[List[str]] = mapped_column(JSON, nullable=False)
-    status: Mapped[JobStatusEnum] = mapped_column(Enum(JobStatusEnum), default=JobStatusEnum.pending, index=True)
-    featured: Mapped[bool] = mapped_column(Boolean, default=False)
-    views: Mapped[int] = mapped_column(Integer, default=0)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), index=True)
-    
-    # embedding
+    currency: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    description_html: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    apply_url: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    posted_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     embedding = mapped_column(Vector(768), nullable=True)
-
-    company: Mapped["Company"] = relationship("Company", back_populates="jobs")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 class Application(Base):
     __tablename__ = "applications"
@@ -114,6 +114,8 @@ class Resume(Base):
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
     user_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey("users.id"), nullable=False)
     file_name: Mapped[str] = mapped_column(String, nullable=False)
+    storage_path: Mapped[str] = mapped_column(String, nullable=False)
+    size_bytes: Mapped[int] = mapped_column(Integer, nullable=False)
     uploaded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     parsed: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
     

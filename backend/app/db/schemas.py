@@ -85,56 +85,59 @@ class CompanyResponse(CompanyBase):
 # ----------------- Jobs -----------------
 
 class JobBase(CamelModel):
+    source: str
+    external_id: str
     title: str
-    description: str
-    requirements: List[str]
+    company: Optional[str] = None
     location: Optional[str] = None
     remote: bool = False
-    job_type: JobTypeEnum
-    level: JobLevelEnum
+    seniority: Optional[str] = None
+    tags: List[str] = Field(default_factory=list)
     salary_min: Optional[float] = None
     salary_max: Optional[float] = None
-    tags: List[str]
+    currency: Optional[str] = None
+    description_html: Optional[str] = None
+    apply_url: Optional[str] = None
+    posted_at: Optional[datetime] = None
+
+class RawJob(JobBase):
+    embedding: Optional[List[float]] = None
+
+class JobFilters(CamelModel):
+    q: Optional[str] = None
+    location: Optional[str] = None
+    remote: Optional[bool] = None
+    seniority: Optional[str] = None
+    tags: Optional[List[str]] = None
+    salary_min: Optional[float] = None
 
 class JobCreate(JobBase):
-    company_id: uuid.UUID
+    pass
 
 class JobUpdate(CamelModel):
     title: Optional[str] = None
-    description: Optional[str] = None
-    requirements: Optional[List[str]] = None
+    company: Optional[str] = None
     location: Optional[str] = None
     remote: Optional[bool] = None
-    job_type: Optional[JobTypeEnum] = None
-    level: Optional[JobLevelEnum] = None
+    seniority: Optional[str] = None
+    tags: Optional[List[str]] = None
     salary_min: Optional[float] = None
     salary_max: Optional[float] = None
-    tags: Optional[List[str]] = None
+    currency: Optional[str] = None
+    description_html: Optional[str] = None
+    apply_url: Optional[str] = None
     status: Optional[JobStatusEnum] = None
-    featured: Optional[bool] = None
-
-class JobFilters(CamelModel):
-    query: Optional[str] = None
-    tags: Optional[List[str]] = None
-    remote: Optional[bool] = None
-    job_type: Optional[JobTypeEnum] = None
-    level: Optional[JobLevelEnum] = None
-    salary_min: Optional[float] = None
-    featured: Optional[bool] = None
-    status: Optional[JobStatusEnum] = None
+    is_featured: Optional[bool] = None
 
 class JobResponse(JobBase):
     id: uuid.UUID
-    company_id: uuid.UUID
-    status: JobStatusEnum
-    featured: bool
-    views: int
     created_at: datetime
+    updated_at: datetime
     model_config = ConfigDict(from_attributes=True)
 
 class JobWithCompanyResponse(JobResponse):
-    company: CompanyResponse
-    model_config = ConfigDict(from_attributes=True)
+    company_obj: Optional[CompanyResponse] = Field(None, alias="company")
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
 # ----------------- Resumes -----------------
 
@@ -187,7 +190,7 @@ class ProfileSnippet(CamelModel):
 class JobSnippet(CamelModel):
     id: uuid.UUID
     title: str
-    company: Optional[dict] = None
+    company: Optional[str] = None
     model_config = ConfigDict(from_attributes=True)
 
 class ApplicationWithRelationsResponse(ApplicationResponse):

@@ -8,7 +8,7 @@ from app.db.session import get_db
 from app.db.schemas import ApplicationCreate, ApplicationUpdate, ApplicationResponse, ApplicationWithRelationsResponse
 from app.db.application_repo import ApplicationRepository
 from app.core.deps import require_user, require_role
-from app.db.models import User, RoleEnum
+from app.db.models import User, RoleEnum, Application
 
 router = APIRouter(route_class=IdempotentRoute, prefix="", tags=["applications"])
 
@@ -31,7 +31,7 @@ async def create_application(
 @router.get("/jobs/{job_id}/applications", response_model=List[ApplicationWithRelationsResponse])
 async def get_job_applications(
     job_id: uuid.UUID,
-    user: User = Depends(require_role([RoleEnum.employer])),
+    user: User = Depends(require_role([RoleEnum.recruiter])),
     db: AsyncSession = Depends(get_db)
 ):
     repo = ApplicationRepository(db)
@@ -51,10 +51,19 @@ async def get_my_applications(
 async def update_application_status(
     application_id: uuid.UUID,
     app_in: ApplicationUpdate,
-    user: User = Depends(require_role([RoleEnum.employer])),
+    user: User = Depends(require_role([RoleEnum.recruiter, RoleEnum.seeker])),
     db: AsyncSession = Depends(get_db)
 ):
     repo = ApplicationRepository(db)
+    # If user is a seeker, they can only set the stage to 'withdrawn'
+    if user.profile.role == RoleEnum.seeker:
+        if app_in.stage != "withdrawn":
+            raise HTTPException(status_code=403, detail="Seekers can only withdraw applications")
+        # Also need to check if they own the application (handled by repo if we add user_id check, but let's fetch it first)
+        app_model = await db.get(Application, application_id)
+        if not app_model or app_model.user_id != user.id:
+            raise HTTPException(status_code=404, detail="Application not found")
+
     application = await repo.update(application_id, app_in)
     if not application:
         raise HTTPException(status_code=404, detail="Application not found")

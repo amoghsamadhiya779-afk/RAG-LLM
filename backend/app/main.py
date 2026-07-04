@@ -3,11 +3,27 @@ import os
 import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Header, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.routes import auth, jobs, companies, applications, resumes, admin, chat, insights
+from app.api.routes import auth, jobs, companies, applications, resumes, admin, chat, insights, internal_ingest
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
+
+# Optional Sentry initialization
+try:
+    import sentry_sdk
+    if settings.SENTRY_DSN:
+        sentry_sdk.init(
+            dsn=settings.SENTRY_DSN,
+            traces_sample_rate=1.0,
+            profiles_sample_rate=1.0,
+        )
+        logger.info("Sentry SDK initialized successfully.")
+    else:
+        logger.info("SENTRY_DSN not provided; Sentry disabled.")
+except ImportError:
+    logger.info("sentry_sdk not installed; Sentry disabled.")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -42,7 +58,16 @@ async def lifespan(app: FastAPI):
             
     yield
 
+from app.core.errors import APIError
+
+async def api_error_handler(request: Request, exc: APIError):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.message, "code": exc.code},
+    )
+
 app = FastAPI(title=settings.PROJECT_NAME, lifespan=lifespan)
+app.add_exception_handler(APIError, api_error_handler)
 
 app.add_middleware(
     CORSMiddleware,
@@ -52,51 +77,65 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(auth.router)
-app.include_router(jobs.router)
-app.include_router(companies.router)
-app.include_router(applications.router)
-app.include_router(resumes.router)
-app.include_router(admin.router)
-app.include_router(chat.router)
-app.include_router(insights.router)
+from app.api.routes import auth, jobs, companies, applications, resumes, admin, chat, insights, internal_ingest, saved
+from fastapi import APIRouter
+
+api_router = APIRouter(prefix="/api/v1")
+api_router.include_router(auth.router)
+api_router.include_router(jobs.router)
+api_router.include_router(saved.router)
+api_router.include_router(companies.router)
+api_router.include_router(applications.router)
+api_router.include_router(resumes.router)
+api_router.include_router(admin.router)
+api_router.include_router(chat.router)
+api_router.include_router(insights.router)
+api_router.include_router(internal_ingest.router)
+
+app.include_router(api_router)
 
 @app.get("/health")
 async def health():
     return {"status": "ok"}
 
-@app.get("/health/deep")
-async def health_deep(
+@app.get("/internal/diagnostics")
+async def diagnostics(
     request: Request,
-    api_key: str = Header(..., alias="X-API-Key")
+    x_cron_secret: str = Header(None, alias="X-Cron-Secret")
 ):
-    if api_key != settings.backend_api_key:
-        raise HTTPException(status_code=401, detail="Invalid API Key")
+    if x_cron_secret != settings.CRON_SECRET:
+        raise HTTPException(status_code=401, detail="Invalid CRON Secret")
         
-    from scripts.check_connections import run_checks
+    import subprocess
+    import json
+    import os
     
-    # We can capture stdout or modify run_checks to return dict. 
-    # Let's modify check_connections.py later to return dict.
-    from scripts.check_connections import (
-        check_database, check_supabase_auth, check_jwks, check_gemini,
-        check_adzuna, check_upstash, check_resend, check_turnstile
-    )
-    
-    results = {
-        "database": await check_database(),
-        "supabase_auth": await check_supabase_auth(),
-        "supabase_jwks": await check_jwks(),
-        "gemini": await check_gemini(),
-        "adzuna": await check_adzuna(),
-        "redis": await check_upstash(),
-        "resend": await check_resend(),
-        "turnstile": await check_turnstile(),
-    }
-    
-    has_critical_failure = any(res[0] == "FAIL" for res in results.values())
-    status_code = 503 if has_critical_failure else 200
-    
-    return JSONResponse(status_code=status_code, content={"status": "fail" if has_critical_failure else "ok", "results": results})
+    # Run the diagnose_apis.py script as a subprocess to keep it isolated
+    # and parse its output.
+    script_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "scripts", "diagnose_apis.py")
+    try:
+        result = subprocess.run(
+            [sys.executable, script_path], 
+            capture_output=True, text=True, timeout=30
+        )
+        
+        output = result.stdout
+        checks = {}
+        for line in output.split('\n'):
+            if line.startswith('[PASS]'):
+                name = line.split(']', 1)[1].split(':', 1)[0].strip()
+                checks[name] = "PASS"
+            elif line.startswith('[FAIL]'):
+                name = line.split(']', 1)[1].split(':', 1)[0].strip()
+                checks[name] = "FAIL"
+                
+        has_critical_failure = any(v == "FAIL" for v in checks.values())
+        status_code = 503 if has_critical_failure else 200
+        
+        return JSONResponse(status_code=status_code, content={"status": "fail" if has_critical_failure else "ok", "results": checks, "raw": output})
+    except Exception as e:
+        logger.error(f"Diagnostics execution failed: {e}")
+        return JSONResponse(status_code=500, content={"status": "error", "detail": str(e)})
 
 @app.get("/ready")
 async def ready():

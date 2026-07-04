@@ -26,7 +26,7 @@ function AtsIndex() {
   return (
     <div className="min-h-screen bg-transparent text-foreground">
       <ShrinkNavbar />
-      <main className="mx-auto max-w-4xl px-6 pt-32 pb-24">
+      <main className="mx-auto max-w-4xl px-4 md:px-6 pt-32 pb-24">
         <BackButton fallback="/dashboard" className="mb-6" />
         <Reveal>
           <p className="font-mono text-xs uppercase tracking-[0.24em] text-muted-foreground">

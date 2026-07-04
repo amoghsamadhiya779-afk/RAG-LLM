@@ -26,7 +26,7 @@ export const Route = createFileRoute("/reset-password")({
     ],
   }),
   errorComponent: ({ reset }) => (
-    <div className="grid min-h-[60vh] place-items-center bg-transparent px-6 text-white">
+    <div className="grid min-h-[60vh] place-items-center bg-transparent px-6 text-foreground">
       <ErrorState title="Couldn't load reset page" onRetry={reset} />
     </div>
   ),
@@ -112,9 +112,9 @@ function ResetPasswordPage() {
       title="Set a new password"
       subtitle="Pick something strong — we'll sign you in as soon as it's saved."
       footer={
-        <p className="text-center text-white/60">
+        <p className="text-center text-muted-foreground">
           Wrong account?{" "}
-          <Link to="/login" className="font-medium text-white underline-offset-4 hover:underline">
+          <Link to="/login" className="font-medium text-foreground underline-offset-4 hover:underline">
             Back to sign in
           </Link>
         </p>
@@ -127,13 +127,13 @@ function ResetPasswordPage() {
           </div>
           <Link
             to="/forgot-password"
-            className="text-xs text-white/60 underline-offset-4 hover:text-white hover:underline"
+            className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
           >
             Request a new link
           </Link>
         </div>
       ) : !ready ? (
-        <div className="flex items-center gap-2 text-sm text-white/60">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" /> Verifying reset link…
         </div>
       ) : (
@@ -144,14 +144,14 @@ function ResetPasswordPage() {
               id="new-password"
               type="password"
               autoComplete="new-password"
-              className="h-11 bg-white/[0.02]"
+              className="h-11 bg-foreground/[0.02]"
               {...form.register("password")}
             />
             <ul className="mt-2 grid grid-cols-1 gap-1 text-[11px]">
               {rules.map((r) => (
                 <li
                   key={r.label}
-                  className={`flex items-center gap-2 ${r.ok ? "text-emerald-300" : "text-white/40"}`}
+                  className={`flex items-center gap-2 ${r.ok ? "text-emerald-300" : "text-muted-foreground"}`}
                 >
                   <Check
                     className={`h-3 w-3 ${r.ok ? "opacity-100" : "opacity-30"}`}
@@ -168,7 +168,7 @@ function ResetPasswordPage() {
               id="confirm-password"
               type="password"
               autoComplete="new-password"
-              className="h-11 bg-white/[0.02]"
+              className="h-11 bg-foreground/[0.02]"
               {...form.register("confirm")}
             />
             {form.formState.errors.confirm && (

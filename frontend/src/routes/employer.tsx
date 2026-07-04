@@ -41,13 +41,13 @@ export const Route = createFileRoute("/employer")({
 function EmployerPage() {
   const canPost = useIsRecruiter();
   return (
-    <div className="min-h-screen bg-transparent text-white">
+    <div className="min-h-screen bg-transparent text-foreground">
       <ShrinkNavbar />
       <main className="mx-auto max-w-7xl px-6 pt-32 pb-24">
         <Reveal>
           <Link
             to="/"
-            className="inline-flex items-center gap-2 text-sm text-white/50 hover:text-white transition mb-6"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition mb-6"
           >
             <ArrowLeft className="h-4 w-4" /> Home
           </Link>
@@ -56,7 +56,7 @@ function EmployerPage() {
               <h1 className="text-4xl md:text-5xl font-semibold tracking-[-0.03em]">
                 <GradientText>Employer</GradientText> workspace
               </h1>
-              <p className="text-white/50 mt-2 max-w-xl">
+              <p className="text-muted-foreground mt-2 max-w-xl">
                 Track how your postings are performing and manage every applicant in one place.
               </p>
             </div>
@@ -127,7 +127,7 @@ function StatsRow() {
 const statusStyles: Record<JobStatus, string> = {
   live: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
   pending: "bg-amber-500/15 text-amber-300 border-amber-500/30",
-  draft: "bg-white/10 text-white/60 border-white/15",
+  draft: "bg-foreground/10 text-foreground/60 border-foreground/15",
   archived: "bg-rose-500/15 text-rose-300 border-rose-500/30",
 };
 
@@ -156,15 +156,15 @@ function MyJobsTable() {
 
   return (
     <GlassPanel className="overflow-hidden">
-      <div className="flex items-center justify-between p-6 border-b border-white/5">
+      <div className="flex items-center justify-between p-6 border-b border-foreground/5">
         <div>
           <h2 className="text-lg font-medium tracking-[-0.02em]">My jobs</h2>
-          <p className="text-sm text-white/40">{data.total} postings total</p>
+          <p className="text-sm text-muted-foreground">{data.total} postings total</p>
         </div>
       </div>
 
       {/* Header */}
-      <div className="hidden md:grid grid-cols-[minmax(0,2.4fr)_100px_120px_130px_140px] gap-4 px-6 py-3 text-[11px] uppercase tracking-[0.18em] text-white/40 border-b border-white/5 font-mono">
+      <div className="hidden md:grid grid-cols-[minmax(0,2.4fr)_100px_120px_130px_140px] gap-4 px-6 py-3 text-[11px] uppercase tracking-[0.18em] text-muted-foreground border-b border-foreground/5 font-mono">
         <div>Role</div>
         <div>Status</div>
         <div className="text-right">Views</div>
@@ -187,23 +187,23 @@ function JobRow({ job, index }: { job: EmployerJob; index: number }) {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.03, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      className="grid md:grid-cols-[minmax(0,2.4fr)_100px_120px_130px_140px] gap-4 items-center px-6 py-4 hover:bg-white/[0.02] transition group"
+      className="grid md:grid-cols-[minmax(0,2.4fr)_100px_120px_130px_140px] gap-4 items-center px-6 py-4 hover:bg-foreground/[0.02] transition group"
     >
       <div className="min-w-0">
         <Link
           to="/jobs/$id"
           params={{ id: job.id }}
-          className="block truncate text-white font-medium group-hover:text-white transition"
+          className="block truncate text-foreground font-medium group-hover:text-foreground transition"
         >
           {job.title}
         </Link>
-        <div className="text-xs text-white/40 truncate flex items-center gap-2 mt-0.5">
+        <div className="text-xs text-muted-foreground truncate flex items-center gap-2 mt-0.5">
           <span>{typeof job.company === "string" ? job.company : job.company?.name || "Unknown"}</span>
-          <span className="text-white/20">·</span>
+          <span className="text-foreground/20">·</span>
           <span>{job.location}</span>
           {job.remote && (
             <>
-              <span className="text-white/20">·</span>
+              <span className="text-foreground/20">·</span>
               <span className="text-primary">Remote</span>
             </>
           )}
@@ -216,17 +216,17 @@ function JobRow({ job, index }: { job: EmployerJob; index: number }) {
         </Badge>
       </div>
 
-      <div className="md:text-right font-mono text-sm text-white/70 tabular-nums">
-        <span className="md:hidden text-white/40 mr-2">Views:</span>
+      <div className="md:text-right font-mono text-sm text-foreground/70 tabular-nums">
+        <span className="md:hidden text-muted-foreground mr-2">Views:</span>
         {job.views.toLocaleString()}
       </div>
 
       <div className="md:text-right font-mono text-sm tabular-nums">
-        <span className="md:hidden text-white/40 mr-2">Applicants:</span>
+        <span className="md:hidden text-muted-foreground mr-2">Applicants:</span>
         <Link
           to="/employer/jobs/$id/applicants"
           params={{ id: job.id }}
-          className="text-white hover:text-primary transition"
+          className="text-foreground hover:text-primary transition"
         >
           {job.applicant_count}
         </Link>
@@ -239,7 +239,7 @@ function JobRow({ job, index }: { job: EmployerJob; index: number }) {
       </div>
 
 
-      <div className="md:text-right text-xs text-white/40">
+      <div className="md:text-right text-xs text-muted-foreground">
         {formatDistanceToNow(job.created_at)}
       </div>
     </motion.li>

@@ -34,7 +34,7 @@ function SavedPage() {
   return (
     <div className="min-h-screen bg-transparent text-foreground">
       <ShrinkNavbar />
-      <main className="mx-auto max-w-6xl px-6 pt-32 pb-24">
+      <main className="mx-auto max-w-6xl px-4 md:px-6 pt-32 pb-24">
         <GuestBanner />
         <BackButton fallback="/" className="mb-6" />
         <Reveal>

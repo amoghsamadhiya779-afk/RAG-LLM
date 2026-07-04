@@ -167,7 +167,7 @@ function ResumePage() {
   const running = phase !== "idle" && phase !== "ready" && phase !== "error";
 
   return (
-    <div className="min-h-screen bg-transparent text-zinc-100 antialiased">
+    <div className="min-h-screen bg-transparent text-foreground antialiased">
       <ShrinkNavbar />
 
       <main className="mx-auto max-w-6xl px-4 pt-28 pb-24 md:px-6">
@@ -179,13 +179,13 @@ function ResumePage() {
           transition={{ duration: 0.6, ease }}
           className="mb-10"
         >
-          <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 font-mono text-[11px] uppercase tracking-widest text-zinc-400">
+          <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-foreground/[0.03] px-3 py-1 font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
             <FileText className="size-3" /> resume · pipeline
           </p>
-          <h1 className="text-3xl font-medium tracking-[-0.03em] text-white md:text-4xl">
+          <h1 className="text-3xl font-medium tracking-[-0.03em] text-foreground md:text-4xl">
             Upload your <GradientText>resume</GradientText>
           </h1>
-          <p className="mt-2 max-w-xl text-sm text-zinc-400">
+          <p className="mt-2 max-w-xl text-sm text-muted-foreground">
             We&apos;ll parse the file, extract skills, and prep an ATS-friendly search based on
             what you actually want to be hired for.
           </p>
@@ -229,18 +229,18 @@ function ResumePage() {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex min-w-0 items-center gap-3">
-                        <div className="grid size-10 place-items-center rounded-lg border border-white/10 bg-white/[0.03]">
-                          <FileText className="size-4 text-zinc-300" />
+                        <div className="grid size-10 place-items-center rounded-lg border border-foreground/10 bg-foreground/[0.03]">
+                          <FileText className="size-4 text-foreground/80" />
                         </div>
                         <div className="min-w-0">
-                          <p className="truncate text-sm text-zinc-100">{file?.name}</p>
-                          <p className="text-[11px] text-zinc-500 font-mono">
+                          <p className="truncate text-sm text-foreground">{file?.name}</p>
+                          <p className="text-[11px] text-muted-foreground/80 font-mono">
                             {file ? `${(file.size / 1024).toFixed(0)} KB` : ""}
                           </p>
                         </div>
                       </div>
                       {phase === "ready" && (
-                        <Button variant="ghost" size="sm" onClick={reset} className="gap-2 text-zinc-400">
+                        <Button variant="ghost" size="sm" onClick={reset} className="gap-2 text-muted-foreground">
                           <RotateCcw className="size-3.5" /> Replace
                         </Button>
                       )}
@@ -248,11 +248,11 @@ function ResumePage() {
 
                     {phase === "uploading" && (
                       <div>
-                        <div className="mb-1 flex items-center justify-between text-[11px] font-mono text-zinc-500">
+                        <div className="mb-1 flex items-center justify-between text-[11px] font-mono text-muted-foreground/80">
                           <span>uploading…</span>
                           <span>{Math.round(uploadPct)}%</span>
                         </div>
-                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.05]">
+                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-foreground/[0.05]">
                           <motion.div
                             className="h-full rounded-full bg-gradient-to-r from-primary via-primary/70 to-primary"
                             animate={{ width: `${uploadPct}%` }}

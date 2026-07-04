@@ -148,21 +148,21 @@ function NewJobPage() {
   };
 
   return (
-    <div className="min-h-screen bg-transparent text-white">
+    <div className="min-h-screen bg-transparent text-foreground">
       <ShrinkNavbar />
       <main className="mx-auto max-w-7xl px-6 pt-32 pb-24">
         <BackButton fallback="/employer" className="mb-6" />
         <Reveal>
           <Link
             to="/employer"
-            className="inline-flex items-center gap-2 text-sm text-white/50 hover:text-white transition mb-6"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition mb-6"
           >
             <ArrowLeft className="h-4 w-4" /> Back to employer
           </Link>
           <h1 className="text-4xl md:text-5xl font-semibold tracking-[-0.03em]">
             Post a <GradientText>new job</GradientText>
           </h1>
-          <p className="text-white/50 mt-2 max-w-xl">
+          <p className="text-muted-foreground mt-2 max-w-xl">
             Fill the form on the left; the preview on the right updates as you type. Posting is free.
           </p>
         </Reveal>
@@ -218,7 +218,7 @@ function NewJobPage() {
                     checked={values.remote}
                     onCheckedChange={(v) => form.setValue("remote", v)}
                   />
-                  <span className="text-sm text-white/60">
+                  <span className="text-sm text-foreground/60">
                     {values.remote ? "Remote-friendly" : "On-site only"}
                   </span>
                 </div>
@@ -242,7 +242,7 @@ function NewJobPage() {
               {tags.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mt-2">
                   {tags.map((t) => (
-                    <Badge key={t} variant="outline" className="border-white/10 text-white/70 font-mono text-[10px]">
+                    <Badge key={t} variant="outline" className="border-foreground/10 text-foreground/70 font-mono text-[10px]">
                       {t}
                     </Badge>
                   ))}
@@ -266,14 +266,14 @@ function NewJobPage() {
                   <>Submit for review</>
                 )}
               </GradientButton>
-              <span className="text-xs text-white/40">
+              <span className="text-xs text-muted-foreground">
                 Status will be <span className="text-amber-300">pending</span> until approved.
               </span>
             </div>
           </GlassPanel>
 
           <div className="lg:sticky lg:top-28 self-start">
-            <div className="text-[10px] uppercase tracking-[0.24em] text-white/40 font-mono mb-3">Live preview</div>
+            <div className="text-[10px] uppercase tracking-[0.24em] text-muted-foreground font-mono mb-3">Live preview</div>
             <JobPreview values={values} tags={tags} />
           </div>
         </form>
@@ -293,7 +293,7 @@ function Field({
 }) {
   return (
     <div className="space-y-1.5">
-      <Label className="text-xs uppercase tracking-[0.14em] text-white/50 font-mono">
+      <Label className="text-xs uppercase tracking-[0.14em] text-muted-foreground font-mono">
         {label}
       </Label>
       {children}
@@ -308,18 +308,18 @@ function JobPreview({ values, tags }: { values: FormValues; tags: string[] }) {
   return (
     <motion.div
       layout
-      className="relative rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-transparent p-6 md:p-8 overflow-hidden"
+      className="relative rounded-2xl border border-foreground/10 bg-gradient-to-b from-white/[0.04] to-transparent p-6 md:p-8 overflow-hidden"
     >
       <div className="relative">
-        <div className="flex items-center gap-2 text-xs text-white/40 font-mono">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground font-mono">
           <Building2 className="h-3.5 w-3.5" />
           {values.company_name || "Your Company"}
-          <span className="text-white/20">·</span>
+          <span className="text-foreground/20">·</span>
           <MapPin className="h-3.5 w-3.5" />
           {values.location || "—"}
           {values.remote && (
             <>
-              <span className="text-white/20">·</span>
+              <span className="text-foreground/20">·</span>
               <span className="text-primary">Remote</span>
             </>
           )}
@@ -329,36 +329,36 @@ function JobPreview({ values, tags }: { values: FormValues; tags: string[] }) {
         </h2>
 
         <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">
-          <Badge variant="outline" className="border-white/10 text-white/70 capitalize">
+          <Badge variant="outline" className="border-foreground/10 text-foreground/70 capitalize">
             {values.seniority}
           </Badge>
-          <Badge variant="outline" className="border-white/10 text-white/70">
+          <Badge variant="outline" className="border-foreground/10 text-foreground/70">
             {values.employment_type.replace("_", " ")}
           </Badge>
         </div>
 
         {showSalary && (
-          <div className="mt-4 inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-sm font-mono">
+          <div className="mt-4 inline-flex items-center gap-2 rounded-lg border border-foreground/10 bg-foreground/[0.03] px-3 py-1.5 text-sm font-mono">
             <DollarSign className="h-3.5 w-3.5 text-emerald-300" />
             {Number(values.salary_min).toLocaleString()}
-            <span className="text-white/30">–</span>
+            <span className="text-foreground/30">–</span>
             {Number(values.salary_max).toLocaleString()}
-            <span className="text-white/40">{values.currency}</span>
+            <span className="text-muted-foreground">{values.currency}</span>
           </div>
         )}
 
         {tags.length > 0 && (
           <div className="mt-4 flex flex-wrap gap-1.5">
-            <Tag className="h-3.5 w-3.5 text-white/40" />
+            <Tag className="h-3.5 w-3.5 text-muted-foreground" />
             {tags.map((t) => (
-              <span key={t} className="text-[11px] font-mono text-white/60 rounded-md border border-white/10 px-2 py-0.5">
+              <span key={t} className="text-[11px] font-mono text-foreground/60 rounded-md border border-foreground/10 px-2 py-0.5">
                 {t}
               </span>
             ))}
           </div>
         )}
 
-        <div className="mt-6 prose prose-invert prose-sm max-w-none whitespace-pre-wrap text-white/70 leading-relaxed border-t border-white/5 pt-6">
+        <div className="mt-6 prose prose-invert prose-sm max-w-none whitespace-pre-wrap text-foreground/70 leading-relaxed border-t border-foreground/5 pt-6">
           {values.description_md || "Description will appear here…"}
         </div>
 

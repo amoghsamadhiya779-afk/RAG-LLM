@@ -70,7 +70,7 @@ const STAGES: { key: ApplicantStage | "all"; label: string }[] = [
 
 const stageStyles: Record<ApplicantStage, string> = {
   new: "border-primary/40 text-primary bg-primary/20",
-  reviewed: "border-white/20 text-white/70 bg-white/5",
+  reviewed: "border-white/20 text-foreground/70 bg-white/5",
   shortlisted: "border-primary/40 text-primary bg-primary/20",
   interview: "border-primary/40 text-primary bg-primary/20",
   hired: "border-emerald-400/40 text-emerald-200 bg-emerald-500/10",
@@ -80,14 +80,14 @@ const stageStyles: Record<ApplicantStage, string> = {
 function ApplicantsPage() {
   const { id } = Route.useParams();
   return (
-    <div className="min-h-screen bg-transparent text-white">
+    <div className="min-h-screen bg-transparent text-foreground">
       <ShrinkNavbar />
       <main className="mx-auto max-w-7xl px-6 pt-32 pb-24">
         <BackButton fallback="/employer" className="mb-6" />
         <Reveal>
           <Link
             to="/employer"
-            className="inline-flex items-center gap-2 text-sm text-white/50 hover:text-white transition mb-6"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition mb-6"
           >
             <ArrowLeft className="h-4 w-4" /> Employer
           </Link>
@@ -96,7 +96,7 @@ function ApplicantsPage() {
               <h1 className="text-4xl md:text-5xl font-semibold tracking-[-0.03em]">
                 <GradientText>Applicants</GradientText>
               </h1>
-              <p className="text-white/50 mt-2 max-w-xl">
+              <p className="text-muted-foreground mt-2 max-w-xl">
                 Review candidates ranked by ATS match. Preview resumes and move them through your pipeline.
               </p>
             </div>
@@ -166,17 +166,17 @@ function ApplicantsContent({ jobId }: { jobId: string }) {
       {/* Filter bar */}
       <div className="mb-6 flex flex-wrap items-center gap-3">
         <div className="relative flex-1 min-w-[240px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search name, email, or keyword..."
-            className="pl-9 bg-white/5 border-white/10 h-10"
+            className="pl-9 bg-white/5 border-foreground/10 h-10"
           />
         </div>
         <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
-          <SelectTrigger className="w-[180px] h-10 bg-white/5 border-white/10">
-            <ArrowUpDown className="h-3.5 w-3.5 mr-1 text-white/50" />
+          <SelectTrigger className="w-[180px] h-10 bg-white/5 border-foreground/10">
+            <ArrowUpDown className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -187,7 +187,7 @@ function ApplicantsContent({ jobId }: { jobId: string }) {
       </div>
 
       <div className="mb-6 flex flex-wrap gap-2">
-        <Filter className="h-4 w-4 text-white/40 self-center mr-1" />
+        <Filter className="h-4 w-4 text-muted-foreground self-center mr-1" />
         {STAGES.map((s) => {
           const active = stage === s.key;
           const count = stageCounts.get(s.key) ?? 0;
@@ -197,12 +197,12 @@ function ApplicantsContent({ jobId }: { jobId: string }) {
               onClick={() => setStage(s.key)}
               className={`px-3 py-1.5 rounded-full border text-xs uppercase tracking-wider font-mono transition ${
                 active
-                  ? "border-white/40 bg-white/10 text-white"
-                  : "border-white/10 bg-white/[0.02] text-white/50 hover:text-white/80"
+                  ? "border-white/40 bg-foreground/10 text-foreground"
+                  : "border-foreground/10 bg-foreground/[0.02] text-muted-foreground hover:text-foreground/80"
               }`}
             >
               {s.label}
-              <span className="ml-2 text-white/40 tabular-nums">{count}</span>
+              <span className="ml-2 text-muted-foreground tabular-nums">{count}</span>
             </button>
           );
         })}
@@ -244,7 +244,7 @@ function ApplicantsTable({
 }) {
   return (
     <GlassPanel className="overflow-hidden">
-      <div className="hidden md:grid grid-cols-[minmax(0,2.4fr)_110px_minmax(0,1.6fr)_120px_140px] gap-4 px-6 py-3 text-[11px] uppercase tracking-[0.18em] text-white/40 border-b border-white/5 font-mono">
+      <div className="hidden md:grid grid-cols-[minmax(0,2.4fr)_110px_minmax(0,1.6fr)_120px_140px] gap-4 px-6 py-3 text-[11px] uppercase tracking-[0.18em] text-muted-foreground border-b border-foreground/5 font-mono">
         <div>Candidate</div>
         <div className="text-right">ATS</div>
         <div>Top matches</div>
@@ -309,30 +309,30 @@ function ApplicantRow({
       ? "text-emerald-300"
       : applicant.ats_score >= 70
         ? "text-primary"
-        : "text-white/60";
+        : "text-foreground/60";
 
   return (
     <motion.li
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.03, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      className="grid md:grid-cols-[minmax(0,2.4fr)_110px_minmax(0,1.6fr)_120px_140px] gap-4 items-center px-6 py-4 hover:bg-white/[0.03] transition group cursor-pointer"
+      className="grid md:grid-cols-[minmax(0,2.4fr)_110px_minmax(0,1.6fr)_120px_140px] gap-4 items-center px-6 py-4 hover:bg-foreground/[0.03] transition group cursor-pointer"
       onClick={() => onSelect(applicant)}
     >
       <div className="flex items-center gap-3 min-w-0">
-        <div className="h-10 w-10 shrink-0 rounded-full bg-gradient-to-br from-primary via-primary/70 to-primary border border-white/10 grid place-items-center text-xs font-mono uppercase text-white/90">
+        <div className="h-10 w-10 shrink-0 rounded-full bg-gradient-to-br from-primary via-primary/70 to-primary border border-foreground/10 grid place-items-center text-xs font-mono uppercase text-foreground/90">
           {initials}
         </div>
         <div className="min-w-0">
-          <div className="truncate text-white font-medium">
+          <div className="truncate text-foreground font-medium">
             {applicant.candidate.full_name}
           </div>
-          <div className="text-xs text-white/40 truncate flex items-center gap-2 mt-0.5">
+          <div className="text-xs text-muted-foreground truncate flex items-center gap-2 mt-0.5">
             <Mail className="h-3 w-3" />
             <span className="truncate">{applicant.candidate.email}</span>
             {applicant.candidate.location && (
               <>
-                <span className="text-white/20">·</span>
+                <span className="text-foreground/20">·</span>
                 <span className="inline-flex items-center gap-1">
                   <MapPin className="h-3 w-3" /> {applicant.candidate.location}
                 </span>
@@ -346,7 +346,7 @@ function ApplicantRow({
         <span className={`text-lg font-semibold ${scoreColor}`}>
           {applicant.ats_score}
         </span>
-        <span className="text-xs text-white/30 ml-1">/100</span>
+        <span className="text-xs text-foreground/30 ml-1">/100</span>
       </div>
 
       <div className="flex flex-wrap gap-1.5">
@@ -359,7 +359,7 @@ function ApplicantRow({
           </span>
         ))}
         {applicant.matched_keywords.length > 3 && (
-          <span className="text-[10px] text-white/40 self-center">
+          <span className="text-[10px] text-muted-foreground self-center">
             +{applicant.matched_keywords.length - 3}
           </span>
         )}
@@ -385,7 +385,7 @@ function ApplicantRow({
         </Select>
       </div>
 
-      <div className="md:text-right text-xs text-white/40">
+      <div className="md:text-right text-xs text-muted-foreground">
         {formatDistanceToNow(applicant.applied_at)}
       </div>
     </motion.li>
@@ -405,7 +405,7 @@ function ApplicantSheet({
     <Sheet open={!!applicant} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="w-full sm:max-w-2xl bg-[#0A0A0A]/95 border-l border-white/10 text-white overflow-y-auto"
+        className="w-full sm:max-w-2xl bg-[#0A0A0A]/95 border-l border-foreground/10 text-foreground overflow-y-auto"
       >
         <AnimatePresence mode="wait">
           {applicant && (
@@ -417,10 +417,10 @@ function ApplicantSheet({
               transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
             >
               <SheetHeader className="text-left">
-                <SheetTitle className="text-2xl tracking-[-0.02em] text-white">
+                <SheetTitle className="text-2xl tracking-[-0.02em] text-foreground">
                   {applicant.candidate.full_name}
                 </SheetTitle>
-                <SheetDescription className="text-white/50">
+                <SheetDescription className="text-muted-foreground">
                   {applicant.candidate.headline ?? applicant.candidate.email}
                 </SheetDescription>
               </SheetHeader>
@@ -428,18 +428,18 @@ function ApplicantSheet({
               <div className="mt-6 grid grid-cols-[auto_1fr] gap-6 items-center">
                 <MatchRing value={applicant.ats_score} size={120} stroke={9} label="ATS" />
                 <div className="space-y-2 text-sm">
-                  <div className="flex items-center gap-2 text-white/70">
-                    <Mail className="h-3.5 w-3.5 text-white/40" />
+                  <div className="flex items-center gap-2 text-foreground/70">
+                    <Mail className="h-3.5 w-3.5 text-muted-foreground" />
                     <a
                       href={`mailto:${applicant.candidate.email}`}
-                      className="hover:text-white transition"
+                      className="hover:text-foreground transition"
                     >
                       {applicant.candidate.email}
                     </a>
                   </div>
                   {applicant.candidate.location && (
-                    <div className="flex items-center gap-2 text-white/70">
-                      <MapPin className="h-3.5 w-3.5 text-white/40" />
+                    <div className="flex items-center gap-2 text-foreground/70">
+                      <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
                       {applicant.candidate.location}
                     </div>
                   )}
@@ -484,7 +484,7 @@ function ApplicantSheet({
                         </span>
                       ))
                     ) : (
-                      <span className="text-xs text-white/40">No gaps detected</span>
+                      <span className="text-xs text-muted-foreground">No gaps detected</span>
                     )}
                   </div>
                 </GlassPanel>
@@ -493,7 +493,7 @@ function ApplicantSheet({
               {/* Resume preview */}
               <div className="mt-8">
                 <div className="flex items-center justify-between mb-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-white/50 font-mono">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground font-mono">
                     Resume
                   </div>
                   <a
@@ -501,21 +501,21 @@ function ApplicantSheet({
                     onClick={(e) => {
                       if (!applicant.resume.preview_url) e.preventDefault();
                     }}
-                    className="inline-flex items-center gap-1.5 text-xs text-white/70 hover:text-white transition"
+                    className="inline-flex items-center gap-1.5 text-xs text-foreground/70 hover:text-foreground transition"
                   >
                     <Download className="h-3.5 w-3.5" /> Download
                   </a>
                 </div>
                 <GlassPanel className="p-6">
                   <div className="flex items-center gap-4">
-                    <div className="h-14 w-11 rounded-md bg-gradient-to-br from-primary via-primary/70 to-primary border border-white/10 grid place-items-center">
-                      <FileText className="h-5 w-5 text-white/70" />
+                    <div className="h-14 w-11 rounded-md bg-gradient-to-br from-primary via-primary/70 to-primary border border-foreground/10 grid place-items-center">
+                      <FileText className="h-5 w-5 text-foreground/70" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="truncate text-sm text-white">
+                      <div className="truncate text-sm text-foreground">
                         {applicant.resume.filename}
                       </div>
-                      <div className="text-xs text-white/40 mt-0.5">
+                      <div className="text-xs text-muted-foreground mt-0.5">
                         PDF preview
                       </div>
                     </div>
@@ -524,7 +524,7 @@ function ApplicantSheet({
                       onClick={(e) => {
                         if (!applicant.resume.preview_url) e.preventDefault();
                       }}
-                      className="inline-flex items-center gap-1.5 text-xs text-white/70 hover:text-white transition"
+                      className="inline-flex items-center gap-1.5 text-xs text-foreground/70 hover:text-foreground transition"
                     >
                       Open <ExternalLink className="h-3.5 w-3.5" />
                     </a>
@@ -533,15 +533,15 @@ function ApplicantSheet({
                     <iframe
                       title={`${applicant.candidate.full_name} resume`}
                       src={applicant.resume.preview_url}
-                      className="mt-4 w-full h-[520px] rounded-lg border border-white/10 bg-white/[0.02]"
+                      className="mt-4 w-full h-[520px] rounded-lg border border-foreground/10 bg-foreground/[0.02]"
                     />
                   ) : (
-                    <div className="mt-4 h-[240px] rounded-lg border border-dashed border-white/10 bg-white/[0.02] grid place-items-center text-center px-6">
+                    <div className="mt-4 h-[240px] rounded-lg border border-dashed border-foreground/10 bg-foreground/[0.02] grid place-items-center text-center px-6">
                       <div>
-                        <div className="text-sm text-white/70">
+                        <div className="text-sm text-foreground/70">
                           Preview unavailable in demo
                         </div>
-                        <div className="text-xs text-white/40 mt-1">
+                        <div className="text-xs text-muted-foreground mt-1">
                           Wire a signed URL from the resumes bucket to render inline.
                         </div>
                       </div>
@@ -553,21 +553,21 @@ function ApplicantSheet({
               {/* Cover letter */}
               {applicant.cover_letter && (
                 <div className="mt-8">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-white/50 font-mono mb-3">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground font-mono mb-3">
                     Cover letter
                   </div>
-                  <GlassPanel className="p-5 text-sm text-white/70 whitespace-pre-wrap leading-relaxed">
+                  <GlassPanel className="p-5 text-sm text-foreground/70 whitespace-pre-wrap leading-relaxed">
                     {applicant.cover_letter}
                   </GlassPanel>
                 </div>
               )}
 
-              <div className="mt-8 flex items-center justify-between text-xs text-white/40">
+              <div className="mt-8 flex items-center justify-between text-xs text-muted-foreground">
                 <span>Applied {formatDistanceToNow(applicant.applied_at)}</span>
                 <Link
                   to="/jobs/$id"
                   params={{ id: jobId }}
-                  className="hover:text-white transition inline-flex items-center gap-1"
+                  className="hover:text-foreground transition inline-flex items-center gap-1"
                 >
                   View job posting <ExternalLink className="h-3 w-3" />
                 </Link>

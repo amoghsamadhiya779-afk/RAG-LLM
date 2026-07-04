@@ -15,7 +15,7 @@ export function FeaturedJobs() {
   const list = featured.length > 0 ? featured : (q.data?.items ?? []).slice(0, 3);
 
   return (
-    <section id="jobs" className="relative py-28">
+    <section id="jobs" className="relative py-16 sm:py-28">
       <div className="mx-auto max-w-6xl px-6">
         <Reveal className="mb-10 flex items-end justify-between gap-6">
           <div>

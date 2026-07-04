@@ -28,7 +28,7 @@ export function AuthShell({
   const reduce = useReducedMotion();
 
   return (
-    <div className="relative min-h-[100svh] bg-transparent text-white">
+    <div className="relative min-h-[100dvh] bg-transparent text-foreground">
       {/* Ambient aurora */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -left-40 h-[520px] w-[520px] rounded-full bg-[radial-gradient(circle_at_center,rgba(6,182,212,0.28),transparent_65%)] blur-3xl" />
@@ -38,19 +38,19 @@ export function AuthShell({
 
       <Link
         to="/"
-        className="absolute left-4 top-4 z-20 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-white/70 backdrop-blur-md transition hover:bg-white/[0.08] hover:text-white sm:left-6 sm:top-6"
+        className="absolute left-4 top-4 z-20 inline-flex items-center gap-2 rounded-full border border-border dark:border-white/10 bg-muted/50 dark:bg-white/[0.04] px-3 py-1.5 text-xs text-muted-foreground backdrop-blur-md transition hover:bg-muted dark:hover:bg-white/[0.08] hover:text-foreground sm:left-6 sm:top-6"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         Home
       </Link>
 
-      <div className="relative z-10 mx-auto grid min-h-[100svh] w-full max-w-6xl grid-cols-1 items-stretch gap-0 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:gap-14 lg:py-24">
+      <div className="relative z-10 mx-auto grid min-h-[100dvh] w-full max-w-6xl grid-cols-1 items-stretch gap-0 px-4 py-8 sm:px-6 sm:py-16 lg:grid-cols-2 lg:gap-14 lg:py-24">
         {/* Brand panel — hidden on mobile, signature centerpiece on desktop */}
         <motion.aside
           initial={reduce ? false : { opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: EASE }}
-          className="hidden flex-col justify-between overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.04] via-transparent to-white/[0.02] p-10 backdrop-blur-xl lg:flex"
+          className="hidden flex-col justify-between overflow-hidden rounded-3xl border border-border dark:border-white/10 bg-gradient-to-br from-muted/50 dark:from-white/[0.04] via-transparent to-transparent dark:to-white/[0.02] p-10 backdrop-blur-xl lg:flex"
         >
           <div className="flex items-center gap-3">
             <JobionMark className="h-12 w-12" />
@@ -64,9 +64,9 @@ export function AuthShell({
               transition={reduce ? undefined : { duration: 40, repeat: Infinity, ease: "linear" }}
               className="relative mx-auto grid h-48 w-48 place-items-center"
             >
-              <div className="absolute inset-0 rounded-full border border-white/10" />
-              <div className="absolute inset-6 rounded-full border border-white/[0.06]" />
-              <div className="absolute inset-12 rounded-full border border-white/[0.04]" />
+              <div className="absolute inset-0 rounded-full border border-border dark:border-white/10" />
+              <div className="absolute inset-6 rounded-full border border-border dark:border-white/[0.06]" />
+              <div className="absolute inset-12 rounded-full border border-border dark:border-white/[0.04]" />
               <JobionMark className="h-20 w-20" />
             </motion.div>
           </div>
@@ -75,7 +75,7 @@ export function AuthShell({
             <h2 className="text-2xl font-semibold leading-tight tracking-[-0.03em]">
               <GradientText>{brandTagline}</GradientText>
             </h2>
-            <p className="mt-3 text-sm text-white/50">
+            <p className="mt-3 text-sm text-muted-foreground">
               One free plan for everyone — save jobs, upload resumes, and run ATS scoring across devices.
             </p>
           </div>
@@ -90,7 +90,7 @@ export function AuthShell({
         >
           <div
             className={cn(
-              "relative w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-2xl sm:p-8",
+              "relative w-full max-w-md overflow-hidden rounded-2xl border border-border dark:border-white/10 bg-card dark:bg-white/[0.03] p-6 backdrop-blur-2xl sm:p-8",
               "shadow-[0_20px_80px_-30px_rgba(6,182,212,0.35)]",
             )}
           >
@@ -99,19 +99,19 @@ export function AuthShell({
 
             <div className="mb-6">
               {eyebrow && (
-                <p className="mb-2 text-xs font-medium uppercase tracking-[0.18em] text-white/40">
+                <p className="mb-2 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                   {eyebrow}
                 </p>
               )}
               <h1 className="text-2xl font-semibold tracking-[-0.03em] sm:text-3xl">
                 {typeof title === "string" ? <GradientText>{title}</GradientText> : title}
               </h1>
-              {subtitle && <p className="mt-2 text-sm text-white/60">{subtitle}</p>}
+              {subtitle && <p className="mt-2 text-sm text-muted-foreground">{subtitle}</p>}
             </div>
 
             {children}
 
-            {footer && <div className="mt-6 border-t border-white/5 pt-5 text-sm">{footer}</div>}
+            {footer && <div className="mt-6 border-t border-border pt-5 text-sm">{footer}</div>}
           </div>
         </motion.section>
       </div>

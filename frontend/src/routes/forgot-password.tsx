@@ -32,7 +32,7 @@ export const Route = createFileRoute("/forgot-password")({
     ],
   }),
   errorComponent: ({ reset }) => (
-    <div className="grid min-h-[60vh] place-items-center bg-transparent px-6 text-white">
+    <div className="grid min-h-[60dvh] place-items-center bg-transparent px-6 text-foreground">
       <ErrorState title="Couldn't load reset page" onRetry={reset} />
     </div>
   ),
@@ -72,9 +72,9 @@ function ForgotPasswordPage() {
       title="Forgot your password?"
       subtitle="No stress — enter your email and we'll send a secure link to set a new one."
       footer={
-        <p className="text-center text-white/60">
+        <p className="text-center text-muted-foreground">
           Remembered it?{" "}
-          <Link to="/login" className="font-medium text-white underline-offset-4 hover:underline">
+          <Link to="/login" className="font-medium text-foreground underline-offset-4 hover:underline">
             Back to sign in
           </Link>
         </p>
@@ -82,7 +82,7 @@ function ForgotPasswordPage() {
     >
       {sent ? (
         <div className="space-y-4">
-          <div className="rounded-xl border border-emerald-400/20 bg-emerald-400/5 p-4 text-sm text-emerald-100/90">
+          <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 text-sm text-emerald-700 dark:text-emerald-100/90">
             <div className="mb-2 flex items-center gap-2 font-medium">
               <Mail className="h-4 w-4" /> Check your inbox
             </div>
@@ -92,7 +92,7 @@ function ForgotPasswordPage() {
           <button
             type="button"
             onClick={() => setSent(false)}
-            className="text-xs text-white/50 underline-offset-4 hover:text-white hover:underline"
+            className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
           >
             Send to a different email
           </button>
@@ -106,7 +106,7 @@ function ForgotPasswordPage() {
               type="email"
               autoComplete="email"
               placeholder="you@company.com"
-              className="h-11 bg-white/[0.02]"
+              className="h-11 bg-input/50 dark:bg-white/[0.02]"
               {...form.register("email")}
             />
             {form.formState.errors.email && (

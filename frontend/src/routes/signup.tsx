@@ -44,7 +44,7 @@ export const Route = createFileRoute("/signup")({
     ],
   }),
   errorComponent: ({ reset }) => (
-    <div className="grid min-h-[60vh] place-items-center bg-transparent px-6 text-white">
+    <div className="grid min-h-[60dvh] place-items-center bg-transparent px-6 text-foreground">
       <ErrorState title="Sign-up unavailable" onRetry={reset} />
     </div>
   ),
@@ -72,12 +72,12 @@ function SignupPage() {
       title="Create your jOBiON account"
       subtitle="One free plan for everyone. Your saved jobs, resume, and ATS reports follow you across devices."
       footer={
-        <p className="text-center text-white/60">
+        <p className="text-center text-muted-foreground">
           Already have an account?{" "}
           <Link
             to="/login"
             search={{ redirect: redirectPath === "/" ? undefined : redirectPath }}
-            className="font-medium text-white underline-offset-4 hover:underline"
+            className="font-medium text-foreground underline-offset-4 hover:underline"
           >
             Sign in
           </Link>
@@ -87,13 +87,13 @@ function SignupPage() {
       <div className="space-y-5">
         <SignUpForm callbackUrl={callbackUrl} redirectPath={redirectPath} intendedRole={search.role} />
         <OAuthRow redirectTo={callbackUrl} postAuthPath={redirectPath} />
-        <p className="text-center text-[11px] leading-relaxed text-white/40">
+        <p className="text-center text-[11px] leading-relaxed text-muted-foreground">
           By continuing you agree to our{" "}
-          <Link to="/features" className="underline-offset-4 hover:text-white hover:underline">
+          <Link to="/features" className="underline-offset-4 hover:text-foreground hover:underline">
             Terms
           </Link>{" "}
           and{" "}
-          <Link to="/features" className="underline-offset-4 hover:text-white hover:underline">
+          <Link to="/features" className="underline-offset-4 hover:text-foreground hover:underline">
             Privacy Policy
           </Link>
           .
@@ -165,7 +165,7 @@ function SignUpForm({
 
   if (emailSent) {
     return (
-      <div className="rounded-xl border border-emerald-400/20 bg-emerald-400/5 p-4 text-sm text-emerald-100/90">
+      <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 text-sm text-emerald-700 dark:text-emerald-100/90">
         We sent a confirmation link to your email. Open it to activate your account.
       </div>
     );
@@ -180,7 +180,7 @@ function SignUpForm({
           type="email"
           autoComplete="email"
           placeholder="you@company.com"
-          className="h-11 bg-white/[0.02]"
+          className="h-11 bg-input/50 dark:bg-white/[0.02]"
           {...form.register("email")}
         />
         {form.formState.errors.email && (
@@ -194,14 +194,14 @@ function SignUpForm({
           type="password"
           autoComplete="new-password"
           placeholder="Create a strong password"
-          className="h-11 bg-white/[0.02]"
+          className="h-11 bg-input/50 dark:bg-white/[0.02]"
           {...form.register("password")}
         />
         <ul className="mt-2 grid grid-cols-1 gap-1 text-[11px]">
           {rules.map((r) => (
             <li
               key={r.label}
-              className={`flex items-center gap-2 ${r.ok ? "text-emerald-300" : "text-white/40"}`}
+              className={`flex items-center gap-2 ${r.ok ? "text-emerald-600 dark:text-emerald-300" : "text-muted-foreground"}`}
             >
               <Check
                 className={`h-3 w-3 ${r.ok ? "opacity-100" : "opacity-30"}`}

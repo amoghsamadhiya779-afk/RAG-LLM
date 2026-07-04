@@ -35,16 +35,16 @@ export function OAuthRow({ redirectTo, postAuthPath }: Props) {
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-3 text-[10px] font-medium uppercase tracking-[0.22em] text-white/35">
-        <span className="h-px flex-1 bg-white/10" />
+      <div className="flex items-center gap-3 text-[10px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
+        <span className="h-px flex-1 bg-border dark:bg-white/10" />
         or continue with
-        <span className="h-px flex-1 bg-white/10" />
+        <span className="h-px flex-1 bg-border dark:bg-white/10" />
       </div>
       <div className="grid grid-cols-2 gap-2">
         <Button
           type="button"
           variant="outline"
-          className="h-11 border-white/10 bg-white/[0.02] text-sm text-white hover:bg-white/[0.06]"
+          className="h-11 border-border dark:border-white/10 bg-input/50 dark:bg-white/[0.02] text-sm text-foreground hover:bg-muted dark:hover:bg-white/[0.06]"
           onClick={() => oauth("google")}
           disabled={busy !== null}
         >
@@ -58,7 +58,7 @@ export function OAuthRow({ redirectTo, postAuthPath }: Props) {
         <Button
           type="button"
           variant="outline"
-          className="h-11 border-white/10 bg-white/[0.02] text-sm text-white hover:bg-white/[0.06]"
+          className="h-11 border-border dark:border-white/10 bg-input/50 dark:bg-white/[0.02] text-sm text-foreground hover:bg-muted dark:hover:bg-white/[0.06]"
           onClick={() => oauth("github")}
           disabled={busy !== null}
         >

@@ -21,7 +21,7 @@ export default function DotFieldBackground() {
   }, []);
 
   // Exclude from landing page (which has its own background)
-  if (pathname === '/') return null;
+  // Removed per user request to have dot grid element in the entire background
 
   // Accessibility: don't render constant animation if requested
   if (prefersReducedMotion) return null;

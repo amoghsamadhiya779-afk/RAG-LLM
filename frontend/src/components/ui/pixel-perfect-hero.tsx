@@ -7,7 +7,7 @@ import { useTheme } from "@/components/theme/ThemeProvider";
 
 import { RotatingText } from "@/components/ui/rotating-text";
 
-const Grainient = React.lazy(() => import("@/components/backgrounds/Grainient"));
+const LightPillar = React.lazy(() => import("@/components/backgrounds/LightPillar"));
 
 export interface PixelHeroProps {
   word1?: string;
@@ -55,36 +55,24 @@ export function PixelHero({
   const isDark = resolvedTheme === "dark";
   const c1 = isDark ? "#284f73" : "#dbeafe";
   const c2 = isDark ? "#261a57" : "#bfdbfe";
-  const c3 = isDark ? "#0a090c" : "#f8fafc";
-  const contrast = isDark ? 1.35 : 1.1;
 
   return (
-    <section className="relative isolate flex min-h-[100svh] w-full items-center justify-center overflow-hidden px-4 py-24 sm:px-6 lg:px-8">
+    <section className="relative isolate flex min-h-[100dvh] w-full items-center justify-center overflow-hidden px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
       <div className="absolute inset-0 -z-10">
         <Suspense fallback={null}>
-          <Grainient
-            color1={c1}
-            color2={c2}
-            color3={c3}
-            timeSpeed={0.25}
-            colorBalance={-0.26}
-            warpStrength={2.15}
-            warpFrequency={5.0}
-            warpSpeed={3.7}
-            warpAmplitude={50.0}
-            blendAngle={0.0}
-            blendSoftness={0.1}
-            rotationAmount={500.0}
-            noiseScale={2.0}
-            grainAmount={0.16}
-            grainScale={2.0}
-            grainAnimated={false}
-            contrast={contrast}
-            gamma={1.0}
-            saturation={1.0}
-            centerX={0.0}
-            centerY={0.0}
-            zoom={0.9}
+          <LightPillar
+            topColor={c1}
+            bottomColor={c2}
+            intensity={isDark ? 1.0 : 0.8}
+            rotationSpeed={0.3}
+            glowAmount={isDark ? 0.005 : 0.002}
+            pillarWidth={3.0}
+            pillarHeight={0.4}
+            noiseIntensity={isDark ? 0.5 : 0.2}
+            pillarRotation={0}
+            interactive={true}
+            mixBlendMode="normal"
+            quality="high"
           />
         </Suspense>
       </div>

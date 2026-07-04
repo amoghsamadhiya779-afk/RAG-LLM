@@ -42,7 +42,7 @@ export const Route = createFileRoute("/login")({
     ],
   }),
   errorComponent: ({ reset }) => (
-    <div className="grid min-h-[60vh] place-items-center bg-transparent px-6 text-white">
+    <div className="grid min-h-[60dvh] place-items-center bg-transparent px-6 text-foreground">
       <ErrorState title="Sign-in unavailable" onRetry={reset} />
     </div>
   ),
@@ -61,12 +61,12 @@ function LoginPage() {
       title="Sign in to jOBiON"
       subtitle="One free plan for everyone. No tiers, no billing — just your work, saved."
       footer={
-        <p className="text-center text-white/60">
+        <p className="text-center text-muted-foreground">
           New to jOBiON?{" "}
           <Link
             to="/signup"
             search={{ redirect: redirectPath === "/" ? undefined : redirectPath }}
-            className="font-medium text-white underline-offset-4 hover:underline"
+            className="font-medium text-foreground underline-offset-4 hover:underline"
           >
             Create an account
           </Link>
@@ -74,7 +74,7 @@ function LoginPage() {
       }
     >
       <Tabs defaultValue="password" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 bg-white/[0.04]">
+        <TabsList className="grid w-full grid-cols-2 bg-muted dark:bg-white/[0.04]">
           <TabsTrigger value="password">Password</TabsTrigger>
           <TabsTrigger value="magic">Magic link</TabsTrigger>
         </TabsList>
@@ -139,7 +139,7 @@ function PasswordSignInForm({
           type="email"
           autoComplete="email"
           placeholder="you@company.com"
-          className="h-11 bg-white/[0.02]"
+          className="h-11 bg-input/50 dark:bg-white/[0.02]"
           {...form.register("email")}
         />
         {form.formState.errors.email && (
@@ -151,7 +151,7 @@ function PasswordSignInForm({
           <Label htmlFor="signin-password">Password</Label>
           <Link
             to="/forgot-password"
-            className="text-xs text-white/50 underline-offset-4 hover:text-white hover:underline"
+            className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
           >
             Forgot password?
           </Link>
@@ -161,7 +161,7 @@ function PasswordSignInForm({
           type="password"
           autoComplete="current-password"
           placeholder="••••••••"
-          className="h-11 bg-white/[0.02]"
+          className="h-11 bg-input/50 dark:bg-white/[0.02]"
           {...form.register("password")}
         />
         {form.formState.errors.password && (
@@ -204,7 +204,7 @@ function MagicLinkForm({ callbackUrl }: { callbackUrl: string }) {
 
   if (sent) {
     return (
-      <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4 text-sm text-white/70">
+      <div className="rounded-xl border border-border dark:border-white/10 bg-muted/50 dark:bg-white/[0.02] p-4 text-sm text-muted-foreground">
         We sent a sign-in link to your inbox. Open it on this device to continue.
       </div>
     );
@@ -219,7 +219,7 @@ function MagicLinkForm({ callbackUrl }: { callbackUrl: string }) {
           type="email"
           autoComplete="email"
           placeholder="you@company.com"
-          className="h-11 bg-white/[0.02]"
+          className="h-11 bg-input/50 dark:bg-white/[0.02]"
           {...form.register("email")}
         />
         {form.formState.errors.email && (

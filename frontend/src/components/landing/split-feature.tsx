@@ -40,7 +40,7 @@ export function SplitFeature({
       <ul className="mt-7 space-y-3">
        {bullets.map((b) => (
         <li key={b} className="flex gap-3 text-small">
-         <span className="mt-[7px] inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-gradient-accent" />
+         <span className="mt-[7px] inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
          <span className="text-foreground">{b}</span>
         </li>
        ))}
@@ -58,7 +58,7 @@ export function SplitFeature({
       <div className="rounded-lg border border-border bg-card p-3 -lift">
        {visual}
       </div>
-      <div aria-hidden className="absolute -inset-6 -z-10 rounded-[2rem] bg-gradient-accent opacity-[0.08] blur-2xl" />
+      <div aria-hidden className="absolute -inset-6 -z-10 rounded-[2rem] bg-primary opacity-[0.08] blur-2xl" />
      </motion.div>
     </motion.div>
    </div>

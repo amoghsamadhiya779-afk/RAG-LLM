@@ -21,7 +21,7 @@ export function CtaBand() {
      <motion.h2 variants={reveal} className="h-display mx-auto max-w-3xl text-h1 sm:text-display">
       Your next role is one
       <br />
-      <span className="text-gradient-accent">search away.</span>
+      <span className="text-primary font-bold">search away.</span>
      </motion.h2>
      <motion.p variants={reveal} className="mx-auto mt-5 max-w-lg text-body leading-relaxed text-secondary sm:text-body-lg">
       Join thousands of developers and dozens of hiring teams already on jOBiON.

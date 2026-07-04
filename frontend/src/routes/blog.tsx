@@ -30,7 +30,7 @@ function BlogIndex() {
           <motion.div initial="hidden" whileInView="show" viewport={viewportOnce} variants={revealStagger} className="max-w-3xl">
             <motion.p variants={reveal} className="eyebrow">Blog</motion.p>
             <motion.h1 variants={reveal} className="h-display mt-4 text-display md:text-display">
-              Notes on hiring, <span className="brand-gradient-text">search, and shipping.</span>
+              Notes on hiring, <span className="text-primary font-bold">search, and shipping.</span>
             </motion.h1>
             <motion.p variants={reveal} className="mt-5 text-body-lg text-secondary">
               What we're learning building an AI-native job board — and what we're seeing in the funnels of the companies using it.
@@ -45,8 +45,8 @@ function BlogIndex() {
             className="group block overflow-hidden rounded-lg border border-border bg-card"
           >
             <div className="grid gap-0 md:grid-cols-2">
-              <div className="relative aspect-[4/3] bg-gradient-to-br from-indigo-500/30 via-violet-500/20 to-pink-500/30 md:aspect-auto">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(255,255,255,0.15),transparent_60%)]" />
+              <div className="relative aspect-[4/3] bg-card border-b border-border md:aspect-auto">
+                <div className="absolute inset-0" />
                 <div className="absolute left-6 top-6"><Badge variant="secondary">Featured</Badge></div>
               </div>
               <div className="flex flex-col justify-center p-8 md:p-12">

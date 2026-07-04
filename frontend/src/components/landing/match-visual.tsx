@@ -70,7 +70,7 @@ export function MatchVisual() {
                     {job?.company.name ?? "Company"} · {job?.remote ? "Remote" : job?.location ?? "Remote"}
                   </div>
                 </div>
-                <span className="shrink-0 rounded-full bg-gradient-accent px-2.5 py-1 text-[11px] font-heading text-white">
+                <span className="shrink-0 rounded-full bg-primary px-2.5 py-1 text-[11px] font-heading text-white">
                   {matches[i]}% match
                 </span>
               </motion.li>

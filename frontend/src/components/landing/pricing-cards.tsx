@@ -81,7 +81,7 @@ export function PricingCards() {
         t.highlighted
          ? {
            backgroundImage:
-            "linear-gradient(var(--color-card), var(--color-card)), linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899)",
+            "linear-gradient(var(--color-card), var(--color-card)), linear-gradient(135deg, var(--primary), var(--primary))",
            backgroundOrigin: "border-box",
            backgroundClip: "padding-box, border-box",
            border: "1.5px solid transparent",
@@ -90,7 +90,7 @@ export function PricingCards() {
        }
       >
        {t.highlighted && (
-        <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-accent px-3 py-1 text-[11px] font-heading uppercase tracking-wider text-white -lift">
+        <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-[11px] font-heading uppercase tracking-wider text-white -lift">
          Popular
         </span>
        )}

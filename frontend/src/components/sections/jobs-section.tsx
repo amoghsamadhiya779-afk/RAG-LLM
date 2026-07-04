@@ -126,14 +126,14 @@ function JobsSectionContent() {
   <div className="container-page relative z-10">
    <div className="mb-12 text-center">
     <h2 className="text-h1 font-display font-display tracking-tight sm:text-display">
-     Explore Open <span className="text-gradient-accent">Roles</span>
+     Explore Open <span className="text-primary font-bold">Roles</span>
     </h2>
     <p className="mt-4 text-body-lg text-secondary max-w-2xl mx-auto">
      Browse engineering roles matched dynamically to your skill stack.
     </p>
    </div>
 
-   <div className="relative mx-auto rounded-cards border border-bone/10 bg-char/50 backdrop-blur-md overflow-hidden">
+   <div className="relative mx-auto rounded-cards border border-border bg-card overflow-hidden">
     {/* Window Header */}
     <div className="flex h-12 items-center border-b border-bone/10 bg-graphite/80 px-4">
      <div className="flex gap-2">

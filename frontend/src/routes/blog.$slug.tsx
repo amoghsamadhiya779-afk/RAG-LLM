@@ -70,7 +70,7 @@ function BlogPostPage() {
           <h1 className="h-display mt-5 text-h1 leading-tight md:text-display">{post.title}</h1>
 
           <div className="mt-6 flex items-center gap-3">
-            <div className="grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br from-indigo-500 via-violet-500 to-pink-500 text-micro font-heading text-white">
+            <div className="grid h-10 w-10 place-items-center rounded-full bg-primary text-micro font-heading text-primary-foreground">
               {post.author.split(" ").map((n: string) => n[0]).join("")}
             </div>
             <div className="text-small">
@@ -79,8 +79,8 @@ function BlogPostPage() {
             </div>
           </div>
 
-          <div className="mt-10 aspect-[2/1] overflow-hidden rounded-lg border border-border bg-gradient-to-br from-indigo-500/20 via-violet-500/15 to-pink-500/20">
-            <div className="h-full w-full bg-[radial-gradient(circle_at_30%_30%,rgba(255,255,255,0.15),transparent_60%)]" />
+          <div className="mt-10 aspect-[2/1] overflow-hidden rounded-lg border border-border bg-card">
+            <div className="h-full w-full" />
           </div>
 
           <div className="prose prose-invert mt-10 max-w-none">

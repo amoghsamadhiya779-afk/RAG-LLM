@@ -22,7 +22,7 @@ function NotFoundComponent() {
   return (
     <div className="flex min-h-dvh items-center justify-center px-4">
       <div className="max-w-md text-center">
-        <h1 className="font-display text-display-xl font-display brand-gradient-text">404</h1>
+        <h1 className="font-display text-display-xl font-display text-primary font-bold">404</h1>
         <h2 className="mt-4 text-body-lg font-heading">Page not found</h2>
         <p className="mt-2 text-small text-secondary">
           That route doesn't exist. Head back to find a job.

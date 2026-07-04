@@ -40,7 +40,7 @@ function AboutPage() {
           <motion.div initial="hidden" whileInView="show" viewport={viewportOnce} variants={revealStagger} className="max-w-3xl">
             <motion.p variants={reveal} className="eyebrow">About</motion.p>
             <motion.h1 variants={reveal} className="h-display mt-4 text-display md:text-display">
-              We're rebuilding the job board, <span className="brand-gradient-text">from the model up.</span>
+              We're rebuilding the job board, <span className="text-primary font-bold">from the model up.</span>
             </motion.h1>
             <motion.p variants={reveal} className="mt-6 text-body-lg leading-relaxed text-secondary">
               jOBiON started as a weekend RAG experiment: could a language model read a thousand job posts and tell you the three that actually match what you've shipped? It could — and the answer was so much better than keyword search that we quit our jobs to build it.
@@ -71,7 +71,7 @@ function AboutPage() {
           <motion.div initial="hidden" whileInView="show" viewport={viewportOnce} variants={revealStagger} className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {team.map((m) => (
               <motion.div key={m.name} variants={reveal} className="rounded-lg border border-border bg-card p-6">
-                <div className="grid h-14 w-14 place-items-center rounded-full bg-gradient-to-br from-indigo-500 via-violet-500 to-pink-500 text-small font-heading text-white">
+                <div className="grid h-14 w-14 place-items-center rounded-full bg-primary text-small font-heading text-primary-foreground">
                   {m.initials}
                 </div>
                 <div className="mt-5 text-body font-heading">{m.name}</div>

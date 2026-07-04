@@ -14,7 +14,7 @@ export function PipelineVisual() {
           <div className="text-micro text-secondary">Senior Full-Stack Engineer</div>
           <div className="text-small font-heading">Applicant pipeline</div>
         </div>
-        <span className="rounded-full bg-gradient-accent px-2.5 py-1 text-[10px] font-heading uppercase tracking-wider text-white">
+        <span className="rounded-full bg-primary px-2.5 py-1 text-[10px] font-heading uppercase tracking-wider text-white">
           Featured
         </span>
       </div>

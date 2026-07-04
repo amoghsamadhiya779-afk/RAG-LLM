@@ -17,7 +17,7 @@ function AiWorkspacePage() {
   <div className="container-page py-12">
    <div className="mb-12 text-center">
     <h1 className="text-h1 font-display font-display tracking-tight sm:text-display">
-     AI <span className="text-gradient-accent">Workspace</span>
+     AI <span className="text-primary font-bold">Workspace</span>
     </h1>
     <p className="mt-4 text-body-lg text-secondary max-w-2xl mx-auto">
      Experience the power of semantic search, instant resume parsing, and personalized AI matching all in one place.

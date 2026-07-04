@@ -1,40 +1,63 @@
-# Security Architecture & Audit Report
+# jOBiON — Frontend security posture
 
-## 1. Authentication & Authorization (AuthZ) Matrix
-- **Identity Provider**: Supabase Auth (JWT).
-- **Enforcement**: strict route dependencies via `app.core.deps.py`.
-  - `require_user`: Validates JWT signature (via JWKS or HS256 secret) and ensures the user exists in the local database. Hard-rejects with 401 if invalid.
-  - `optional_user`: Specifically designed for Guest-First routes (e.g., AI inference). Returns `None` for missing/invalid tokens but permits the request to proceed.
-  - `require_role([RoleEnum])`: Strict Role-Based Access Control (RBAC). Rejects with 403 Forbidden if the authenticated user lacks the required role.
+Frontend-only project. Server hardening (rate limits, JWKS verify, RLS policies,
+webhook signatures, image transforms) is owned by the FastAPI + Supabase side.
 
-**Mitigated Risks**: Removed all `MOCK_` bypass variables that previously disabled authentication in production environments.
+## Shipped
 
-## 2. Abuse Controls & Rate Limiting
-- **Global API Rate Limits**: Powered by Upstash Redis and `slowapi`.
-- **Guest AI Guard**: 
-  - Routes exposed to guests enforce a tiered limit: **5/min**, **20/hr**, and **60/day** per IP.
-  - **Cloudflare Turnstile**: Mandatory challenge verification for unauthenticated AI routes to prevent bot exhaustion.
-- **Idempotency**: 
-  - Mutation endpoints (POST, PUT, PATCH, DELETE) honor an `Idempotency-Key` header.
-  - Custom `IdempotentRoute` class intercepts mutating requests, caches the JSON response in Upstash Redis for 48 hours, and replays it for duplicate keys (returning `Idempotency-Replayed: true`).
-- **AI Budget**: 
-  - Global daily AI token budget enforces a circuit breaker to prevent runaway LLM costs.
+### Headers
+- `public/_headers` (Cloudflare/Netlify format): HSTS, nosniff,
+  `Referrer-Policy`, `Permissions-Policy`, `X-Frame-Options: DENY`,
+  `frame-ancestors 'none'` in CSP.
+- Meta CSP mirror in `src/routes/__root.tsx` for hosts that ignore `_headers`.
+- Long-term cache for `/assets/*` + `/fonts/*`; `no-cache` on HTML.
 
-## 3. Safe Configuration & Secret Hygiene
-- **Strict Pydantic Settings**: `app.core.config.Settings` is now the sole reader of environment variables. Missing required secrets prevent application startup with a clear initialization error.
-- **Removed Pervasive `os.environ`**: Replaced all inline `os.environ.get()` calls with strongly typed `settings` properties.
-- **Secret Masking**: Utility scripts (e.g., `check_connections.py`) mask secrets, showing only the final 4 characters.
+### Auth / open-redirect
+- `sanitizeRedirect` (`src/components/auth/auth-errors.ts`) accepts only
+  same-origin paths — rejects protocol-relative (`//host`), backslash tricks
+  (`/\host`), and any candidate containing `:` (blocks `javascript:` /
+  `data:` scheme smuggling).
+- All auth routes (`/login`, `/signup`, `/auth/callback`) run redirect
+  targets through it before navigating.
 
-## 4. Transport Security & Network
-- **CORS Hardening**: Removed wildcard `allow_origins=["*"]`. The application now strictly binds to `settings.ALLOWED_ORIGINS` (comma-split, whitespace/slash stripped), ensuring only verified frontend domains can interact with the API.
-- **Upstream Timeouts**: All external API calls (Supabase, Turnstile, Resend, Adzuna, Gemini) via `httpx.AsyncClient` now enforce explicit connection and read timeouts (`timeout=10.0`), preventing resource starvation from hanging third-party services.
+### Build guards
+- `src/lib/env.ts` throws at build/boot if `VITE_USE_MOCKS` is truthy in
+  production, or if `VITE_API_URL` is missing when mocks are off.
+- No `VITE_*` var carries a secret. Only publishable Supabase + optional
+  Turnstile site key.
 
-## 5. Logging & Observability
-- **PII Redaction**: `structlog` pipeline includes a custom redactor that obfuscates sensitive keys (`password`, `token`, `secret`, `api_key`, `authorization`, `email`, `phone`) as `****REDACTED****` before serialization.
-- **Structured JSON Logs**: Deployed structured JSON logging for reliable ingestion by logging agents.
+### Guest data
+- `useGuestDataExpiry` (`src/hooks/useGuestDataExpiry.ts`) — day-6 warning,
+  day-7 auto-purge.
+- `GuestBanner` exposes a "Clear my guest data" action.
+- Guest quotas (`src/lib/guest/quota.ts`) throttle expensive AI actions.
 
-## 6. Dependency Auditing
-- Added `pip-audit` to the verification workflow to scan Python dependencies for known CVEs. Continuous auditing ensures vulnerable packages are flagged before deployment.
+### Client hardening
+- `apiFetch` attaches `x-request-id` + `Idempotency-Key` on every mutation
+  and forwards a Turnstile token when supplied.
+- Sentry init (`src/lib/observability/sentry.ts`) is lazy + PII-scrubbed.
+- Dropzone validates 5 MB cap + PDF/DOCX/DOC magic bytes before upload.
 
-## 7. Database Integrity
-- Disabled SQLAlchemy's internal statement caching (`statement_cache_size=0`, `prepared_statement_cache_size=0`) and implemented `NullPool` to ensure compatibility with Supavisor's transaction-mode connection pooler, preventing stale connection errors.
+## Follow-ups (backend / infra)
+
+- Real Turnstile site key + server-side verification.
+- Server-side rate limits per identity + IP on `/analyze`, `/apply`, and
+  auth endpoints; global spend kill-switch on AI calls.
+- Supabase RLS on every table + storage bucket; audit `service_role` usage.
+- Backend JWKS verify of Supabase JWTs on every write.
+- Move guest resume storage from `localStorage` base64 to IndexedDB
+  (`idb-keyval`) once the FastAPI service defines a resumable upload
+  contract.
+
+## Verification
+
+```bash
+# Headers on preview
+curl -I https://<preview>/ | grep -Ei 'content-security-policy|strict-transport|x-frame|referrer|permissions'
+
+# Redirect fuzz
+/login?redirect=//evil.com          # → "/"
+/login?redirect=/\evil.com          # → "/"
+/login?redirect=javascript:alert(1) # → "/"
+/login?redirect=/dashboard          # → "/dashboard"
+```

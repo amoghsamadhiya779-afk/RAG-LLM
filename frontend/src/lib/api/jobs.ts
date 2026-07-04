@@ -28,7 +28,7 @@ async function hasSession() {
 
 export const saveJob = async (id: string) => {
   if (!(await hasSession())) return { saved: true }; // Guests use localStorage (handled in UI)
-  return apiFetch<{ saved: true }>(`/saved`, { method: "POST", body: { job_id: id } });
+  return apiFetch<{ saved: true }>(`/saved/${id}`, { method: "POST" });
 };
 
 export const unsaveJob = async (id: string) => {

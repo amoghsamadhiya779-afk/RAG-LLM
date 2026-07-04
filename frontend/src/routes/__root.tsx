@@ -20,7 +20,6 @@ import { env } from "@/lib/env";
 import { ScrollProgress } from "@/components/fx";
 import { GlassPanel } from "@/components/ui-ext/GlassPanel";
 import { LenisProvider } from "@/components/landing/LenisProvider";
-import { GalaxyBackground } from "@/components/landing/GalaxyBackground";
 import { PageTransition } from "@/components/layout/PageTransition";
 
 import { useRouterState } from "@tanstack/react-router";
@@ -32,6 +31,8 @@ const CommandPalette = lazy(() =>
 const ChatOrb = lazy(() =>
   import("@/components/fx/ChatOrb").then((m) => ({ default: m.ChatOrb })),
 );
+const DotFieldBackground = lazy(() => import("@/components/backgrounds/DotFieldBackground"));
+
 import { IntroSplash } from "@/components/brand/IntroSplash";
 import { MiniBrandPending } from "@/components/brand/MiniBrandPending";
 
@@ -290,13 +291,17 @@ function RootComponent() {
           <SessionProvider>
             <LenisProvider>
               <IntroSplash>
-                <div className="fixed inset-0 -z-10">
-                  <GalaxyBackground />
+                <div className="fixed inset-0 -z-10 bg-background">
                 </div>
+                <Suspense fallback={null}>
+                  <DotFieldBackground />
+                </Suspense>
                 <ScrollProgress />
-                <PageTransition>
-                  <Outlet />
-                </PageTransition>
+                <div className="relative z-10">
+                  <PageTransition>
+                    <Outlet />
+                  </PageTransition>
+                </div>
                 <Suspense fallback={null}>
                   <CommandPalette />
                   <ChatOrb />

@@ -1,11 +1,13 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { Link } from "@tanstack/react-router";
 import { useReducedMotion } from "framer-motion";
 import { ArrowRight, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/components/theme/ThemeProvider";
 
 import { RotatingText } from "@/components/ui/rotating-text";
 
+const Grainient = React.lazy(() => import("@/components/backgrounds/Grainient"));
 
 export interface PixelHeroProps {
   word1?: string;
@@ -46,16 +48,53 @@ export function PixelHero({
   // Paint hero content immediately (LCP) — no opacity gate.
   const [isLoaded] = useState(true);
   const reducedMotion = useReducedMotion();
+  const { resolvedTheme } = useTheme();
 
   useEffect(() => {}, [reducedMotion]);
 
+  const isDark = resolvedTheme === "dark";
+  const c1 = isDark ? "#284f73" : "#dbeafe";
+  const c2 = isDark ? "#261a57" : "#bfdbfe";
+  const c3 = isDark ? "#0a090c" : "#f8fafc";
+  const contrast = isDark ? 1.35 : 1.1;
+
   return (
     <section className="relative isolate flex min-h-[100svh] w-full items-center justify-center overflow-hidden px-4 py-24 sm:px-6 lg:px-8">
+      <div className="absolute inset-0 -z-10">
+        <Suspense fallback={null}>
+          <Grainient
+            key={resolvedTheme}
+            color1={c1}
+            color2={c2}
+            color3={c3}
+            timeSpeed={0.25}
+            colorBalance={-0.26}
+            warpStrength={2.15}
+            warpFrequency={5.0}
+            warpSpeed={3.7}
+            warpAmplitude={50.0}
+            blendAngle={0.0}
+            blendSoftness={0.1}
+            rotationAmount={500.0}
+            noiseScale={2.0}
+            grainAmount={0.16}
+            grainScale={2.0}
+            grainAnimated={false}
+            contrast={contrast}
+            gamma={1.0}
+            saturation={1.0}
+            centerX={0.0}
+            centerY={0.0}
+            zoom={0.9}
+          />
+        </Suspense>
+      </div>
+      
       <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center text-center">
         {eyebrow ? (
           <div
             className={cn(
-              "inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 font-mono text-[11px] tracking-widest text-white/70 uppercase backdrop-blur-md transition-all duration-700",
+              "inline-flex items-center gap-2 rounded-full border border-foreground/15 bg-foreground/5 px-3 py-1 font-mono text-[11px] tracking-widest text-foreground/70 uppercase backdrop-blur-md transition-all duration-700",
               isLoaded ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
             )}
           >
@@ -66,7 +105,7 @@ export function PixelHero({
 
         <h1
           className={cn(
-            "mt-8 select-none font-semibold leading-[0.95] tracking-[-0.04em] transition-all duration-1000",
+            "mt-8 select-none font-semibold leading-[0.95] tracking-[-0.04em] transition-all duration-1000 text-foreground",
             isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
           )}
           style={{ fontSize: "clamp(2.75rem, 10vw, 8rem)" }}
@@ -80,12 +119,12 @@ export function PixelHero({
 
         <div
           className={cn(
-            "mt-6 flex items-baseline justify-center gap-3 text-white/90 transition-all duration-1000 delay-150",
+            "mt-6 flex items-baseline justify-center gap-3 text-foreground/90 transition-all duration-1000 delay-150",
             isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           )}
           style={{ fontSize: "clamp(1.25rem, 3vw, 2.25rem)" }}
         >
-          <span className="font-sans font-medium tracking-[-0.02em] text-white/70">
+          <span className="font-sans font-medium tracking-[-0.02em] text-foreground/70">
             for your
           </span>
           {reducedMotion ? (
@@ -115,7 +154,7 @@ export function PixelHero({
 
         <p
           className={cn(
-            "mt-8 max-w-2xl text-balance text-base text-white/70 transition-all duration-1000 delay-200 sm:text-lg",
+            "mt-8 max-w-2xl text-balance text-base text-foreground/70 transition-all duration-1000 delay-200 sm:text-lg",
             isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           )}
         >
@@ -143,7 +182,7 @@ export function PixelHero({
           </button>
           <Link
             to={jobsUrl}
-            className="group inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/5 px-6 py-3 text-sm font-medium text-white/90 backdrop-blur-md transition-colors hover:bg-white/10"
+            className="group inline-flex items-center justify-center gap-2 rounded-xl border border-foreground/15 bg-foreground/5 px-6 py-3 text-sm font-medium text-foreground/90 backdrop-blur-md transition-colors hover:bg-foreground/10"
           >
             <Search className="h-4 w-4 opacity-80" />
             <span className="sm:hidden">{secondaryCtaMobile}</span>
@@ -157,7 +196,7 @@ export function PixelHero({
             isLoaded ? "opacity-100" : "opacity-0"
           )}
         >
-          <p className="mb-4 font-mono text-[10px] tracking-[0.25em] text-white/40 uppercase">
+          <p className="mb-4 font-mono text-[10px] tracking-[0.25em] text-foreground/40 uppercase">
             Candidates hired at
           </p>
           <div className="relative overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)]">
@@ -165,7 +204,7 @@ export function PixelHero({
               {[...HIRING_COMPANIES, ...HIRING_COMPANIES].map((name, i) => (
                 <span
                   key={`${name}-${i}`}
-                  className="font-mono text-sm tracking-widest text-white/60 uppercase"
+                  className="font-mono text-sm tracking-widest text-foreground/60 uppercase"
                 >
                   {name}
                 </span>

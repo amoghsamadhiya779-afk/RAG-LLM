@@ -85,7 +85,7 @@ function AdminPage() {
   const isAdmin = role === "admin" || preview;
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white">
+    <div className="min-h-screen bg-transparent text-white">
       <ShrinkNavbar />
       <div className="mx-auto max-w-7xl px-6 pt-28 pb-24">
         <Reveal>
@@ -604,7 +604,7 @@ function UserRow({
               <Trash2 className="w-4 h-4" />
             </button>
           </AlertDialogTrigger>
-          <AlertDialogContent className="bg-[#0A0A0A] border-white/10">
+          <AlertDialogContent className="bg-transparent border-white/10">
             <AlertDialogHeader>
               <AlertDialogTitle>Delete {user.full_name ?? user.email}?</AlertDialogTitle>
               <AlertDialogDescription>

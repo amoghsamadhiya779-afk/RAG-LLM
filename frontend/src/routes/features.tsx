@@ -70,7 +70,7 @@ const JOBION_FEATURES: BentoCardData[] = [
 
 function FeaturesPage() {
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-transparent text-foreground">
       <ShrinkNavbar />
 
       <main className="overflow-x-hidden pt-32 pb-24">

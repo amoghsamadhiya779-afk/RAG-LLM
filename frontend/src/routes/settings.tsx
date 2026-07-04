@@ -78,7 +78,7 @@ export const Route = createFileRoute("/settings")({
 
 function SettingsPage() {
   return (
-    <div className="relative min-h-screen bg-background">
+    <div className="relative min-h-screen bg-transparent">
       <ShrinkNavbar />
       <main className="mx-auto w-full max-w-5xl px-6 pb-24 pt-28">
         <BackButton fallback="/dashboard" className="mb-6" />

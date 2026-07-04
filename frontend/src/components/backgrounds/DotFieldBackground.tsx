@@ -28,18 +28,22 @@ export default function DotFieldBackground() {
 
   // Theme tints (Brand: Volt Graphite blue)
   const isDark = resolvedTheme === 'dark';
-  const gradientFrom = isDark ? 'rgba(46,111,255,0.22)' : 'rgba(37,87,230,0.15)';
-  const gradientTo = isDark ? 'rgba(106,162,255,0.10)' : 'rgba(37,87,230,0.06)';
-  const glowColor = isDark ? 'rgba(46,111,255,0.10)' : 'rgba(37,87,230,0.07)';
+  // Use static dark values. CSS filter invert will seamlessly handle light mode!
+  const gradientFrom = 'rgba(46,111,255,0.30)';
+  const gradientTo = 'rgba(106,162,255,0.14)';
+  const glowColor = 'rgba(46,111,255,0.14)';
 
   return (
     <div className="dot-field-ambient" aria-hidden="true">
       <React.Suspense fallback={null}>
         <DotField
-          key={resolvedTheme} // force re-mount on theme toggle to instantly snap gradient
           dotRadius={1.5}
           dotSpacing={16}
           cursorRadius={420}
+          style={{
+            filter: isDark ? "invert(0) hue-rotate(0deg)" : "invert(1) hue-rotate(180deg)",
+            opacity: isDark ? 1 : 0.2,
+          }}
           bulgeOnly={true}
           bulgeStrength={48}
           glowRadius={180}

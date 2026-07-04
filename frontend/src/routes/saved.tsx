@@ -32,7 +32,7 @@ export const Route = createFileRoute("/saved")({
 
 function SavedPage() {
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-transparent text-foreground">
       <ShrinkNavbar />
       <main className="mx-auto max-w-6xl px-6 pt-32 pb-24">
         <GuestBanner />

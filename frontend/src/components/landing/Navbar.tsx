@@ -1,6 +1,7 @@
 import { useRouterState, Link } from "@tanstack/react-router";
 import { LogOut, User as UserIcon, Briefcase, ShieldCheck } from "lucide-react";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { useTheme } from "@/components/theme/ThemeProvider";
 import PillNav, { type PillNavItem } from "@/components/ui/pill-nav";
 import { useSession } from "@/features/auth/SessionProvider";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,9 @@ export function Navbar() {
   const activeHref = useActiveHref();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { isGuest, user, role, signOut } = useSession();
+  const { resolvedTheme } = useTheme();
+
+  const isDark = resolvedTheme === "dark";
 
   return (
     <header className="pointer-events-none sticky top-0 z-40">
@@ -42,12 +46,13 @@ export function Navbar() {
             logo="/jobion-mark.svg"
             logoAlt="jOBiON"
             logoHref="/"
+            logoText="jOBiON"
             items={NAV_ITEMS}
             activeHref={activeHref}
-            baseColor="#000000"
-            pillColor="rgba(255,255,255,0.06)"
-            pillTextColor="#FFFFFF"
-            hoveredPillTextColor="#FFFFFF"
+            baseColor={isDark ? "#000000" : "#ffffff"}
+            pillColor={isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}
+            pillTextColor={isDark ? "#FFFFFF" : "#000000"}
+            hoveredPillTextColor={isDark ? "#FFFFFF" : "#000000"}
             initialLoadAnimation
           />
         </div>
@@ -57,7 +62,7 @@ export function Navbar() {
               <Link to="/login" search={{ redirect: pathname }}>
                 <Button
                   size="sm"
-                  className="h-9 rounded-full border border-white/10 bg-white/[0.03] px-4 text-xs font-medium text-white hover:bg-white/[0.08]"
+                  className="h-9 rounded-full border border-foreground/10 bg-foreground/5 px-4 text-xs font-medium text-foreground hover:bg-foreground/10"
                   variant="ghost"
                 >
                   Sign in
@@ -66,7 +71,7 @@ export function Navbar() {
               <Link to="/signup" search={{ redirect: pathname }} className="hidden sm:inline-flex">
                 <Button
                   size="sm"
-                  className="h-9 rounded-full bg-white px-4 text-xs font-medium text-black hover:bg-white/90"
+                  className="h-9 rounded-full bg-foreground px-4 text-xs font-medium text-background hover:opacity-90"
                 >
                   Sign up
                 </Button>
@@ -78,13 +83,13 @@ export function Navbar() {
                 <button
                   type="button"
                   aria-label="Account menu"
-                  className="grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-white/[0.03] text-xs font-medium text-white transition hover:bg-white/[0.08]"
+                  className="grid h-9 w-9 place-items-center rounded-full border border-foreground/10 bg-foreground/5 text-xs font-medium text-foreground transition hover:bg-foreground/10"
                 >
                   {(user?.email?.[0] ?? "U").toUpperCase()}
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel className="truncate text-xs font-normal text-white/60">
+                <DropdownMenuLabel className="truncate text-xs font-normal text-muted-foreground">
                   {user?.email ?? "Account"}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />

@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap');
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
@@ -175,6 +176,26 @@
     font-feature-settings: "cv11", "ss01", "ss03";
   }
 
+  html,
+  html *,
+  html *::before,
+  html *::after {
+    transition-property: background-color, color, border-color, box-shadow, opacity, fill, stroke, filter, text-shadow;
+    transition-duration: 500ms;
+    transition-timing-function: ease;
+  }
+
+  /* Exclude elements that manage their own transitions (GSAP, animations, etc.) */
+  .no-theme-transition,
+  .no-theme-transition *,
+  [data-no-transition],
+  [data-no-transition] *,
+  .pill *,
+  .hover-circle,
+  canvas {
+    transition-property: none !important;
+  }
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
@@ -316,4 +337,15 @@
   filter: none;
   animation: none;
 }
+
+/* Outfit font utility for hero */
+.font-outfit {
+  font-family: "Outfit", ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
+/* Galaxy background wrapper — smooth theme transitions */
+.galaxy-theme-wrapper {
+  transition: opacity 600ms ease, filter 600ms ease;
+}
+
 

@@ -28,7 +28,7 @@ export function AuthShell({
   const reduce = useReducedMotion();
 
   return (
-    <div className="relative min-h-[100svh] bg-[#0A0A0A] text-white">
+    <div className="relative min-h-[100svh] bg-transparent text-white">
       {/* Ambient aurora */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -left-40 h-[520px] w-[520px] rounded-full bg-[radial-gradient(circle_at_center,rgba(6,182,212,0.28),transparent_65%)] blur-3xl" />

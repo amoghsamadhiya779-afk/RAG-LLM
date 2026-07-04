@@ -65,7 +65,7 @@ function AuthCallbackPage() {
   }, [navigate, redirect]);
 
   return (
-    <div className="grid min-h-[100svh] place-items-center bg-[#0A0A0A] text-white">
+    <div className="grid min-h-[100svh] place-items-center bg-transparent text-white">
       <div className="flex items-center gap-3 text-white/60">
         <Loader2 className="h-4 w-4 animate-spin" />
         Signing you in…

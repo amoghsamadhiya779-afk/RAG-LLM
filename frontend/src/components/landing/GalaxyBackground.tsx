@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { useReducedMotion } from "framer-motion";
+import { useLocation } from "@tanstack/react-router";
 import { useTheme } from "@/components/theme/ThemeProvider";
 
 // Lazy so ogl + shader source only ship when the landing hero mounts.
@@ -24,39 +25,30 @@ const GALAXY_PROPS = {
   transparent: true,
 };
 
-function canRunGalaxy() {
-  if (typeof window === "undefined") return false;
-  const finePointer = window.matchMedia("(pointer: fine)").matches;
-  const wideEnough = window.matchMedia("(min-width: 768px)").matches;
-  const cores = navigator.hardwareConcurrency ?? 4;
-  return finePointer && wideEnough && cores >= 4;
-}
-
-/**
- * Volt Graphite hero background. Renders the OGL Galaxy shader only when
- * the device can handle it AND the tab is visible — otherwise the parent's
- * CSS vignette placeholder stays as-is (that IS the mobile/low-power spec,
- * not a fallback bug).
- */
 export function GalaxyBackground() {
   const reduce = useReducedMotion();
   const { resolvedTheme } = useTheme();
-  const [enabled, setEnabled] = useState(false);
+  const { pathname } = useLocation();
   const [tabVisible, setTabVisible] = useState(true);
 
   useEffect(() => {
-    setEnabled(canRunGalaxy());
     const onVis = () => setTabVisible(document.visibilityState === "visible");
     document.addEventListener("visibilitychange", onVis);
     return () => document.removeEventListener("visibilitychange", onVis);
   }, []);
 
-  if (reduce || !enabled) return null;
+  if (pathname !== "/" || reduce) return null;
+
+  const isDark = resolvedTheme === "dark";
 
   return (
-    <div 
-      className="absolute inset-0 h-full w-full animate-galaxy-fade-in"
-      style={{ filter: resolvedTheme === 'light' ? 'invert(1) hue-rotate(180deg)' : 'none' }}
+    <div
+      className="galaxy-theme-wrapper pointer-events-none fixed inset-0 z-0 h-full w-full animate-galaxy-fade-in"
+      style={{
+        filter: isDark ? "none" : "invert(1) hue-rotate(180deg)",
+        opacity: isDark ? 1 : 0.06,
+      }}
+      aria-hidden="true"
     >
       {tabVisible ? (
         <Suspense fallback={null}>
@@ -66,3 +58,4 @@ export function GalaxyBackground() {
     </div>
   );
 }
+

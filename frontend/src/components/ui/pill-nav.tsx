@@ -23,6 +23,7 @@ export interface PillNavProps {
   pillTextColor?: string;
   onMobileMenuClick?: () => void;
   initialLoadAnimation?: boolean;
+  logoText?: string;
 }
 
 const isExternal = (href: string) =>
@@ -47,6 +48,7 @@ export default function PillNav({
   pillTextColor,
   onMobileMenuClick,
   initialLoadAnimation = true,
+  logoText = "jOBiON",
 }: PillNavProps) {
   const resolvedPillTextColor = pillTextColor ?? baseColor;
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -240,7 +242,10 @@ export default function PillNav({
 
   const firstHref = logoHref ?? items?.[0]?.href ?? "/";
   const LogoInner = (
-    <img src={logo} alt={logoAlt} ref={logoImgRef} />
+    <div className="flex items-center gap-2 h-full">
+      <img src={logo} alt={logoAlt} ref={logoImgRef} className="h-full w-auto" />
+      {logoText && <span className="text-[14px] font-bold tracking-tight text-[var(--pill-text)]" style={{ color: resolvedPillTextColor }}>{logoText}</span>}
+    </div>
   );
 
   const renderPillContent = (item: PillNavItem, i: number) => (

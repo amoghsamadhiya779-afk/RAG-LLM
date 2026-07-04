@@ -24,7 +24,7 @@ export const Route = createFileRoute("/dashboard_/ats/")({
 
 function AtsIndex() {
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-transparent text-foreground">
       <ShrinkNavbar />
       <main className="mx-auto max-w-4xl px-6 pt-32 pb-24">
         <BackButton fallback="/dashboard" className="mb-6" />

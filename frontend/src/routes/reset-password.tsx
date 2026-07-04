@@ -26,7 +26,7 @@ export const Route = createFileRoute("/reset-password")({
     ],
   }),
   errorComponent: ({ reset }) => (
-    <div className="grid min-h-[60vh] place-items-center bg-[#0A0A0A] px-6 text-white">
+    <div className="grid min-h-[60vh] place-items-center bg-transparent px-6 text-white">
       <ErrorState title="Couldn't load reset page" onRetry={reset} />
     </div>
   ),

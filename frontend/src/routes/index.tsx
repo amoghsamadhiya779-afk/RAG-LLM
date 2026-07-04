@@ -75,6 +75,8 @@ function SectionSkeleton({ h = "h-[600px]" }: { h?: string }) {
   return <div aria-hidden className={`${h} w-full`} />;
 }
 
+import { GalaxyBackground } from "@/components/landing/GalaxyBackground";
+
 function LandingPage() {
   return (
     <div className="min-h-screen bg-transparent text-foreground">

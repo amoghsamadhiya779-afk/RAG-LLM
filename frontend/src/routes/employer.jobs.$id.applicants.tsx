@@ -80,7 +80,7 @@ const stageStyles: Record<ApplicantStage, string> = {
 function ApplicantsPage() {
   const { id } = Route.useParams();
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white">
+    <div className="min-h-screen bg-transparent text-white">
       <ShrinkNavbar />
       <main className="mx-auto max-w-7xl px-6 pt-32 pb-24">
         <BackButton fallback="/employer" className="mb-6" />

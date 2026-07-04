@@ -167,7 +167,7 @@ function ResumePage() {
   const running = phase !== "idle" && phase !== "ready" && phase !== "error";
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-zinc-100 antialiased">
+    <div className="min-h-screen bg-transparent text-zinc-100 antialiased">
       <ShrinkNavbar />
 
       <main className="mx-auto max-w-6xl px-4 pt-28 pb-24 md:px-6">

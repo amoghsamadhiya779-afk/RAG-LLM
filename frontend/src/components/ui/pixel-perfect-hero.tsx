@@ -63,7 +63,6 @@ export function PixelHero({
       <div className="absolute inset-0 -z-10">
         <Suspense fallback={null}>
           <Grainient
-            key={resolvedTheme}
             color1={c1}
             color2={c2}
             color3={c3}
@@ -105,14 +104,17 @@ export function PixelHero({
 
         <h1
           className={cn(
-            "mt-8 select-none font-semibold leading-[0.95] tracking-[-0.04em] transition-all duration-1000 text-foreground",
+            "font-outfit mt-8 select-none font-extrabold leading-[0.95] tracking-[-0.04em] transition-all duration-1000 text-foreground",
             isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
           )}
-          style={{ fontSize: "clamp(2.75rem, 10vw, 8rem)" }}
+          style={{
+            fontSize: "clamp(2.75rem, 10vw, 8rem)",
+            textShadow: isDark ? "0 2px 24px rgba(0,0,0,0.5), 0 0 60px rgba(46,111,255,0.15)" : "none",
+          }}
         >
-          <span className="tahoe-glass-text font-serif italic">{word1}</span>
+          <span className="tahoe-glass-text italic">{word1}</span>
           <br />
-          <span className="tahoe-glass-text font-sans font-extrabold">
+          <span className="tahoe-glass-text">
             {word2}
           </span>
         </h1>

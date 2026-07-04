@@ -106,7 +106,7 @@ export const Route = createFileRoute("/dashboard_/applications")({
 
 function ApplicationsPage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-transparent">
       <ShrinkNavbar />
       <main className="mx-auto max-w-5xl px-4 pt-28 pb-24">
         <GuestBanner />

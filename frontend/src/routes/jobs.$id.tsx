@@ -66,7 +66,7 @@ export const Route = createFileRoute("/jobs/$id")({
 
 function PageShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-transparent text-foreground">
       <Navbar />
       <main className="mx-auto max-w-5xl px-6 py-12">
         <BackButton fallback="/jobs" className="mb-6" />{children}</main>

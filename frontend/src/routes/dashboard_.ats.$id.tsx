@@ -36,7 +36,7 @@ export const Route = createFileRoute("/dashboard_/ats/$id")({
 function AtsReportPage() {
   const { id } = Route.useParams();
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-transparent">
       <ShrinkNavbar />
       <main className="mx-auto max-w-6xl px-4 pt-28 pb-24">
         <BackButton fallback="/dashboard" className="mb-6" />

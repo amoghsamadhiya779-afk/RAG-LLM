@@ -71,7 +71,7 @@ function computeProfile(me: Awaited<ReturnType<typeof getMe>>) {
 
 function DashboardPage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-transparent">
       <ShrinkNavbar />
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-28 pb-24 space-y-10">
         <GuestBanner />

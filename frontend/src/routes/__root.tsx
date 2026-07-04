@@ -21,6 +21,7 @@ import { ScrollProgress } from "@/components/fx";
 import { GlassPanel } from "@/components/ui-ext/GlassPanel";
 import { LenisProvider } from "@/components/landing/LenisProvider";
 import { PageTransition } from "@/components/layout/PageTransition";
+import { AntigravityBackground } from "@/components/landing/AntigravityBackground";
 
 import { useRouterState } from "@tanstack/react-router";
 
@@ -38,7 +39,7 @@ import { MiniBrandPending } from "@/components/brand/MiniBrandPending";
 
 function BoundaryShell({ children }: { children: ReactNode }) {
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4 py-16">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-transparent px-4 py-16">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 opacity-60"
@@ -80,7 +81,7 @@ function NotFoundComponent() {
   return (
     <BoundaryShell>
       <GlassPanel className="p-8 text-center sm:p-10">
-        <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/40 px-3 py-1 font-mono text-[11px] tracking-widest text-muted-foreground uppercase">
+        <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-border/60 bg-transparent/40 px-3 py-1 font-mono text-[11px] tracking-widest text-muted-foreground uppercase">
           <span className="h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_10px_currentColor]" />
           Error 404
         </div>
@@ -135,7 +136,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         <p className="mt-3 text-sm text-muted-foreground">
           Our monitors already logged this. Retry the request or head back home — your session is safe.
         </p>
-        <pre className="mt-5 max-h-40 overflow-auto rounded-xl border border-border/60 bg-background/50 p-4 font-mono text-[11px] leading-relaxed text-muted-foreground">
+        <pre className="mt-5 max-h-40 overflow-auto rounded-xl border border-border/60 bg-transparent/50 p-4 font-mono text-[11px] leading-relaxed text-muted-foreground">
           <span className="text-primary">Error</span>: {error.message || "Unknown error"}
         </pre>
         <div className="mt-6 flex flex-wrap gap-2">
@@ -151,7 +152,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 
           <Link
             to="/"
-            className="inline-flex items-center justify-center rounded-xl border border-border/60 bg-background/40 px-5 py-2.5 text-sm font-medium text-foreground backdrop-blur transition-colors hover:bg-accent/40"
+            className="inline-flex items-center justify-center rounded-xl border border-border/60 bg-transparent/40 px-5 py-2.5 text-sm font-medium text-foreground backdrop-blur transition-colors hover:bg-accent/40"
           >
             Go home
           </Link>
@@ -231,7 +232,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function EnvError({ message }: { message: string }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="flex min-h-screen items-center justify-center bg-transparent px-4">
       <div className="max-w-lg rounded-xl border border-destructive/40 bg-destructive/5 p-6">
         <h1 className="text-lg font-semibold">Environment misconfigured</h1>
         <p className="mt-2 text-sm text-muted-foreground">{message}</p>
@@ -291,8 +292,7 @@ function RootComponent() {
           <SessionProvider>
             <LenisProvider>
               <IntroSplash>
-                <div className="fixed inset-0 -z-10 bg-background">
-                </div>
+                <AntigravityBackground />
                 <Suspense fallback={null}>
                   <DotFieldBackground />
                 </Suspense>

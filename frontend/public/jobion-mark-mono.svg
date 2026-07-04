@@ -1,7 +1,0 @@
-<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- the j spine -->
-  <path d="M38 16v20c0 6.6-5.4 12-12 12-4.9 0-9.1-2.9-11-7"
-        stroke="currentColor" stroke-width="6" stroke-linecap="round" fill="none"/>
-  <!-- the electric node -->
-  <circle cx="44" cy="44" r="6" fill="currentColor"/>
-</svg>

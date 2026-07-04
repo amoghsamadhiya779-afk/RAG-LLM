@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-# Sitemap: add once a project URL is set

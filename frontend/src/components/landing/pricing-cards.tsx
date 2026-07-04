@@ -21,7 +21,7 @@ const tiers: Tier[] = [
   period: "forever",
   description: "For early hires and indie companies.",
   features: ["1 active job posting", "Basic listing", "Applicant inbox", "Standard search visibility"],
-  cta: { label: "Get started", to: "/post" },
+  cta: { label: "Get started", to: "/dashboard" },
  },
  {
   name: "Featured",
@@ -29,7 +29,7 @@ const tiers: Tier[] = [
   period: "per job",
   description: "Boost visibility for roles that need to fill fast.",
   features: ["Highlighted placement", "30-day visibility boost", "Top of semantic results", "Performance analytics", "Featured badge"],
-  cta: { label: "Feature a job", to: "/post" },
+  cta: { label: "Feature a job", to: "/dashboard" },
   highlighted: true,
  },
  {

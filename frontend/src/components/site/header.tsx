@@ -3,10 +3,13 @@
 import { Link } from "@tanstack/react-router";
 import { useLocation } from "@tanstack/react-router";
 import { useLenis } from "@/hooks/use-lenis";
+import { useTheme } from "@/components/theme-provider";
+import { Sun, Moon } from "lucide-react";
 
 export function SiteHeader() {
   const pathname = useLocation().pathname;
   const lenis = useLenis();
+  const { theme, setTheme } = useTheme();
 
   const handleAnchorClick = (e: React.MouseEvent<HTMLAnchorElement>, hash: string) => {
     // If we're on the homepage, prevent default router navigation and smooth scroll using Lenis
@@ -34,37 +37,46 @@ export function SiteHeader() {
         </Link>
         
         <nav className="flex items-center gap-6">
-          <a 
-            href="#features" 
+          <Link 
+            to="/" 
+            hash="features"
             onClick={(e) => handleAnchorClick(e, "#features")}
             className="text-[14px] font-ui text-mist transition-colors hover:text-bone"
           >
             Features
-          </a>
-          <a 
-            href="#jobs" 
-            onClick={(e) => handleAnchorClick(e, "#jobs")}
+          </Link>
+          <Link 
+            to="/jobs" 
             className="text-[14px] font-ui text-mist transition-colors hover:text-bone"
           >
             Jobs
-          </a>
-          <a 
-            href="#companies" 
-            onClick={(e) => handleAnchorClick(e, "#companies")}
+          </Link>
+          <Link 
+            to="/companies" 
             className="text-[14px] font-ui text-mist transition-colors hover:text-bone"
           >
             Companies
-          </a>
-          <a 
-            href="#ai-workspace" 
-            onClick={(e) => handleAnchorClick(e, "#ai-workspace")}
+          </Link>
+          <Link 
+            to="/ai-workspace" 
             className="text-[14px] font-ui text-mist transition-colors hover:text-bone"
           >
             AI Workspace
-          </a>
+          </Link>
         </nav>
         
         <div className="flex items-center gap-4">
+          <button
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="flex h-9 w-9 items-center justify-center rounded-full text-mist transition-colors hover:text-bone hover:bg-white/5"
+            aria-label="Toggle theme"
+          >
+            {theme === "dark" ? (
+              <Sun strokeWidth={1.75} size={18} />
+            ) : (
+              <Moon strokeWidth={1.75} size={18} />
+            )}
+          </button>
           <Link to="/dashboard" className="inline-flex h-9 items-center justify-center rounded-pill bg-paper px-4 text-[14px] font-ui text-void transition-colors hover:bg-paper/90">
             Post a Job
           </Link>

@@ -43,7 +43,7 @@ export function PricingTeaser() {
             <Reveal key={f.to}>
               <Link to={f.to as never} className="group block h-full">
                 <GlassPanel className="relative h-full p-5 transition-transform group-hover:-translate-y-0.5">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-foreground/80">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-foreground/10 bg-foreground/[0.03] text-foreground/80">
                     <f.Icon className="h-4 w-4" />
                   </div>
                   <h3 className="mt-4 text-sm font-semibold tracking-tight">{f.label}</h3>

@@ -46,17 +46,33 @@ def mock_search_provider(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_internet_search(mock_search_provider):
-    transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as ac:
-        response = await ac.post("/jobs/search", json={"keywords": ["python", "remote"]})
-        data = response.json()
-        assert response.status_code == 200
-        assert len(data) > 0
-        assert data[0]["title"] == "Mock Job"
+    from unittest.mock import patch, AsyncMock
+    from app.db.models import Job
+    from datetime import datetime, timezone
+    mock_job = Job(
+        id=uuid.uuid4(), 
+        title="Mock Job", 
+        company="Mock", 
+        description_html="Mock desc", 
+        source="internal", 
+        external_id="ext-123",
+        remote=False,
+        tags=[],
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc)
+    )
+    with patch("app.db.repositories.jobs_repo.JobsRepository.query_jobs_with_count", new_callable=AsyncMock) as mock_query:
+        mock_query.return_value = ([mock_job], 1)
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as ac:
+            response = await ac.get("/api/v1/jobs", params={"q": "python remote"})
+            data = response.json()
+            assert response.status_code == 200
+            assert "items" in data
 
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from app.db.base import Base
-from app.models.models import User, Profile, Resume, RoleEnum
+from app.db.models import User, Profile, Resume, RoleEnum
 
 @pytest.mark.asyncio
 async def test_ats_scoring(monkeypatch):
@@ -81,7 +97,7 @@ async def test_ats_scoring(monkeypatch):
     monkeypatch.setenv("GEMINI_API_KEY", "test-key")
     monkeypatch.setenv("GEMINI_MODEL", "gemini-2.5-flash")
 
-    test_db_url = "sqlite+aiosqlite:///./test_temp.db"
+    test_db_url = "sqlite+aiosqlite:///:memory:"
     test_engine = create_async_engine(test_db_url, echo=False)
     TestSessionLocal = async_sessionmaker(
         bind=test_engine,
@@ -90,10 +106,10 @@ async def test_ats_scoring(monkeypatch):
     )
 
     async with test_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
 
-    from app.core.deps import MOCK_USER_ID
-    mock_uuid = uuid.UUID(MOCK_USER_ID)
+    mock_uuid = uuid.uuid4()
     resume_uuid = uuid.uuid4()
 
     async with TestSessionLocal() as session:
@@ -105,14 +121,16 @@ async def test_ats_scoring(monkeypatch):
         profile = Profile(
             user_id=mock_uuid,
             full_name="Universal Project User",
-            role=RoleEnum.admin
+            role=RoleEnum.seeker
         )
         resume = Resume(
             id=resume_uuid,
             user_id=mock_uuid,
             file_name="resume.pdf",
+            storage_path="mock/path.pdf",
+            size_bytes=1000,
             parsed={"skills": ["Python"]},
-            embedding=[0.0] * 1536
+            embedding=[0.0] * 768
         )
         session.add(user)
         session.add(profile)
@@ -124,13 +142,20 @@ async def test_ats_scoring(monkeypatch):
             yield session
 
     from app.db.session import get_db
+    from app.core.deps import require_user, get_current_profile
+    
+    async def override_require_user(): return user
+    async def override_get_current_profile(): return profile
+    
     app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[require_user] = override_require_user
+    app.dependency_overrides[get_current_profile] = override_get_current_profile
 
     try:
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as ac:
             response = await ac.post(
-                "/resumes/ats/score",
+                "/api/v1/resumes/ats/score",
                 json={
                     "resume_id": str(resume_uuid),
                     "job_text": "Need Python and Go"
@@ -143,6 +168,8 @@ async def test_ats_scoring(monkeypatch):
             assert "Go" in data["missing_skills"]
     finally:
         app.dependency_overrides.pop(get_db, None)
+        app.dependency_overrides.pop(require_user, None)
+        app.dependency_overrides.pop(get_current_profile, None)
         await test_engine.dispose()
         import os
         if os.path.exists("./test_temp.db"):

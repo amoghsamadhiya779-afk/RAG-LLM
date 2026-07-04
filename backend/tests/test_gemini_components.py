@@ -1,9 +1,9 @@
 import pytest
 import json
 from dataclasses import dataclass
-from app.rag.embeddings import GeminiEmbeddingModel
-from app.rag.llm import GeminiAnswerGenerator
-from app.rag.vector_store import StoredChunk, SearchResult
+from app.services.rag.embeddings import GeminiEmbeddingModel
+from app.services.rag.llm import GeminiAnswerGenerator
+from app.services.rag.vector_store import StoredChunk, SearchResult
 
 class MockEmbeddingItem:
     def __init__(self, values):

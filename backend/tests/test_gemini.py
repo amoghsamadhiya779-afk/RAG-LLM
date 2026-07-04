@@ -145,8 +145,12 @@ async def test_lifespan_verification_fails_model_not_found(monkeypatch):
         del sys.modules["pytest"]
         
     try:
-        with pytest.raises(ValueError, match="was not found in available models"):
+        import logging
+        from unittest.mock import patch
+        with patch.object(logging.getLogger("app.main"), "error") as mock_error:
             async with lifespan(FastAPI()):
                 pass
+            mock_error.assert_called_once()
+            assert "was not found in available models" in mock_error.call_args[0][0]
     finally:
         sys.modules.update(original_modules)

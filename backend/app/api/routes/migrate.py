@@ -1,7 +1,8 @@
 from app.core.idempotency import IdempotentRoute
 from fastapi import APIRouter, Depends, Header, Request
 from pydantic import BaseModel, conlist
-from app.core.security import require_user, User
+from app.core.deps import require_user
+from app.db.models import User
 from app.core.errors import APIError
 from app.core.limits import redis
 import structlog

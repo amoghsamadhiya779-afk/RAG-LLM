@@ -45,7 +45,7 @@ async def analyze_resume_gemini(text: str) -> ParsedResume:
     
     try:
         response = await client.aio.models.generate_content(
-            model='gemini-2.5-flash',
+            model=settings.GEMINI_MODEL,
             contents=prompt,
             config=types.GenerateContentConfig(
                 response_mime_type="application/json",
@@ -82,7 +82,7 @@ async def get_ats_score(resume_text: str, job_description: str) -> ATSScore:
     
     try:
         response = await client.aio.models.generate_content(
-            model='gemini-2.5-flash',
+            model=settings.GEMINI_MODEL,
             contents=prompt,
             config=types.GenerateContentConfig(
                 response_mime_type="application/json",

@@ -17,7 +17,7 @@ async def check_gemini():
     try:
         from google import genai
         client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
-        r = client.models.embed_content(model="text-embedding-004", contents="ping")
+        r = client.models.embed_content(model=os.getenv("GEMINI_EMBED_MODEL", "gemini-embedding-2"), contents="ping")
         dims = len(r.embeddings[0].values)
         rec("Gemini embed", dims == 768, f"{dims} dims (expect 768)")
     except Exception as e:

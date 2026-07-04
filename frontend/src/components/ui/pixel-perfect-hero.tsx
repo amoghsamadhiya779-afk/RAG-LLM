@@ -58,7 +58,7 @@ export function PixelHero({
 
   return (
     <section className="relative isolate flex min-h-[100dvh] w-full items-center justify-center overflow-hidden px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
-      <div className="absolute inset-0 -z-10">
+      <div className="absolute inset-0 -z-10 [mask-image:linear-gradient(to_bottom,black_60%,transparent_100%)]">
         <Suspense fallback={null}>
           <LightPillar
             topColor={c1}

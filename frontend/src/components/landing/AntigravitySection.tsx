@@ -19,12 +19,12 @@ export function AntigravitySection() {
   }, []);
 
   return (
-    <section className="relative w-full overflow-hidden bg-transparent py-24 md:py-32">
+    <section className="relative w-full overflow-hidden bg-background min-h-[100dvh] flex flex-col items-center justify-center">
 
       {/* Absolute Background Layer */}
       <div className="absolute inset-0 z-0">
         <Suspense fallback={null}>
-          <Antigravity />
+          <Antigravity color="#6aa2ff" />
         </Suspense>
       </div>
 

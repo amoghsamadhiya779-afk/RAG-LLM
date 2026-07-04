@@ -20,7 +20,6 @@ import { ScrollProgress } from "@/components/fx";
 import { GlassPanel } from "@/components/ui-ext/GlassPanel";
 import { LenisProvider } from "@/components/landing/LenisProvider";
 import { PageTransition } from "@/components/layout/PageTransition";
-import { AntigravityBackground } from "@/components/landing/AntigravityBackground";
 
 import { useRouterState } from "@tanstack/react-router";
 
@@ -287,7 +286,6 @@ function RootComponent() {
           <SessionProvider>
             <LenisProvider>
               <IntroSplash>
-                <AntigravityBackground />
                 <Suspense fallback={null}>
                   <DotFieldBackground />
                 </Suspense>

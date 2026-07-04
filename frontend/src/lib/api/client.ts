@@ -107,7 +107,10 @@ export async function apiFetch<T = unknown>(
     headers.set("Idempotency-Key", opts.idempotencyKey ?? requestId);
   }
 
-  const url = `${env.API_URL!.replace(/\/$/, "")}${path.startsWith("/") ? path : `/${path}`}`;
+  const baseUrl = env.API_URL!.replace(/\/$/, "");
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  const finalPath = normalizedPath.startsWith("/api/v1") ? normalizedPath : `/api/v1${normalizedPath}`;
+  const url = `${baseUrl}${finalPath}`;
 
   let res: Response;
   const timeoutCtrl = new AbortController();

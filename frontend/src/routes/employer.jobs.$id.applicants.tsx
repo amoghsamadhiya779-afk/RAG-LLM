@@ -283,7 +283,7 @@ function ApplicantRow({
     onSuccess: (_data, stage) => {
       qc.setQueryData(
         ["employer", "applicants", jobId],
-        (prev: { items: Applicant[]; total: number; page: number; page_size: number } | undefined) =>
+        (prev: { items: Applicant[]; total: number; page: number; limit: number } | undefined) =>
           prev
             ? {
                 ...prev,

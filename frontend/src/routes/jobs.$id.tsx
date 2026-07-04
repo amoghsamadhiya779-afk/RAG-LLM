@@ -256,7 +256,7 @@ function DescriptionMarkdown({ source }: { source: string }) {
 function SimilarJobs({ currentId, tags }: { currentId: string; tags: string[] }) {
   const q = useQuery({
     queryKey: ["jobs", "similar", tags[0] ?? ""],
-    queryFn: () => listJobs({ page: 1, page_size: 12 }),
+    queryFn: () => listJobs({ page: 1, limit: 12 }),
     staleTime: 60_000,
   });
   const items = (q.data?.items ?? [])

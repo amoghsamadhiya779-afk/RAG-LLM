@@ -39,7 +39,7 @@ export function CommandPalette() {
 
   const { data } = useQuery({
     queryKey: ["palette-jobs", debounced],
-    queryFn: () => listJobs({ q: debounced || undefined, page_size: 6 }),
+    queryFn: () => listJobs({ q: debounced || undefined, limit: 6 }),
     enabled: open && debounced.length > 1,
     staleTime: 60_000,
   });

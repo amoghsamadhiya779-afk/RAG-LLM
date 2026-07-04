@@ -42,7 +42,7 @@ function jobsListQueryFn(search: JobsSearch, page: number) {
     seniority: search.level.length ? search.level : undefined,
     tags: search.tags.length ? search.tags : undefined,
     page,
-    page_size: PAGE_SIZE,
+    limit: PAGE_SIZE,
   });
 }
 

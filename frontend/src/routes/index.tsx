@@ -39,7 +39,7 @@ const Footer = lazy(() =>
 // keyed identically to whatever FeaturedJobs consumes.
 export const featuredJobsQueryOptions = queryOptions({
   queryKey: ["jobs", "featured"],
-  queryFn: () => listJobs({ page: 1, page_size: 6 }),
+  queryFn: () => listJobs({ page: 1, limit: 6 }),
   staleTime: 60_000,
 });
 

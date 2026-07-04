@@ -86,7 +86,7 @@ export const mockJobs: Job[] = Array.from({ length: 24 }, (_, i) => {
 
 registerMock("GET /jobs", ({ query }) => {
   const page = Number(query.get("page") ?? 1);
-  const size = Number(query.get("page_size") ?? 12);
+  const size = Number(query.get("limit") ?? 12);
   const q = query.get("q")?.toLowerCase();
   let items = mockJobs;
   if (q) {
@@ -102,7 +102,7 @@ registerMock("GET /jobs", ({ query }) => {
     items: items.slice(start, start + size),
     total: items.length,
     page,
-    page_size: size,
+    limit: size,
   };
 });
 
@@ -124,7 +124,7 @@ registerMock("GET /applications", () => ({
   items: mockApplications,
   total: mockApplications.length,
   page: 1,
-  page_size: 20,
+  limit: 20,
 }));
 
 // ---------- Resumes ----------
@@ -141,7 +141,7 @@ registerMock("GET /resumes", () => ({
   items: mockResumes,
   total: mockResumes.length,
   page: 1,
-  page_size: 20,
+  limit: 20,
 }));
 
 const mockAnalysis: ResumeAnalysis = {
@@ -232,7 +232,7 @@ registerMock("GET /admin/users", () => ({
   items: mockAdminUsers,
   total: mockAdminUsers.length,
   page: 1,
-  page_size: mockAdminUsers.length,
+  limit: mockAdminUsers.length,
 }));
 registerMock("PATCH /admin/users/:id/role", ({ path, body }) => {
   const id = path.split("/")[3];
@@ -260,13 +260,13 @@ registerMock("GET /admin/jobs/pending", () => ({
   items: pendingJobs,
   total: pendingJobs.length,
   page: 1,
-  page_size: pendingJobs.length,
+  limit: pendingJobs.length,
 }));
 registerMock("GET /admin/jobs", () => ({
   items: mockJobs,
   total: mockJobs.length,
   page: 1,
-  page_size: mockJobs.length,
+  limit: mockJobs.length,
 }));
 registerMock("POST /admin/jobs/:id/approve", ({ path }) => {
   const id = path.split("/")[3];
@@ -309,7 +309,7 @@ registerMock("DELETE /jobs/:id/save", ({ path }) => {
 });
 registerMock("GET /jobs/saved", () => {
   const items = mockJobs.filter((j) => savedSet.has(j.id));
-  return { items, total: items.length, page: 1, page_size: items.length };
+  return { items, total: items.length, page: 1, limit: items.length };
 });
 
 // ---------- Applications (create) ----------
@@ -339,7 +339,7 @@ registerMock("GET /employer/jobs", () => ({
   items: myJobs,
   total: myJobs.length,
   page: 1,
-  page_size: myJobs.length,
+  limit: myJobs.length,
 }));
 
 registerMock("GET /employer/stats", () => ({
@@ -437,7 +437,7 @@ registerMock("GET /employer/jobs/:id/applicants", ({ path }) => {
   const parts = path.split("/");
   const jobId = parts[3];
   const items = makeApplicants(jobId);
-  return { items, total: items.length, page: 1, page_size: items.length };
+  return { items, total: items.length, page: 1, limit: items.length };
 });
 
 registerMock("PATCH /employer/applicants/:id/stage", ({ path, body }) => {

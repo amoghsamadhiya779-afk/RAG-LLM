@@ -48,7 +48,11 @@ function buildEnv(): EnvShape {
   }
   const d = parsed.data;
   const useMocks = d.VITE_USE_MOCKS ?? import.meta.env.DEV;
-  const apiUrl = d.VITE_API_URL && d.VITE_API_URL !== "" ? d.VITE_API_URL : undefined;
+  let apiUrl = d.VITE_API_URL && d.VITE_API_URL !== "" ? d.VITE_API_URL : undefined;
+
+  if (!apiUrl && import.meta.env.DEV && !useMocks) {
+    apiUrl = "http://localhost:8000";
+  }
 
   // Prod guard: shipping the build with mocks on is a data-integrity bug.
   if (import.meta.env.PROD && useMocks) {

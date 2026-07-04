@@ -5,8 +5,13 @@ function toQuery(filters: JobFilters = {}): string {
   const p = new URLSearchParams();
   if (filters.q) p.set("q", filters.q);
   if (filters.remote !== undefined) p.set("remote", String(filters.remote));
-  if (filters.page) p.set("page", String(filters.page));
-  if (filters.page_size) p.set("page_size", String(filters.page_size));
+  
+  const limit = filters.limit ?? 20;
+  const page = filters.page ?? 1;
+  const offset = (page - 1) * limit;
+  p.set("limit", String(limit));
+  p.set("offset", String(offset));
+
   filters.tags?.forEach((t) => p.append("tag", t));
   filters.seniority?.forEach((s) => p.append("seniority", s));
   filters.employment_type?.forEach((e) => p.append("employment_type", e));
@@ -37,6 +42,6 @@ export const unsaveJob = async (id: string) => {
 };
 
 export const listSavedJobs = async () => {
-  if (!(await hasSession())) return { items: [], total: 0, page: 1, page_size: 20 };
+  if (!(await hasSession())) return { items: [], total: 0, page: 1, limit: 20 };
   return apiFetch<Paginated<Job>>("/saved");
 };

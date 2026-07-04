@@ -51,7 +51,7 @@ const savedQO = queryOptions({
 });
 const recommendedQO = queryOptions({
   queryKey: ["jobs", "recommended"],
-  queryFn: () => listJobs({ page: 1, page_size: 6 }),
+  queryFn: () => listJobs({ page: 1, limit: 6 }),
   staleTime: 60_000,
 });
 

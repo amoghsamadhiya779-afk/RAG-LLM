@@ -12,7 +12,6 @@ import { Toaster } from "sonner";
 import { initSentry } from "@/lib/observability/sentry";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { SessionProvider } from "@/features/auth/SessionProvider";
@@ -119,9 +118,6 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
-  useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
 
   return (
     <BoundaryShell>
@@ -169,9 +165,8 @@ const CSP = [
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' data: https://fonts.gstatic.com",
   "img-src 'self' data: blob: https:",
-  `connect-src 'self' https://*.supabase.co wss://*.supabase.co ${env.API_URL ?? ""} https://*.sentry.io https://challenges.cloudflare.com`,
+  "connect-src 'self' https://1amogh212-resume-intelligence.hf.space https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com https://*.sentry.io",
   "frame-src https://challenges.cloudflare.com",
-  "frame-ancestors 'none'",
   "worker-src 'self' blob:",
   "object-src 'none'",
   "base-uri 'self'",

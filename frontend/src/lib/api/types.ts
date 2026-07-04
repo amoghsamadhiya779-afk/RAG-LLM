@@ -50,14 +50,14 @@ export interface JobFilters {
   seniority?: Seniority[];
   employment_type?: EmploymentType[];
   page?: number;
-  page_size?: number;
+  limit?: number;
 }
 
 export interface Paginated<T> {
   items: T[];
   total: number;
   page: number;
-  page_size: number;
+  limit: number;
 }
 
 export type ApplicationStatus = "submitted" | "in_review" | "interview" | "rejected" | "hired";

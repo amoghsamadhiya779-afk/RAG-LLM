@@ -1,0 +1,24 @@
+--- 1a) Live /api/v1/jobs?limit=3 ---
+{"items":[{"source":"arbeitnow","externalId":"chief-of-staff-retail-nxt-hamburg-162298","title":"Chief of Staff (m/w/d) – RETAIL NXT","company":"Fleet Events GmbH","location":"Hamburg","remote":false,"seniority":null,"tags":["Business Operations"],"salaryMin":null,"salaryMax":null,"currency":null,"descriptionHtml":"<h1>Chief of Staff (m/w/d) – RETAIL NXT</h1>\n<h2>Über RETAIL NXT</h2>\n<p>RETAIL NXT ist eine der relevanten Plattformen für Handel, Technologie und Digitalisierung im deutschsprachigen Raum.</p>\n<p>Wir bringen Entscheiderinnen und Entscheider aus Retail, Consumer Brands, Technologie und Innovation zusammen und schaffen einen Raum, in dem die Zukunft des Handels diskutiert, vernetzt und weiterentwickelt wird.</p>\n<p>In den vergangenen Jahren ist RETAIL NXT deutlich gewachsen. Mit diesem Wachstum steigen auch die Anforderungen an Struktur, operative Exzellenz, bereichsübergreifende Steuerung und strategische Weiterentwicklung.</p>\n<p>Für diese nächste Entwicklungsphase su
+
+--- 1b) SQL Counts ---
+Total: 243
+Null embeddings: 0
+
+--- 1c) Local DB Host ---
+aws-1-ap-south-1.pooler.supabase.com
+
+--- 2) /internal/diagnostics ---
+Unauth status: 401
+Auth status: 503
+Auth body: {"status":"fail","results":{"Gemini":"FAIL","Postgres":"PASS","Supabase REST":"PASS","Supabase JWKS":"PASS","Adzuna":"FAIL","Serper":"PASS","Upstash Redis":"PASS","Resend":"PASS","Turnstile":"FAIL","H
+
+--- 3) Newest Row vector_dims ---
+vector_dims: 768
+
+--- 1d) Newest Jobs in DB ---
+Head of R&D - arbeitnow - 2026-07-04 18:21:01.812926+00:00
+Social Media Nebenjob: Content Creatorin (w) für Mode, Pflege & Lifestyle - arbeitnow - 2026-07-04 18:21:01.812923+00:00
+Senior Online Marketing Manager (m/w/d) - arbeitnow - 2026-07-04 18:21:01.812920+00:00
+Assistenz für Kundenkontakt und Beratungsvorbereitung (m/w/d) - arbeitnow - 2026-07-04 18:21:01.812916+00:00
+Quereinsteiger: Redaktion, Marketing, Vertrieb (m/w/d) - arbeitnow - 2026-07-04 18:21:01.812912+00:00

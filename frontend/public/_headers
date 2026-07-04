@@ -1,0 +1,23 @@
+# Static hosting headers (Cloudflare Pages / Netlify format).
+# Vercel deployments get an equivalent vercel.json — ping if that's needed.
+# Meta CSP in src/routes/__root.tsx is kept in sync as a defense-in-depth fallback
+# for hosts that ignore this file.
+
+/*
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+  X-Frame-Options: DENY
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.sentry.io https://challenges.cloudflare.com https://*.lovable.app https://*.onrender.com; frame-src https://challenges.cloudflare.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
+
+# Long-term cache for hashed build assets. HTML stays no-cache below.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# HTML: always revalidate so users pick up new builds immediately.
+/*.html
+  Cache-Control: no-cache

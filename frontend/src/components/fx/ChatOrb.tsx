@@ -87,34 +87,11 @@ export function ChatOrb() {
     setErrorState("none");
     
     try {
-      const res = await apiFetch("/api/v1/chat", {
+      const data = await apiFetch<any>("/api/v1/chat", {
         method: "POST",
-        body: JSON.stringify({ message: text }),
+        body: { message: text },
         turnstileToken: tsToken ?? undefined,
       });
-      
-      const data = await res.json();
-      if (!res.ok) {
-        if (res.status === 429 && data.code === "ai_budget_exhausted") {
-          setErrorState("budget");
-          setPendingMessage(text);
-          return;
-        }
-        if (res.status === 401 && (data.code === "turnstile_required" || data.code === "turnstile_invalid")) {
-          setTsToken(null);
-          setPendingMessage(text);
-          setErrorState("turnstile");
-          return;
-        }
-        setMessages(prev => [...prev, { 
-            id: Date.now().toString(), 
-            role: "error_bubble", 
-            text: "Something went wrong.", 
-            isRetryable: true 
-        }]);
-        setPendingMessage(text);
-        return;
-      }
       
       setMessages(prev => [...prev, { id: Date.now().toString(), role: "assistant", text: data.response }]);
       setPendingMessage(null);
@@ -123,7 +100,29 @@ export function ChatOrb() {
           setTsToken(null); 
       }
       
-    } catch (err) {
+    } catch (err: any) {
+      if (err.status === 429) {
+        setErrorState("budget");
+        setPendingMessage(text);
+        return;
+      }
+      if (err.status === 401 && (err.code === "turnstile_required" || err.code === "turnstile_invalid")) {
+        setTsToken(null);
+        setPendingMessage(text);
+        setErrorState("turnstile");
+        return;
+      }
+      if (err.status === 422) {
+        setMessages(prev => [...prev, { 
+          id: Date.now().toString(), 
+          role: "error_bubble", 
+          text: "Message format invalid (422).", 
+          isRetryable: true 
+        }]);
+        setPendingMessage(text);
+        return;
+      }
+
       toast.error("Network error. Please check your connection.");
       setMessages(prev => [...prev, { 
         id: Date.now().toString(), 

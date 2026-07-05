@@ -201,8 +201,8 @@ function CollapsedTile({
           </div>
 
           <h3 className="mt-5 flex items-start justify-between gap-3 text-lg leading-snug">
-            {job.source === "serper_web" ? (
-              <a href={job.apply_url || "#"} target="_blank" rel="noopener noreferrer" className="line-clamp-2 hover:underline decoration-primary/50">
+            {job.source !== "internal" && job.apply_url ? (
+              <a href={job.apply_url} target="_blank" rel="noopener noreferrer" className="line-clamp-2 hover:underline decoration-primary/50">
                 {job.title}
               </a>
             ) : (
@@ -210,8 +210,8 @@ function CollapsedTile({
                 {job.title}
               </Link>
             )}
-            {job.source === "serper_web" ? (
-              <a href={job.apply_url || "#"} target="_blank" rel="noopener noreferrer" className="focus:outline-none">
+            {job.source !== "internal" && job.apply_url ? (
+              <a href={job.apply_url} target="_blank" rel="noopener noreferrer" className="focus:outline-none">
                 <ArrowUpRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
               </a>
             ) : (

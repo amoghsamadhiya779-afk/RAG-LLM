@@ -42,14 +42,7 @@ export function RecruiterUpsellPanel({
     },
     onError: (err: unknown) => {
       const e = err as ApiError | Error;
-      const status = e instanceof ApiError ? e.status : 0;
-      if (status === 404 || status === 501) {
-        toast("Recruiter self-serve is coming soon", {
-          description: "For now, contact support to enable posting.",
-        });
-      } else {
-        toast.error(e.message || "Couldn't upgrade — try again.");
-      }
+      toast.error(e.message || "Couldn't upgrade — try again.");
     },
   });
 

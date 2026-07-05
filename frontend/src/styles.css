@@ -353,4 +353,19 @@
   transition: opacity 600ms ease, filter 600ms ease;
 }
 
-
+/* 
+ * Mobile Performance Optimizations
+ * Disable expensive blur and grain effects on mobile for 60fps scrolling
+ */
+@media (max-width: 640px) {
+  * {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  
+  .grain, .grain::after {
+    display: none !important;
+    content: none !important;
+    opacity: 0 !important;
+  }
+}

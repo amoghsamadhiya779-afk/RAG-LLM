@@ -104,7 +104,7 @@ function JobsPage() {
     const t = setTimeout(() => {
       if (qDraft !== search.q)
         navigate({ search: (p: typeof search) => ({ ...p, q: qDraft }), replace: true });
-    }, 800);
+    }, 300);
     return () => clearTimeout(t);
   }, [qDraft, search.q, navigate]);
 
@@ -125,6 +125,7 @@ function JobsPage() {
     queryFn: () => searchWeb(search.q || ""),
     enabled: !!search.q && search.q.length >= 2,
     staleTime: 60_000,
+    placeholderData: keepPreviousData,
   });
 
   const items = useMemo(() => {
@@ -137,6 +138,8 @@ function JobsPage() {
 
   // infinite scroll sentinel
   const sentinel = useRef<HTMLDivElement | null>(null);
+  const listContainerRef = useRef<HTMLDivElement>(null);
+  
   useEffect(() => {
     const el = sentinel.current;
     if (!el || !query.hasNextPage) return;
@@ -149,6 +152,16 @@ function JobsPage() {
     obs.observe(el);
     return () => obs.disconnect();
   }, [query]);
+
+  // Smooth scroll to top of list container when page/filters change, but only if we have data
+  useEffect(() => {
+    if (query.isFetched && !query.isFetchingNextPage && listContainerRef.current) {
+      const topPos = listContainerRef.current.offsetTop - 120;
+      if (window.scrollY > topPos) {
+        window.scrollTo({ top: topPos, behavior: 'smooth' });
+      }
+    }
+  }, [search]); // Runs when filters/search changes
 
   function updateFilters(next: Partial<JobFilterValue>) {
     navigate({
@@ -215,7 +228,7 @@ function JobsPage() {
             <JobFilters value={filterValue} onChange={updateFilters} onReset={resetFilters} />
           </div>
 
-          <section>
+          <section ref={listContainerRef} className={`transition-opacity duration-300 ${query.isFetching && !query.isFetchingNextPage ? 'opacity-60' : 'opacity-100'}`}>
             {query.isLoading ? (
               <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
                 {Array.from({ length: 6 }).map((_, i) => (
@@ -236,7 +249,25 @@ function JobsPage() {
               />
             ) : (
               <>
-                {webItems.length > 0 && (
+                {webQuery.isFetching && !webQuery.isLoading && (
+                  <div className="mb-4 text-xs font-medium text-muted-foreground flex items-center gap-2 animate-pulse">
+                     <Search className="h-3 w-3" /> Searching the web for "{search.q}"...
+                  </div>
+                )}
+                
+                {webQuery.isLoading ? (
+                  <div className="mb-10">
+                    <h2 className="mb-6 flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+                      <span>From the web</span>
+                      <div className="h-px flex-1 bg-border/60" />
+                    </h2>
+                    <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                      {Array.from({ length: 3 }).map((_, i) => (
+                        <Skeleton key={i} className="h-64 rounded-2xl" />
+                      ))}
+                    </div>
+                  </div>
+                ) : webItems.length > 0 ? (
                   <div className="mb-10">
                     <h2 className="mb-6 flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.15em] text-muted-foreground">
                       <span>From the web</span>
@@ -248,7 +279,7 @@ function JobsPage() {
                       ))}
                     </div>
                   </div>
-                )}
+                ) : null}
                 
                 {items.length > 0 && webItems.length > 0 && (
                   <h2 className="mb-6 flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.15em] text-muted-foreground">
@@ -285,3 +316,4 @@ function JobsPage() {
     </div>
   );
 }
+

@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, Query, Request
 from app.services.serper import search_jobs_web
 from app.core.limits import check_guest_limits, check_ai_budget, redis
 from app.core.deps import optional_user
+from fastapi.encoders import jsonable_encoder
 from typing import Dict, Any
 import json
 
@@ -30,7 +31,7 @@ async def search_web(
     results = await search_jobs_web(q, limit=5)
     
     # Adzuna enrichment is deferred per approval, so we just return results
-    response = {"items": results}
+    response = {"items": jsonable_encoder(results)}
     
     # Cache the result
     if redis:

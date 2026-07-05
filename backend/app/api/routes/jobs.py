@@ -38,7 +38,6 @@ async def get_jobs(
     )
     
     offset = (page - 1) * page_size
-    
     jobs, total = await repo.query_jobs_with_count(filters, limit=page_size, offset=offset)
     
     return PaginatedResponse(

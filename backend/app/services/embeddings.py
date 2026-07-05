@@ -8,7 +8,7 @@ from app.core.limits import check_ai_budget
 logger = structlog.get_logger(__name__)
 
 async def embed_text(text: str) -> List[float]:
-    """Generates an embedding for the given text using text-embedding-004."""
+    """Generates an embedding for the given text using the configured model."""
     if not text or not text.strip():
         return [0.0] * 768
         

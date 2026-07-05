@@ -71,14 +71,14 @@ class JobsRepository:
             stmt = stmt.where(Job.salary_min >= filters.salary_min)
             
         if filters.employment_type:
-            from sqlalchemy import cast, String
-            from sqlalchemy.dialects.postgresql import ARRAY
-            stmt = stmt.where(Job.tags.op('&&')(cast(filters.employment_type, ARRAY(String))))
+            from sqlalchemy import cast, Text
+            from sqlalchemy.dialects.postgresql import ARRAY as PG_ARRAY
+            stmt = stmt.where(Job.tags.overlap(cast(filters.employment_type, PG_ARRAY(Text))))
             
         if filters.tags:
-            from sqlalchemy import cast, String
-            from sqlalchemy.dialects.postgresql import ARRAY
-            stmt = stmt.where(Job.tags.op('&&')(cast(filters.tags, ARRAY(String))))
+            from sqlalchemy import cast, Text
+            from sqlalchemy.dialects.postgresql import ARRAY as PG_ARRAY
+            stmt = stmt.where(Job.tags.overlap(cast(filters.tags, PG_ARRAY(Text))))
             
         return stmt
 

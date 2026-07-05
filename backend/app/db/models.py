@@ -2,9 +2,10 @@ import uuid
 from datetime import datetime, timezone
 from enum import Enum as PyEnum
 from typing import List, Optional, Any
-
-from sqlalchemy import String, Boolean, Integer, Float, ForeignKey, DateTime, Enum, JSON, Uuid, ARRAY
+from datetime import datetime, timezone
+from sqlalchemy import String, Boolean, Integer, Float, ForeignKey, DateTime, Enum, JSON, Uuid, ARRAY, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.dialects.postgresql import ARRAY as PG_ARRAY
 from pgvector.sqlalchemy import Vector
 
 from app.db.base import Base
@@ -88,7 +89,7 @@ class Job(Base):
     location: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     remote: Mapped[bool] = mapped_column(Boolean, default=False)
     seniority: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    tags: Mapped[List[str]] = mapped_column(ARRAY(String), default=list)
+    tags: Mapped[List[str]] = mapped_column(PG_ARRAY(Text), default=list)
     salary_min: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     salary_max: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     currency: Mapped[Optional[str]] = mapped_column(String, nullable=True)

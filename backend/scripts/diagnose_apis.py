@@ -16,12 +16,16 @@ async def check_gemini():
     if missing("GEMINI_API_KEY"): return rec("Gemini", False, "GEMINI_API_KEY missing")
     try:
         from google import genai
-        client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
         from google.genai import types
-        model_name = os.getenv("GEMINI_EMBED_MODEL", "gemini-embedding-2")
-        r = client.models.embed_content(model=model_name, contents="ping", config=types.EmbedContentConfig(output_dimensionality=768))
+        from app.core.config import settings
+        
+        client = genai.Client(api_key=settings.GEMINI_API_KEY)
+        model_name = settings.GEMINI_EMBED_MODEL
+        target_dims = settings.GEMINI_EMBED_DIMS
+        
+        r = client.models.embed_content(model=model_name, contents="ping", config=types.EmbedContentConfig(output_dimensionality=target_dims))
         dims = len(r.embeddings[0].values)
-        rec("Gemini embed", dims == 768, f"{dims} dims (expect 768) via {model_name}")
+        rec("Gemini embed", dims == target_dims, f"{dims} dims (expect {target_dims}) via {model_name}")
     except Exception as e:
         rec("Gemini", False, repr(e)[:180])
 

@@ -73,12 +73,12 @@ class JobsRepository:
         if filters.employment_type:
             from sqlalchemy import cast, String
             from sqlalchemy.dialects.postgresql import ARRAY
-            stmt = stmt.where(Job.tags.overlap(cast(filters.employment_type, ARRAY(String))))
+            stmt = stmt.where(Job.tags.op('&&')(cast(filters.employment_type, ARRAY(String))))
             
         if filters.tags:
             from sqlalchemy import cast, String
             from sqlalchemy.dialects.postgresql import ARRAY
-            stmt = stmt.where(Job.tags.overlap(cast(filters.tags, ARRAY(String))))
+            stmt = stmt.where(Job.tags.op('&&')(cast(filters.tags, ARRAY(String))))
             
         return stmt
 

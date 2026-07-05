@@ -29,8 +29,6 @@ const senioritySchema = z.enum(["intern", "junior", "mid", "senior", "staff", "p
 const searchSchema = z.object({
   q: z.string().optional().default(""),
   remote: z.boolean().optional(),
-  type: z.array(employmentTypeSchema).optional().default([]),
-  level: z.array(senioritySchema).optional().default([]),
   tags: z.array(z.string()).optional().default([]),
   salary: z.number().optional().default(0),
 });
@@ -46,8 +44,6 @@ function jobsListQueryFn(search: JobsSearch, page: number) {
   return listJobs({
     q: search.q || undefined,
     remote: search.remote,
-    employment_type: search.type.length ? search.type : undefined,
-    seniority: search.level.length ? search.level : undefined,
     tags: search.tags.length ? search.tags : undefined,
     salary_min: search.salary || undefined,
     page,
@@ -111,8 +107,6 @@ function JobsPage() {
   const filterValue: JobFilterValue = useMemo(
     () => ({
       remote: search.remote,
-      employment_type: search.type,
-      seniority: search.level,
       tags: search.tags,
       salary_min: search.salary,
     }),
@@ -169,8 +163,6 @@ function JobsPage() {
       search: (p: typeof search) => ({
         ...p,
         remote: "remote" in next ? next.remote : p.remote,
-        type: next.employment_type ?? p.type,
-        level: next.seniority ?? p.level,
         tags: next.tags ?? p.tags,
         salary: next.salary_min ?? p.salary,
       }),
@@ -178,7 +170,7 @@ function JobsPage() {
   }
 
   function resetFilters() {
-    navigate({ search: () => ({ q: "", type: [], level: [], tags: [], salary: 0 }), replace: true });
+    navigate({ search: () => ({ q: "", tags: [], salary: 0 }), replace: true });
   }
 
   return (

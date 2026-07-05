@@ -8,28 +8,11 @@ import type { EmploymentType, Seniority } from "@/lib/api/types";
 
 export interface JobFilterValue {
   remote?: boolean;
-  employment_type: EmploymentType[];
-  seniority: Seniority[];
   tags: string[];
   salary_min: number;
 }
 
-const EMP_TYPES: { value: EmploymentType; label: string }[] = [
-  { value: "full_time", label: "Full-time" },
-  { value: "part_time", label: "Part-time" },
-  { value: "contract", label: "Contract" },
-  { value: "internship", label: "Internship" },
-];
-
-const SENIORITIES: { value: Seniority; label: string }[] = [
-  { value: "junior", label: "Junior" },
-  { value: "mid", label: "Mid" },
-  { value: "senior", label: "Senior" },
-  { value: "staff", label: "Staff" },
-  { value: "principal", label: "Principal" },
-];
-
-const TAGS = ["React", "TypeScript", "Python", "Go", "Rust", "AI/ML", "Design", "Product"];
+const TAGS = ["Engineering", "IT", "Finance", "Marketing", "Management", "Design", "Product"];
 
 interface JobFiltersProps {
   value: JobFilterValue;
@@ -62,35 +45,7 @@ export function JobFilters({ value, onChange, onReset }: JobFiltersProps) {
         />
       </section>
 
-      <section className="space-y-3">
-        <h3 className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Type</h3>
-        <div className="space-y-2">
-          {EMP_TYPES.map((t) => (
-            <label key={t.value} className="flex cursor-pointer items-center gap-2 text-sm">
-              <Checkbox
-                checked={value.employment_type.includes(t.value)}
-                onCheckedChange={() => onChange({ employment_type: toggle(value.employment_type, t.value) })}
-              />
-              {t.label}
-            </label>
-          ))}
-        </div>
-      </section>
 
-      <section className="space-y-3">
-        <h3 className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Seniority</h3>
-        <div className="space-y-2">
-          {SENIORITIES.map((s) => (
-            <label key={s.value} className="flex cursor-pointer items-center gap-2 text-sm">
-              <Checkbox
-                checked={value.seniority.includes(s.value)}
-                onCheckedChange={() => onChange({ seniority: toggle(value.seniority, s.value) })}
-              />
-              {s.label}
-            </label>
-          ))}
-        </div>
-      </section>
 
       <section className="space-y-3">
         <div className="flex items-center justify-between">

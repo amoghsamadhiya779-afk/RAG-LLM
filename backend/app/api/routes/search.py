@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Query, Request
 from app.services.serper import search_jobs_web
 from app.core.limits import check_guest_limits, check_ai_budget, redis
-from app.core.deps import get_current_user_optional
+from app.core.deps import optional_user
 from typing import Dict, Any
 import json
 
@@ -11,7 +11,7 @@ router = APIRouter()
 async def search_web(
     request: Request,
     q: str = Query(..., min_length=2),
-    user = Depends(get_current_user_optional)
+    user = Depends(optional_user)
 ):
     # Enforce rate limit (strict IP limit for guests + auth)
     await check_guest_limits(request)

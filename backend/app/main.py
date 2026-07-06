@@ -94,6 +94,23 @@ api_router.include_router(internal_ingest.router)
 api_router.include_router(migrate.router)
 api_router.include_router(search.router, prefix="/search")
 
+from app.core.deps import require_user, get_current_profile
+from app.db.models import User, Profile
+from fastapi import Depends
+
+@api_router.get("/me")
+async def get_me(
+    user: User = Depends(require_user),
+    profile: Profile = Depends(get_current_profile)
+):
+    return {
+        "id": str(profile.user_id),
+        "email": user.email,
+        "full_name": profile.full_name,
+        "avatar_url": profile.avatar_url,
+        "role": profile.role.value if profile.role else None
+    }
+
 app.include_router(api_router)
 
 @app.get("/health")

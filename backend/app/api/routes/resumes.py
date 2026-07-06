@@ -56,10 +56,16 @@ class ResumeUploadRequest(BaseModel):
     storage_path: str
 
 async def download_from_supabase(storage_path: str) -> bytes:
-    from supabase import create_client, Client
-    supabase: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_ROLE_KEY)
-    response = supabase.storage.from_("resumes").download(storage_path)
-    return response
+    import httpx
+    url = f"{settings.SUPABASE_URL}/storage/v1/object/resumes/{storage_path}"
+    headers = {
+        "Authorization": f"Bearer {settings.SUPABASE_SERVICE_ROLE_KEY}",
+        "apikey": settings.SUPABASE_SERVICE_ROLE_KEY
+    }
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url, headers=headers)
+        response.raise_for_status()
+        return response.content
 
 @router.post("")
 async def upload_resume(

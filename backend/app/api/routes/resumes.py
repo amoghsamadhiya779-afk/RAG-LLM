@@ -61,7 +61,7 @@ async def download_from_supabase(storage_path: str) -> bytes:
     response = supabase.storage.from_("resumes").download(storage_path)
     return response
 
-@router.post("", response_model=ResumeResponse)
+@router.post("")
 async def upload_resume(
     payload: ResumeUploadRequest,
     background_tasks: BackgroundTasks,
@@ -76,7 +76,7 @@ async def upload_resume(
     try:
         file_bytes = await download_from_supabase(payload.storage_path)
     except Exception as e:
-        raise HTTPException(status_code=404, detail="Could not download file from storage")
+        raise HTTPException(status_code=502, detail="Upstream storage error: Could not download file from Supabase")
 
     # 3. Check size
     if len(file_bytes) > MAX_FILE_SIZE:
@@ -119,7 +119,13 @@ async def upload_resume(
     await db.commit()
     await db.refresh(resume)
     
-    return ResumeResponse.model_validate(resume)
+    return {
+        "id": str(resume.id),
+        "filename": resume.file_name,
+        "storage_path": resume.storage_path,
+        "size_bytes": resume.size_bytes,
+        "created_at": resume.uploaded_at.isoformat() if resume.uploaded_at else None
+    }
 
 @router.get("/mine", response_model=List[ResumeResponse])
 async def get_my_resumes(

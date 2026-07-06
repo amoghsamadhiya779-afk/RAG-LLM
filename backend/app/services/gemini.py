@@ -24,8 +24,15 @@ class ParsedResume(BaseModel):
     summary: Optional[str] = None
     job_titles: List[str] = Field(default_factory=list)
 
+class ATSScoreSections(BaseModel):
+    keywords: int = Field(ge=0, le=100)
+    experience: int = Field(ge=0, le=100)
+    education: int = Field(ge=0, le=100)
+    formatting: int = Field(ge=0, le=100)
+
 class ATSScore(BaseModel):
-    score: int
+    overall: int = Field(ge=0, le=100)
+    sections: ATSScoreSections
     matched_keywords: List[str]
     missing_keywords: List[str]
     suggestions: List[str]

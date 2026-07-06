@@ -10,4 +10,4 @@ export const getResumeAnalysis = (id: string) =>
 
 /** Called by FastAPI after Supabase Storage upload; frontend sends storage_path. */
 export const registerResume = (payload: { filename: string; storage_path: string }) =>
-  apiFetch<Resume>("/resumes", { method: "POST", body: payload });
+  apiFetch<Resume>("/resumes", { method: "POST", body: payload, timeout: 60000 });

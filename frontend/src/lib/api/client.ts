@@ -12,12 +12,14 @@ export interface ApiFetchOptions extends Omit<RequestInit, "body"> {
   mock?: boolean;
   /** Fall back to mock if network fails (default: true when mocks are on). */
   networkFallback?: boolean;
-  /** Skip attaching the Supabase bearer token. */
+  /** Bypass attaching Authorization headers. */
   noAuth?: boolean;
-  /** Idempotency key for POST/PUT mutations (auto-generated when omitted). */
-  idempotencyKey?: string;
-  /** Cloudflare Turnstile token for guest-facing sensitive actions. */
+  /** Turnstile token for Cloudflare bot protection. */
   turnstileToken?: string;
+  /** Idempotency key for mutations (POST/PUT/PATCH/DELETE). */
+  idempotencyKey?: string;
+  /** Custom timeout in ms (default: 15000). */
+  timeout?: number;
 }
 
 function newRequestId(): string {
@@ -116,7 +118,7 @@ export async function apiFetch<T = unknown>(
 
   let res: Response;
   const timeoutCtrl = new AbortController();
-  const timeoutId = setTimeout(() => timeoutCtrl.abort(), 4000);
+  const timeoutId = setTimeout(() => timeoutCtrl.abort(), opts.timeout ?? 15000);
   const signal = opts.signal
     ? (AbortSignal.any ? AbortSignal.any([opts.signal, timeoutCtrl.signal]) : timeoutCtrl.signal)
     : timeoutCtrl.signal;

@@ -17,11 +17,19 @@ export interface CreateJobInput {
   currency: string;
 }
 
-export const createJob = (input: CreateJobInput) =>
-  apiFetch<EmployerJob>("/jobs", {
+export const createJob = (input: CreateJobInput) => {
+  const payload = {
+    ...input,
+    company: input.company_name,
+    description_html: input.description_md,
+    source: "internal",
+    external_id: "tmp_id"
+  };
+  return apiFetch<EmployerJob>("/jobs", {
     method: "POST",
-    body: input as unknown as Record<string, unknown>,
+    body: payload as unknown as Record<string, unknown>,
   });
+};
 
 export const listMyJobs = () =>
   apiFetch<Paginated<EmployerJob>>("/jobs/mine");

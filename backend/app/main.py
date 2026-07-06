@@ -85,11 +85,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-from app.api.routes import auth, jobs, companies, applications, resumes, admin, chat, insights, internal_ingest, saved, migrate, search
+from app.api.routes import auth, jobs, companies, applications, resumes, admin, chat, insights, internal_ingest, saved, migrate, search, users
 from fastapi import APIRouter
 
 api_router = APIRouter(prefix="/api/v1")
 api_router.include_router(auth.router)
+api_router.include_router(users.router)
 api_router.include_router(jobs.router)
 api_router.include_router(saved.router)
 api_router.include_router(companies.router)

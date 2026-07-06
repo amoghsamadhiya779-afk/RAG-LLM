@@ -20,7 +20,7 @@ export interface BecomeRecruiterResponse {
 export async function becomeRecruiter(opts?: {
   turnstileToken?: string;
 }): Promise<BecomeRecruiterResponse> {
-  return apiFetch<BecomeRecruiterResponse>("/me/role/recruiter", {
+  return apiFetch<BecomeRecruiterResponse>("/users/become-recruiter", {
     method: "POST",
     body: {},
     headers: opts?.turnstileToken

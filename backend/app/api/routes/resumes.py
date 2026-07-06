@@ -176,7 +176,12 @@ async def get_resume_analysis(
             "status": "pending",
             "extracted_skills": [],
             "seniority_estimate": "Unknown",
-            "suggestions": []
+            "suggestions": [],
+            "strengths": [],
+            "gaps": [],
+            "summary": "Analysis in progress...",
+            "id": str(resume_id),
+            "resume_id": str(resume_id)
         }
     
     # Map parsed schema to what the frontend expects
@@ -184,7 +189,12 @@ async def get_resume_analysis(
         "status": "completed",
         "extracted_skills": resume.parsed.get("skills", []),
         "seniority_estimate": resume.parsed.get("seniority", "Unknown"),
-        "suggestions": resume.parsed.get("suggested_keywords", [])
+        "suggestions": resume.parsed.get("suggested_keywords", []),
+        "strengths": [],
+        "gaps": [],
+        "summary": f"Identified {len(resume.parsed.get('skills', []))} core skills and estimated seniority as {resume.parsed.get('seniority', 'Unknown')}.",
+        "id": str(resume.id),
+        "resume_id": str(resume.id)
     }
 
 @router.post("/{resume_id}/parse", response_model=ParsedResume)

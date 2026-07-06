@@ -14,8 +14,9 @@ security = HTTPBearer()
 
 def verify_supabase_jwt(token: str):
     try:
-        if settings.SUPABASE_JWT_SECRET:
-            # Fallback for HS256 if explicitly provided
+        header = jwt.get_unverified_header(token)
+        if header.get("alg") == "HS256" and settings.SUPABASE_JWT_SECRET:
+            # Fallback for HS256 if explicitly provided and token matches
             payload = jwt.decode(
                 token, 
                 settings.SUPABASE_JWT_SECRET, 

@@ -123,6 +123,19 @@ class Resume(Base):
     # embedding
     embedding = mapped_column(Vector(768), nullable=True)
 
+class AtsReport(Base):
+    __tablename__ = "ats_reports"
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    resume_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey("resumes.id"), nullable=False)
+    job_id: Mapped[Optional[uuid.UUID]] = mapped_column(Uuid, ForeignKey("jobs.id"), nullable=True)
+    overall: Mapped[int] = mapped_column(Integer, nullable=False)
+    sections: Mapped[dict] = mapped_column(JSON, nullable=False)
+    matched_keywords: Mapped[List[str]] = mapped_column(PG_ARRAY(Text), default=list)
+    missing_keywords: Mapped[List[str]] = mapped_column(PG_ARRAY(Text), default=list)
+    jd_snippet: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    suggestions: Mapped[List[str]] = mapped_column(PG_ARRAY(Text), default=list)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
 class SavedJob(Base):
     __tablename__ = "saved_jobs"
     user_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey("users.id"), primary_key=True)

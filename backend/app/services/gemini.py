@@ -71,7 +71,13 @@ async def get_ats_score(resume_text: str, job_description: str) -> ATSScore:
     
     prompt = f"""
     Evaluate the following resume against the job description.
-    Provide an ATS score from 0-100, a list of matched keywords, missing keywords, and suggestions for improvement.
+    Provide an overall ATS score (0-100), and breakdown scores (0-100) for:
+    - keywords (how well skills match)
+    - experience (does the candidate have the required years and level of responsibility)
+    - education (does the candidate meet degree requirements)
+    - formatting (is the resume structured cleanly)
+    
+    Also provide a list of matched keywords, missing keywords, and 3-5 specific suggestions for improvement.
     
     Job Description:
     {job_description}

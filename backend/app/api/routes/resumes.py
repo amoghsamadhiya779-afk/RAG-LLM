@@ -133,14 +133,15 @@ async def upload_resume(
         "created_at": resume.uploaded_at.isoformat() if resume.uploaded_at else None
     }
 
-@router.get("/mine", response_model=List[ResumeResponse])
+@router.get("/mine")
 async def get_my_resumes(
     user: User = Depends(require_role([RoleEnum.seeker])),
     db: AsyncSession = Depends(get_db)
 ):
     repo = ResumeRepository(db)
     resumes = await repo.get_mine(user.id)
-    return [ResumeResponse.model_validate(r) for r in resumes]
+    items = [ResumeResponse.model_validate(r).model_dump() for r in resumes]
+    return {"items": items, "total": len(items)}
 
 @router.get("/{resume_id}", response_model=ResumeResponse)
 async def get_resume(

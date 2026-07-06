@@ -55,6 +55,14 @@ async def lifespan(app: FastAPI):
                 logger.info(f"Gemini startup check passed. Model '{model_name}' is available.")
         except Exception as e:
             logger.warning(f"Gemini configuration or verification failed (API may be down or key invalid): {e}. Continuing boot.")
+
+        # Ensure all tables are created (creates missing tables, like AtsReport)
+        from app.db.base import Base
+        from app.db.session import engine
+        from app.db.models import AtsReport
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+            logger.info("Database schemas ensured.")
             
     yield
 

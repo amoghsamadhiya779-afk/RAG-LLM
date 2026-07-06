@@ -1,18 +1,18 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { Gauge, FileText, ArrowRight } from "lucide-react";
-
-import { ShrinkNavbar } from "@/components/fx/ShrinkNavbar";
-import { GlassPanel } from "@/components/ui-ext/GlassPanel";
-import { GradientText } from "@/components/ui-ext/GradientText";
-import { Reveal } from "@/components/ui-ext/motion";
-import { BackButton } from "@/components/layout/BackButton";
-import { Footer } from "@/components/landing/Footer";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { listResumes } from "@/lib/api/resumes";
+import { scoreResume } from "@/lib/api/ats";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Loader2, FileText, CheckCircle2 } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard_/ats/")({
   staticData: { transition: "fadeRise" },
   head: () => ({
     meta: [
-      { title: "ATS Score — jOBiON" },
+      { title: "ATS Score - jOBiON" },
       {
         name: "description",
         content: "Upload a resume and see how ATS bots score you for any role.",
@@ -23,61 +23,129 @@ export const Route = createFileRoute("/dashboard_/ats/")({
 });
 
 function AtsIndex() {
+  const navigate = useNavigate();
+  const [selectedResumeId, setSelectedResumeId] = useState<string>("");
+  const [jdText, setJdText] = useState("");
+
+  const resumesQuery = useQuery({
+    queryKey: ["resumes", "mine"],
+    queryFn: () => listResumes(),
+  });
+
+  const scoreMutation = useMutation({
+    mutationFn: async () => {
+      if (!selectedResumeId || !jdText) throw new Error("Missing inputs");
+      return scoreResume({ resume_id: selectedResumeId, jd_text: jdText });
+    },
+    onSuccess: (data) => {
+      navigate({ to: "/dashboard/ats/$id", params: { id: data.id } });
+    },
+  });
+
+  const isFormValid = selectedResumeId.length > 0 && jdText.trim().length > 10;
+
   return (
     <div className="min-h-screen bg-transparent text-foreground">
-      <ShrinkNavbar />
-      <main className="mx-auto max-w-4xl px-4 md:px-6 pt-32 pb-24">
-        <BackButton fallback="/dashboard" className="mb-6" />
-        <Reveal>
-          <p className="font-mono text-xs uppercase tracking-[0.24em] text-muted-foreground">
+      <main className="mx-auto max-w-4xl px-4 py-24 sm:px-6 sm:py-32">
+        <div className="text-center">
+          <p className="text-sm font-semibold uppercase tracking-widest text-primary">
             ATS scoring
           </p>
           <h1 className="mt-3 text-4xl font-semibold tracking-[-0.03em] sm:text-5xl">
-            Beat the <GradientText>bots</GradientText>
+            Beat the bots.
           </h1>
-          <p className="mt-4 max-w-2xl text-muted-foreground">
-            Upload a resume, and we'll score it against real ATS rules —
+          <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground sm:text-xl sm:leading-relaxed">
+            Select a resume, paste a Job Description, and we'll score it against real ATS rules -
             keyword coverage, missing skills, and actionable fixes.
           </p>
-        </Reveal>
+        </div>
 
-        <div className="mt-10 grid gap-5 md:grid-cols-2">
-          <Reveal>
-            <Link to="/dashboard/resume" className="group block h-full">
-              <GlassPanel className="h-full p-6 transition-transform group-hover:-translate-y-1">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03]">
-                  <FileText className="h-5 w-5" />
-                </div>
-                <h2 className="mt-5 text-lg font-semibold">Upload a resume</h2>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Start a fresh analysis — upload once, score against every job.
-                </p>
-                <span className="mt-6 inline-flex items-center gap-1 text-xs font-mono uppercase tracking-[0.2em] text-primary/80 group-hover:text-primary">
-                  Upload <ArrowRight className="h-3 w-3" />
-                </span>
-              </GlassPanel>
-            </Link>
-          </Reveal>
+        <div className="mt-16 mx-auto max-w-2xl">
+          <div className="rounded-3xl border border-border/50 bg-background/50 p-8 shadow-2xl shadow-primary/5 backdrop-blur-xl">
+            <div className="space-y-6">
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Select Resume</label>
+                {resumesQuery.isLoading ? (
+                  <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Loading your resumes...</span>
+                  </div>
+                ) : resumesQuery.isError ? (
+                  <p className="text-sm text-destructive">Failed to load resumes.</p>
+                ) : (
+                  <Select
+                    value={selectedResumeId}
+                    onValueChange={setSelectedResumeId}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select an uploaded resume" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {resumesQuery.data?.items && resumesQuery.data.items.length > 0 ? (
+                        resumesQuery.data.items.map((r) => (
+                          <SelectItem key={r.id} value={r.id}>
+                            <div className="flex items-center">
+                              <FileText className="mr-2 h-4 w-4 text-muted-foreground" />
+                              {r.file_name}
+                            </div>
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value="none" disabled>
+                          No resumes found. Please upload one first.
+                        </SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
+                )}
+                {resumesQuery.data?.items?.length === 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    You don't have any resumes. Go to the Dashboard to upload one.
+                  </p>
+                )}
+              </div>
 
-          <Reveal>
-            <Link to="/dashboard" className="group block h-full">
-              <GlassPanel className="h-full p-6 transition-transform group-hover:-translate-y-1">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03]">
-                  <Gauge className="h-5 w-5" />
-                </div>
-                <h2 className="mt-5 text-lg font-semibold">Recent scores</h2>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Open your dashboard to review previous ATS reports and applications.
-                </p>
-                <span className="mt-6 inline-flex items-center gap-1 text-xs font-mono uppercase tracking-[0.2em] text-primary/80 group-hover:text-primary">
-                  Dashboard <ArrowRight className="h-3 w-3" />
-                </span>
-              </GlassPanel>
-            </Link>
-          </Reveal>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Job Description</label>
+                <Textarea 
+                  placeholder="Paste the target job description here..."
+                  className="min-h-[200px] resize-y bg-background/50"
+                  value={jdText}
+                  onChange={(e) => setJdText(e.target.value)}
+                />
+              </div>
+
+              <div className="pt-4">
+                <Button 
+                  size="lg" 
+                  className="w-full rounded-xl"
+                  disabled={!isFormValid || scoreMutation.isPending}
+                  onClick={() => scoreMutation.mutate()}
+                >
+                  {scoreMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Analyzing Against ATS Rules...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="mr-2 h-5 w-5" />
+                      Run ATS Scan
+                    </>
+                  )}
+                </Button>
+                {scoreMutation.isError && (
+                  <p className="mt-2 text-sm text-destructive text-center">
+                    Failed to generate ATS score. Please try again.
+                  </p>
+                )}
+              </div>
+
+            </div>
+          </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 }

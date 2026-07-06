@@ -111,6 +111,72 @@ async def get_me(
         "role": profile.role.value if profile.role else None
     }
 
+from pydantic import BaseModel
+from typing import Dict, Any
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, update
+from app.db.session import get_db
+from app.db.models import SavedJob, Application, Resume
+
+class MigrateVisitorPayload(BaseModel):
+    from_visitor_id: str
+    to_user_id: str
+    snapshot: Dict[str, Any]
+
+@api_router.post("/me/migrate")
+async def migrate_me(
+    payload: MigrateVisitorPayload,
+    user: User = Depends(require_user),
+    db: AsyncSession = Depends(get_db)
+):
+    if str(user.id) != payload.to_user_id:
+        raise HTTPException(status_code=403, detail="Forbidden")
+
+    from_uuid = payload.from_visitor_id
+    to_uuid = str(user.id)
+
+    # 1. Saved Jobs
+    visitor_saved = await db.execute(select(SavedJob).where(SavedJob.user_id == from_uuid))
+    visitor_saved = visitor_saved.scalars().all()
+    saved_count = 0
+    for sj in visitor_saved:
+        existing = await db.execute(select(SavedJob).where(SavedJob.user_id == to_uuid, SavedJob.job_id == sj.job_id))
+        if not existing.scalar_one_or_none():
+            sj.user_id = to_uuid
+            saved_count += 1
+        else:
+            await db.delete(sj)
+            
+    # 2. Applications
+    visitor_apps = await db.execute(select(Application).where(Application.user_id == from_uuid))
+    visitor_apps = visitor_apps.scalars().all()
+    app_count = 0
+    for app in visitor_apps:
+        existing = await db.execute(select(Application).where(Application.user_id == to_uuid, Application.job_id == app.job_id))
+        if not existing.scalar_one_or_none():
+            app.user_id = to_uuid
+            app_count += 1
+        else:
+            await db.delete(app)
+            
+    # 3. Resumes
+    result = await db.execute(
+        update(Resume).where(Resume.user_id == from_uuid).values(user_id=to_uuid)
+    )
+    resume_count = result.rowcount
+
+    await db.commit()
+
+    return {
+        "ok": True,
+        "merged": {
+            "saved_jobs": saved_count,
+            "applications": app_count,
+            "ats_reports": 0,
+            "resume": resume_count > 0
+        }
+    }
+
 app.include_router(api_router)
 
 @app.get("/health")

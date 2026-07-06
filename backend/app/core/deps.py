@@ -12,30 +12,38 @@ from app.core.errors import APIError
 
 security = HTTPBearer()
 
+import logging
+from functools import lru_cache
+
+logger = logging.getLogger(__name__)
+
+@lru_cache(maxsize=1)
+def get_jwks_client():
+    jwks_url = f"{settings.SUPABASE_URL}/auth/v1/.well-known/jwks.json"
+    return jwt.PyJWKClient(jwks_url, cache_keys=True)
+
 def verify_supabase_jwt(token: str):
     try:
         header = jwt.get_unverified_header(token)
         if header.get("alg") == "HS256" and settings.SUPABASE_JWT_SECRET:
             # Fallback for HS256 if explicitly provided and token matches
-            payload = jwt.decode(
+            return jwt.decode(
                 token, 
                 settings.SUPABASE_JWT_SECRET, 
                 algorithms=["HS256"], 
                 audience="authenticated"
             )
-            return payload
             
-        jwks_url = f"{settings.SUPABASE_URL}/auth/v1/.well-known/jwks.json"
-        jwks_client = jwt.PyJWKClient(jwks_url)
+        jwks_client = get_jwks_client()
         signing_key = jwks_client.get_signing_key_from_jwt(token)
-        payload = jwt.decode(
+        return jwt.decode(
             token,
             signing_key.key,
             algorithms=["RS256", "ES256"],
             audience="authenticated"
         )
-        return payload
     except jwt.PyJWTError as e:
+        logger.debug(f"JWT verification failed: {e}")
         raise APIError("unauthorized", f"Invalid token: {str(e)}", 401)
 
 async def optional_user(
@@ -79,7 +87,47 @@ async def require_user(
     user = result.scalar_one_or_none()
     
     if not user:
-        raise APIError("unauthorized", "User not found in local database.", 401)
+        from sqlalchemy.dialects.postgresql import insert
+        
+        # Just-In-Time (JIT) Provisioning for missing users
+        email = payload.get("email") or ""
+        if not email:
+            # Synthetic email to satisfy nullable=False without a schema migration
+            email = f"anon_{user_id}@guest.local"
+            
+        is_anonymous = payload.get("is_anonymous", False)
+        
+        user_stmt = insert(User).values(
+            id=user_uuid,
+            email=email,
+            password_hash="supabase_auth_placeholder"
+        ).on_conflict_do_nothing(index_elements=['id'])
+        await db.execute(user_stmt)
+        
+        full_name = "Anonymous Guest" if is_anonymous else "New User"
+        avatar_url = ""
+        
+        user_meta = payload.get("user_metadata") or {}
+        full_name = user_meta.get("full_name", user_meta.get("name", full_name))
+        avatar_url = user_meta.get("avatar_url", user_meta.get("picture", ""))
+            
+        profile_stmt = insert(Profile).values(
+            user_id=user_uuid,
+            role=RoleEnum.seeker,
+            full_name=full_name,
+            avatar_url=avatar_url
+        ).on_conflict_do_nothing(index_elements=['user_id'])
+        await db.execute(profile_stmt)
+        
+        try:
+            await db.commit()
+        except Exception as e:
+            await db.rollback()
+            raise APIError("server_error", f"Failed to auto-provision user: {str(e)}", 500)
+            
+        # Refetch the user now that we guarantee it exists
+        result = await db.execute(select(User).where(User.id == str(user_uuid)))
+        user = result.scalar_one_or_none()
         
     return user
 

@@ -31,6 +31,51 @@ function readDeviceId(): string {
   return id;
 }
 
+let anonRetryCount = 0;
+let isAnonFailedHard = false;
+let anonSignInPromise: Promise<{ data: { session: Session | null; user?: User | null }; error: any }> | null = null;
+
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function safeSignInAnonymously() {
+  if (isAnonFailedHard || anonRetryCount >= 3) {
+    return { data: { session: null }, error: new Error("Anon sign-in max retries reached or 429") };
+  }
+
+  if (anonSignInPromise) {
+    return anonSignInPromise;
+  }
+
+  anonSignInPromise = (async () => {
+    try {
+      const delays = [0, 1000, 5000, 15000];
+      const waitTime = delays[anonRetryCount] || 0;
+      if (waitTime > 0) {
+        console.log(`[Auth] Waiting ${waitTime}ms before anon sign-in retry...`);
+        await delay(waitTime);
+      }
+      
+      const res = await supabase.auth.signInAnonymously();
+      
+      if (res.error) {
+        if (res.error.status === 429) {
+          console.error("[Auth] 429 Rate limited during anonymous sign in. Stopping.");
+          isAnonFailedHard = true;
+          anonRetryCount = 3;
+        } else {
+          console.error(`[Auth] Anonymous sign-in failed (attempt ${anonRetryCount + 1}):`, res.error.message);
+          anonRetryCount++;
+        }
+      }
+      return res as any;
+    } finally {
+      anonSignInPromise = null;
+    }
+  })();
+
+  return anonSignInPromise;
+}
+
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [deviceId] = useState<string>(readDeviceId);
@@ -53,15 +98,14 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         setIsLoadingSession(false);
         return;
       }
-      const { data: anon, error } = await supabase.auth.signInAnonymously();
+      
+      const { data: anon, error } = await safeSignInAnonymously();
       if (!mounted) return;
       if (error) {
         setSession(null);
-      } else {
+      } else if (anon.session) {
         setSession(anon.session);
-        if (anon.session) {
-          prevVisitorRef.current = { id: anon.session.user.id, isAnon: true };
-        }
+        prevVisitorRef.current = { id: anon.session.user.id, isAnon: true };
       }
       setIsLoadingSession(false);
     }
@@ -106,8 +150,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         // Cache belonged to previous identity; drop it. Bootstrap will mint a new anon.
         queryClient.clear();
         prevVisitorRef.current = null;
-        void supabase.auth.signInAnonymously().then(({ data: anon }) => {
-          if (anon.session) {
+        
+        void safeSignInAnonymously().then(({ data: anon }) => {
+          if (anon?.session) {
             setSession(anon.session);
             prevVisitorRef.current = { id: anon.session.user.id, isAnon: true };
           }

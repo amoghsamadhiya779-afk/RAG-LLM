@@ -27,6 +27,8 @@ function newRequestId(): string {
   return `req_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
 }
 
+let hasClearedStaleSession = false;
+
 let mocksEnabled = env.USE_MOCKS;
 if (typeof window !== "undefined") {
   const w = window as Window & { __jobion?: { mocks: boolean; toggle: () => boolean } };
@@ -134,10 +136,14 @@ export async function apiFetch<T = unknown>(
   if (res.status === 401 && typeof window !== "undefined" && !opts.noAuth) {
     // Open-access app: on 401, clear the (possibly stale) session so the
     // SessionProvider can mint a fresh anonymous one on next render.
-    try {
-      await supabase.auth.signOut();
-    } catch {
-      /* ignore */
+    // Capped to once per page load to prevent infinite logout loops.
+    if (!hasClearedStaleSession) {
+      hasClearedStaleSession = true;
+      try {
+        await supabase.auth.signOut();
+      } catch {
+        /* ignore */
+      }
     }
   }
 

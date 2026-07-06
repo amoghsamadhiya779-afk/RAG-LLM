@@ -38,14 +38,64 @@ async def get_job_applications(
     apps = await repo.get_for_job(job_id)
     return [ApplicationWithRelationsResponse.model_validate(a) for a in apps]
 
-@router.get("/applications/mine", response_model=List[ApplicationWithRelationsResponse])
+@router.get("/applications/mine")
 async def get_my_applications(
     user: User = Depends(require_role([RoleEnum.seeker])),
     db: AsyncSession = Depends(get_db)
 ):
     repo = ApplicationRepository(db)
     apps = await repo.get_mine(user.id)
-    return [ApplicationWithRelationsResponse.model_validate(a) for a in apps]
+    
+    stage_map = {
+        "applied": "submitted",
+        "reviewing": "in_review",
+        "interview": "interview",
+        "offer": "hired",
+        "rejected": "rejected",
+        "withdrawn": "withdrawn"
+    }
+
+    items = []
+    for app in apps:
+        job = app.job
+        job_dict = {
+            "id": str(job.id) if job else "",
+            "source": job.source if job else "unknown",
+            "title": job.title if job else "Untitled",
+            "company": job.company if job else "Unknown",
+            "location": job.location if job else "Unknown",
+            "remote": job.remote if job else False,
+            "seniority": job.seniority if job else None,
+            "employment_type": None,
+            "job_type": None,
+            "level": job.seniority if job else None,
+            "tags": getattr(job, 'tags', []) or [],
+            "description_md": getattr(job, 'description_html', None) or "",
+            "apply_url": getattr(job, 'apply_url', None),
+            "salary_min": getattr(job, 'salary_min', None),
+            "salary_max": getattr(job, 'salary_max', None),
+            "currency": getattr(job, 'currency', None),
+            "status": "live",
+            "is_featured": False,
+            "featured_until": None,
+            "created_at": job.created_at.isoformat() if job and job.created_at else None
+        }
+
+        items.append({
+            "id": str(app.id),
+            "job": job_dict,
+            "resume_id": str(app.resume_id) if app.resume_id else None,
+            "cover_letter": app.cover_note,
+            "status": stage_map.get(app.stage.value, "submitted") if app.stage else "submitted",
+            "created_at": app.created_at.isoformat() if app.created_at else None
+        })
+
+    return {
+        "items": items,
+        "total": len(items),
+        "page": 1,
+        "pageSize": max(len(items), 20)
+    }
 
 @router.patch("/applications/{application_id}", response_model=ApplicationResponse)
 async def update_application_status(

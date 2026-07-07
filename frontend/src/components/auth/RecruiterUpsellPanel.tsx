@@ -8,8 +8,6 @@ import { GradientButton } from "@/components/ui-ext/GradientButton";
 import { TurnstileGate, TURNSTILE_ENABLED } from "@/components/security/TurnstileGate";
 import { GuestActionHint } from "@/components/guest/GuestActionHint";
 import { useSession } from "@/features/auth/SessionProvider";
-import { GuestActionHint } from "@/components/guest/GuestActionHint";
-import { useSession } from "@/features/auth/SessionProvider";
 
 interface Props {
   title?: string;
@@ -27,7 +25,6 @@ export function RecruiterUpsellPanel({
   title = "This is the recruiter workspace",
   description = "Post free listings, review applicants, and see ATS-matched candidates. Create a free recruiter account to unlock posting.",
 }: Props) {
-  const { isGuest } = useSession();
   const { isGuest } = useSession();
   const router = useRouter();
 

@@ -130,7 +130,7 @@ const statusStyles: Record<JobStatus, string> = {
   live: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
   pending: "bg-amber-500/15 text-amber-300 border-amber-500/30",
   draft: "bg-foreground/10 text-foreground/60 border-foreground/15",
-  archived: "bg-rose-500/15 text-rose-300 border-rose-500/30",
+  closed: "bg-rose-500/15 text-rose-300 border-rose-500/30",
 };
 
 function MyJobsTable() {
@@ -187,7 +187,7 @@ function MyJobsTable() {
 function JobRow({ job, index }: { job: EmployerJob; index: number }) {
   const queryClient = useQueryClient();
   const closeJobMutation = useMutation({
-    mutationFn: () => updateJob(job.id, { status: "archived" }),
+    mutationFn: () => updateJob(job.id, { status: "closed" }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["employer"] }),
   });
   return (
@@ -260,7 +260,7 @@ function JobRow({ job, index }: { job: EmployerJob; index: number }) {
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
         </Link>
-        {job.status !== "archived" && (
+        {job.status !== "closed" && (
           <button
             onClick={() => closeJobMutation.mutate()}
             disabled={closeJobMutation.isPending}

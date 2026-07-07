@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { useReducedMotion } from "framer-motion";
 import { useLocation } from "@tanstack/react-router";
 import { useTheme } from "@/components/theme/ThemeProvider";
+import { useDevicePerformance } from "@/hooks/useDevicePerformance";
 
 // Lazy so ogl + shader source only ship when the landing hero mounts.
 const Galaxy = lazy(() => import("@/components/landing/Galaxy"));
@@ -30,6 +31,7 @@ export function GalaxyBackground() {
   const { resolvedTheme } = useTheme();
   const { pathname } = useLocation();
   const [tabVisible, setTabVisible] = useState(true);
+  const { isLowTier } = useDevicePerformance();
 
   useEffect(() => {
     const onVis = () => setTabVisible(document.visibilityState === "visible");
@@ -40,6 +42,15 @@ export function GalaxyBackground() {
   if (pathname !== "/" || reduce) return null;
 
   const isDark = resolvedTheme === "dark";
+
+  const dynamicProps = isLowTier
+    ? {
+        ...GALAXY_PROPS,
+        density: 0.4,
+        mouseInteraction: false,
+        mouseRepulsion: false,
+      }
+    : GALAXY_PROPS;
 
   return (
     <div
@@ -52,7 +63,7 @@ export function GalaxyBackground() {
     >
       {tabVisible ? (
         <Suspense fallback={null}>
-          <Galaxy {...GALAXY_PROPS} />
+          <Galaxy {...dynamicProps} />
         </Suspense>
       ) : null}
     </div>

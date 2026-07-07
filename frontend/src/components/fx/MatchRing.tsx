@@ -1,5 +1,6 @@
 import { motion, useReducedMotion } from "framer-motion";
 import { useId } from "react";
+import { useDevicePerformance } from "@/hooks/useDevicePerformance";
 
 interface Props {
   value: number; // 0-100
@@ -10,7 +11,9 @@ interface Props {
 }
 
 export function MatchRing({ value, size = 140, stroke = 10, label, className }: Props) {
-  const reduce = useReducedMotion();
+  const osReduce = useReducedMotion();
+  const { isLowTier } = useDevicePerformance();
+  const reduce = osReduce || isLowTier;
   const id = useId();
   const clamped = Math.max(0, Math.min(100, value));
   const radius = (size - stroke) / 2;

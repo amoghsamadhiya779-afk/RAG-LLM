@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
 import { Check, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useDevicePerformance } from "@/hooks/useDevicePerformance";
+import { getOptimizedTransition } from "@/lib/animations";
 
 export type StepStatus = "idle" | "active" | "done" | "error";
 export interface StepDef {
@@ -11,6 +13,7 @@ export interface StepDef {
 }
 
 export function ProgressStepper({ steps }: { steps: StepDef[] }) {
+  const { isLowTier } = useDevicePerformance();
   return (
     <ol className="grid grid-cols-1 gap-3 md:grid-cols-4">
       {steps.map((s, i) => {
@@ -30,6 +33,7 @@ export function ProgressStepper({ steps }: { steps: StepDef[] }) {
                   ? "rgba(99,102,241,0.4)"
                   : "rgba(255,255,255,0.06)",
               }}
+              transition={getOptimizedTransition(isLowTier)}
               className="flex items-center gap-3 rounded-xl border bg-white/[0.02] p-3"
             >
               <div

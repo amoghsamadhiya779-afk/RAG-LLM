@@ -8,6 +8,8 @@ import {
 import { AnimatePresence, motion, type Transition, type TargetAndTransition } from "framer-motion";
 import "./rotating-text.css";
 import { cn } from "@/lib/utils";
+import { useDevicePerformance } from "@/hooks/useDevicePerformance";
+import { getOptimizedTransition } from "@/lib/animations";
 
 export interface RotatingTextProps {
   texts: string[];
@@ -50,6 +52,7 @@ export function RotatingText({
   style,
 }: RotatingTextProps) {
   const [index, setIndex] = useState(0);
+  const { isLowTier } = useDevicePerformance();
 
   const words = useMemo(() => splitText(texts[index] ?? "", splitBy), [texts, index, splitBy]);
 
@@ -112,7 +115,7 @@ export function RotatingText({
                     initial={initial}
                     animate={animate}
                     exit={exit}
-                    transition={{ ...transition, delay }}
+                    transition={getOptimizedTransition(isLowTier, { ...transition, delay })}
                   >
                     {ch}
                   </motion.span>

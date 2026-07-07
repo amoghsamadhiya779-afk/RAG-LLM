@@ -1,6 +1,7 @@
 import { motion, useReducedMotion, type MotionProps } from "framer-motion";
 import type { ReactNode } from "react";
 import { reducedMotionVariants, reveal, revealStagger } from "@/lib/motion";
+import { useDevicePerformance } from "@/hooks/useDevicePerformance";
 
 interface RevealProps extends MotionProps {
   children: ReactNode;
@@ -8,7 +9,9 @@ interface RevealProps extends MotionProps {
 }
 
 export function Reveal({ children, className, ...rest }: RevealProps) {
-  const shouldReduce = useReducedMotion();
+  const osReduce = useReducedMotion();
+  const { isLowTier } = useDevicePerformance();
+  const shouldReduce = osReduce || isLowTier;
   return (
     <motion.div
       initial="hidden"
@@ -24,7 +27,9 @@ export function Reveal({ children, className, ...rest }: RevealProps) {
 }
 
 export function StaggerGroup({ children, className, ...rest }: RevealProps) {
-  const shouldReduce = useReducedMotion();
+  const osReduce = useReducedMotion();
+  const { isLowTier } = useDevicePerformance();
+  const shouldReduce = osReduce || isLowTier;
   return (
     <motion.div
       initial="hidden"

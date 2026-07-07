@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from '@tanstack/react-router';
 import { useTheme } from '../theme/ThemeProvider';
+import { useDevicePerformance } from '@/hooks/useDevicePerformance';
 
 // Lazy load the heavy canvas component so it doesn't block initial hydration
 const DotField = React.lazy(() => import('./DotField'));
@@ -9,6 +10,7 @@ export default function DotFieldBackground() {
   const { pathname } = useLocation();
   const { resolvedTheme } = useTheme();
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const { isLowTier } = useDevicePerformance();
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -23,8 +25,8 @@ export default function DotFieldBackground() {
   // Exclude from landing page (which has its own background)
   // Removed per user request to have dot grid element in the entire background
 
-  // Accessibility: don't render constant animation if requested
-  if (prefersReducedMotion) return null;
+  // Accessibility: don't render constant animation if requested, or if low-tier/mobile
+  if (prefersReducedMotion || isLowTier) return null;
 
   // Theme tints (Brand: Volt Graphite blue)
   const isDark = resolvedTheme === 'dark';

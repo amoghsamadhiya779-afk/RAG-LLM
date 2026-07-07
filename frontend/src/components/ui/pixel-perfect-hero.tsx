@@ -4,6 +4,7 @@ import { useReducedMotion } from "framer-motion";
 import { ArrowRight, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/theme/ThemeProvider";
+import { useDevicePerformance } from "@/hooks/useDevicePerformance";
 
 import { RotatingText } from "@/components/ui/rotating-text";
 
@@ -49,16 +50,7 @@ export function PixelHero({
   const [isLoaded] = useState(true);
   const reducedMotion = useReducedMotion();
   const { resolvedTheme } = useTheme();
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const mq = window.matchMedia("(max-width: 768px)");
-    setIsMobile(mq.matches);
-    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
+  const { isMobile, isLowTier } = useDevicePerformance();
 
   const isDark = resolvedTheme === "dark";
   const c1 = isDark ? "#284f73" : "#dbeafe";
@@ -84,9 +76,9 @@ export function PixelHero({
             pillarHeight={0.4}
             noiseIntensity={isDark ? 0.5 : 0.2}
             pillarRotation={0}
-            interactive={!isMobile}
+            interactive={!isMobile && !isLowTier}
             mixBlendMode="normal"
-            quality="high"
+            quality={isLowTier ? "low" : "high"}
           />
         </Suspense>
       </div>

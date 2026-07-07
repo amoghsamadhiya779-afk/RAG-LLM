@@ -1,4 +1,5 @@
 import { motion, useReducedMotion } from "framer-motion";
+import { useDevicePerformance } from "@/hooks/useDevicePerformance";
 
 interface Props {
   label: string;
@@ -6,7 +7,9 @@ interface Props {
 }
 
 export function SectionBar({ label, value }: Props) {
-  const reduce = useReducedMotion();
+  const osReduce = useReducedMotion();
+  const { isLowTier } = useDevicePerformance();
+  const reduce = osReduce || isLowTier;
   const v = Math.max(0, Math.min(100, value));
   return (
     <div className="space-y-1.5">

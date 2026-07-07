@@ -54,7 +54,7 @@ class User(Base):
 class Profile(Base):
     __tablename__ = "profiles"
     user_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey("users.id"), primary_key=True)
-    role: Mapped[RoleEnum] = mapped_column(Enum(RoleEnum), nullable=False)
+    role: Mapped[RoleEnum] = mapped_column(Enum(RoleEnum, values_callable=lambda e: [m.value for m in e]), nullable=False)
     full_name: Mapped[str] = mapped_column(String, nullable=False)
     headline: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     avatar_url: Mapped[Optional[str]] = mapped_column(String, nullable=True)

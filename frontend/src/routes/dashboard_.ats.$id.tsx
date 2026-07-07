@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { getAtsScore } from "@/lib/api/ats";
 import type { AtsScore } from "@/lib/api/types";
 import { BackButton } from "@/components/layout/BackButton";
+import DotFieldBackground from "@/components/backgrounds/DotFieldBackground";
 
 export const Route = createFileRoute("/dashboard_/ats/$id")({
   head: ({ params }) => ({
@@ -36,9 +37,10 @@ export const Route = createFileRoute("/dashboard_/ats/$id")({
 function AtsReportPage() {
   const { id } = Route.useParams();
   return (
-    <div className="min-h-screen bg-transparent">
+    <div className="min-h-screen bg-transparent relative">
+      <DotFieldBackground />
       <ShrinkNavbar />
-      <main className="mx-auto max-w-6xl px-4 pt-28 pb-24">
+      <main className="mx-auto max-w-6xl px-4 pt-28 pb-24 relative z-10">
         <BackButton fallback="/dashboard" className="mb-6" />
         <Reveal>
           <div className="mb-8 flex items-center justify-between gap-4">
@@ -73,6 +75,11 @@ function Report({ id }: { id: string }) {
 
   const onExport = () => exportReport(data);
 
+  const matchedKeywords = data.matched_keywords || [];
+  const missingKeywords = data.missing_keywords || [];
+  const suggestions = data.suggestions || [];
+  const aiFeedbackAvailable = (data as any).ai_feedback_available !== false;
+
   return (
     <div className="space-y-6">
       {/* Hero: Ring + Sections + Export */}
@@ -89,6 +96,11 @@ function Report({ id }: { id: string }) {
               <SectionBar label="Formatting" value={data.sections.formatting} />
             </div>
             <div className="flex flex-col gap-2 md:items-end">
+              {!aiFeedbackAvailable && (
+                <span className="text-xs text-muted-foreground/80 italic">
+                  AI feedback unavailable
+                </span>
+              )}
               <Button
                 onClick={onExport}
                 className="bg-[linear-gradient(135deg,#2E6FFF,#4C82FF,#6AA2FF)] text-white hover:opacity-90"
@@ -119,19 +131,19 @@ function Report({ id }: { id: string }) {
                 Matched keywords
               </h2>
               <Badge variant="secondary" className="ml-auto font-mono">
-                {data.matched_keywords.length}
+                {matchedKeywords.length}
               </Badge>
             </div>
-            {data.matched_keywords.length === 0 ? (
+            {matchedKeywords.length === 0 ? (
               <p className="text-sm text-muted-foreground">No matches detected.</p>
             ) : (
-              <div className="flex flex-wrap gap-2">
-                {data.matched_keywords.map((k) => (
+              <div className="flex flex-wrap gap-1.5">
+                {matchedKeywords.map((k) => (
                   <motion.span
                     key={k}
                     initial={{ opacity: 0, y: 6 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="rounded-md border border-emerald-500/20 bg-emerald-500/5 px-2.5 py-1 font-mono text-xs text-emerald-300"
+                    className="rounded-md border border-border/60 bg-background/60 px-2 py-0.5 text-[11px] text-muted-foreground"
                   >
                     {k}
                   </motion.span>
@@ -151,19 +163,19 @@ function Report({ id }: { id: string }) {
                 Missing skills
               </h2>
               <Badge variant="secondary" className="ml-auto font-mono">
-                {data.missing_keywords.length}
+                {missingKeywords.length}
               </Badge>
             </div>
-            {data.missing_keywords.length === 0 ? (
+            {missingKeywords.length === 0 ? (
               <p className="text-sm text-muted-foreground">You covered everything. Nice.</p>
             ) : (
-              <div className="flex flex-wrap gap-2">
-                {data.missing_keywords.map((k) => (
+              <div className="flex flex-wrap gap-1.5">
+                {missingKeywords.map((k) => (
                   <motion.span
                     key={k}
                     initial={{ opacity: 0, y: 6 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="rounded-md border border-rose-500/20 bg-rose-500/5 px-2.5 py-1 font-mono text-xs text-rose-300"
+                    className="rounded-md border border-border/60 bg-background/60 px-2 py-0.5 text-[11px] text-muted-foreground"
                   >
                     {k}
                   </motion.span>
@@ -184,11 +196,11 @@ function Report({ id }: { id: string }) {
               Actionable suggestions
             </h2>
           </div>
-          {data.suggestions.length === 0 ? (
+          {suggestions.length === 0 ? (
             <p className="text-sm text-muted-foreground">No suggestions right now.</p>
           ) : (
             <ol className="space-y-3">
-              {data.suggestions.map((s, i) => (
+              {suggestions.map((s, i) => (
                 <motion.li
                   key={i}
                   initial={{ opacity: 0, x: -6 }}
@@ -237,14 +249,14 @@ function exportReport(data: AtsScore) {
     `- Education:  ${data.sections.education}%`,
     `- Formatting: ${data.sections.formatting}%`,
     ``,
-    `Matched Keywords (${data.matched_keywords.length}):`,
-    ...data.matched_keywords.map((k) => `  + ${k}`),
+    `Matched Keywords (${(data.matched_keywords || []).length}):`,
+    ...(data.matched_keywords || []).map((k) => `  + ${k}`),
     ``,
-    `Missing Keywords (${data.missing_keywords.length}):`,
-    ...data.missing_keywords.map((k) => `  - ${k}`),
+    `Missing Keywords (${(data.missing_keywords || []).length}):`,
+    ...(data.missing_keywords || []).map((k) => `  - ${k}`),
     ``,
     `Suggestions:`,
-    ...data.suggestions.map((s, i) => `  ${i + 1}. ${s}`),
+    ...(data.suggestions || []).map((s, i) => `  ${i + 1}. ${s}`),
     ``,
     data.jd_snippet ? `Job Description Snippet:\n${data.jd_snippet}` : null,
   ]

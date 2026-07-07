@@ -29,6 +29,7 @@ import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as DashboardAtsIndexRouteImport } from './routes/dashboard_.ats.index'
 import { Route as EmployerJobsNewRouteImport } from './routes/employer.jobs.new'
 import { Route as DashboardAtsIdRouteImport } from './routes/dashboard_.ats.$id'
+import { Route as EmployerJobsIdEditRouteImport } from './routes/employer.jobs.$id.edit'
 import { Route as EmployerJobsIdApplicantsRouteImport } from './routes/employer.jobs.$id.applicants'
 
 const SignupRoute = SignupRouteImport.update({
@@ -131,6 +132,11 @@ const DashboardAtsIdRoute = DashboardAtsIdRouteImport.update({
   path: '/dashboard/ats/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EmployerJobsIdEditRoute = EmployerJobsIdEditRouteImport.update({
+  id: '/jobs/$id/edit',
+  path: '/jobs/$id/edit',
+  getParentRoute: () => EmployerRoute,
+} as any)
 const EmployerJobsIdApplicantsRoute =
   EmployerJobsIdApplicantsRouteImport.update({
     id: '/jobs/$id/applicants',
@@ -160,6 +166,7 @@ export interface FileRoutesByFullPath {
   '/employer/jobs/new': typeof EmployerJobsNewRoute
   '/dashboard/ats/': typeof DashboardAtsIndexRoute
   '/employer/jobs/$id/applicants': typeof EmployerJobsIdApplicantsRoute
+  '/employer/jobs/$id/edit': typeof EmployerJobsIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -183,6 +190,7 @@ export interface FileRoutesByTo {
   '/employer/jobs/new': typeof EmployerJobsNewRoute
   '/dashboard/ats': typeof DashboardAtsIndexRoute
   '/employer/jobs/$id/applicants': typeof EmployerJobsIdApplicantsRoute
+  '/employer/jobs/$id/edit': typeof EmployerJobsIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -207,6 +215,7 @@ export interface FileRoutesById {
   '/employer/jobs/new': typeof EmployerJobsNewRoute
   '/dashboard_/ats/': typeof DashboardAtsIndexRoute
   '/employer/jobs/$id/applicants': typeof EmployerJobsIdApplicantsRoute
+  '/employer/jobs/$id/edit': typeof EmployerJobsIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -232,6 +241,7 @@ export interface FileRouteTypes {
     | '/employer/jobs/new'
     | '/dashboard/ats/'
     | '/employer/jobs/$id/applicants'
+    | '/employer/jobs/$id/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -255,6 +265,7 @@ export interface FileRouteTypes {
     | '/employer/jobs/new'
     | '/dashboard/ats'
     | '/employer/jobs/$id/applicants'
+    | '/employer/jobs/$id/edit'
   id:
     | '__root__'
     | '/'
@@ -278,6 +289,7 @@ export interface FileRouteTypes {
     | '/employer/jobs/new'
     | '/dashboard_/ats/'
     | '/employer/jobs/$id/applicants'
+    | '/employer/jobs/$id/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -442,6 +454,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAtsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/employer/jobs/$id/edit': {
+      id: '/employer/jobs/$id/edit'
+      path: '/jobs/$id/edit'
+      fullPath: '/employer/jobs/$id/edit'
+      preLoaderRoute: typeof EmployerJobsIdEditRouteImport
+      parentRoute: typeof EmployerRoute
+    }
     '/employer/jobs/$id/applicants': {
       id: '/employer/jobs/$id/applicants'
       path: '/jobs/$id/applicants'
@@ -465,11 +484,13 @@ const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 interface EmployerRouteChildren {
   EmployerJobsNewRoute: typeof EmployerJobsNewRoute
   EmployerJobsIdApplicantsRoute: typeof EmployerJobsIdApplicantsRoute
+  EmployerJobsIdEditRoute: typeof EmployerJobsIdEditRoute
 }
 
 const EmployerRouteChildren: EmployerRouteChildren = {
   EmployerJobsNewRoute: EmployerJobsNewRoute,
   EmployerJobsIdApplicantsRoute: EmployerJobsIdApplicantsRoute,
+  EmployerJobsIdEditRoute: EmployerJobsIdEditRoute,
 }
 
 const EmployerRouteWithChildren = EmployerRoute._addFileChildren(

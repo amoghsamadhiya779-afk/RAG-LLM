@@ -4,9 +4,11 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { listResumes } from "@/lib/api/resumes";
 import { scoreResume } from "@/lib/api/ats";
 import { Button } from "@/components/ui/button";
+import { GradientButton } from "@/components/ui-ext/GradientButton";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, FileText, CheckCircle2 } from "lucide-react";
+import DotFieldBackground from "@/components/backgrounds/DotFieldBackground";
 
 export const Route = createFileRoute("/dashboard_/ats/")({
   staticData: { transition: "fadeRise" },
@@ -45,14 +47,15 @@ function AtsIndex() {
   const isFormValid = selectedResumeId.length > 0 && jdText.trim().length > 10;
 
   return (
-    <div className="min-h-screen bg-transparent text-foreground">
-      <main className="mx-auto max-w-4xl px-4 py-24 sm:px-6 sm:py-32">
+    <div className="min-h-screen bg-transparent text-foreground relative">
+      <DotFieldBackground />
+      <main className="mx-auto max-w-4xl px-4 py-24 sm:px-6 sm:py-32 relative z-10">
         <div className="text-center">
           <p className="text-sm font-semibold uppercase tracking-widest text-primary">
             ATS scoring
           </p>
           <h1 className="mt-3 text-4xl font-semibold tracking-[-0.03em] sm:text-5xl">
-            Beat the bots.
+            Beat the <span className="text-primary">bots.</span>
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground sm:text-xl sm:leading-relaxed">
             Select a resume, paste a Job Description, and we'll score it against real ATS rules -
@@ -87,7 +90,7 @@ function AtsIndex() {
                           <SelectItem key={r.id} value={r.id}>
                             <div className="flex items-center">
                               <FileText className="mr-2 h-4 w-4 text-muted-foreground" />
-                              {r.file_name}
+                              {r.filename}
                             </div>
                           </SelectItem>
                         ))
@@ -117,9 +120,8 @@ function AtsIndex() {
               </div>
 
               <div className="pt-4">
-                <Button 
-                  size="lg" 
-                  className="w-full rounded-xl"
+                <GradientButton 
+                  className="w-full rounded-xl py-6 text-lg"
                   disabled={!isFormValid || scoreMutation.isPending}
                   onClick={() => scoreMutation.mutate()}
                 >
@@ -134,7 +136,7 @@ function AtsIndex() {
                       Run ATS Scan
                     </>
                   )}
-                </Button>
+                </GradientButton>
                 {scoreMutation.isError && (
                   <p className="mt-2 text-sm text-destructive text-center">
                     Failed to generate ATS score. Please try again.

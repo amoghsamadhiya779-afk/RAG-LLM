@@ -85,7 +85,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-from app.api.routes import auth, jobs, companies, applications, resumes, admin, chat, insights, internal_ingest, saved, migrate, search, users
+from app.api.routes import auth, jobs, companies, applications, resumes, admin, chat, insights, internal_ingest, saved, migrate, search, users, ats
 from fastapi import APIRouter
 
 api_router = APIRouter(prefix="/api/v1")
@@ -102,6 +102,7 @@ api_router.include_router(insights.router)
 api_router.include_router(internal_ingest.router)
 api_router.include_router(migrate.router)
 api_router.include_router(search.router, prefix="/search")
+api_router.include_router(ats.router)
 
 from app.core.deps import require_user, get_current_profile
 from app.db.models import User, Profile

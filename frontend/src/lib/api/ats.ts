@@ -5,6 +5,6 @@ export const scoreResume = (payload: {
   resume_id: string;
   job_id?: string;
   jd_text?: string;
-}) => apiFetch<AtsScore>("/ats/score", { method: "POST", body: payload });
+}) => apiFetch<AtsScore>("/ats/score", { method: "POST", body: payload, timeout: 60000 });
 
 export const getAtsScore = (id: string) => apiFetch<AtsScore>(`/ats/${id}`);

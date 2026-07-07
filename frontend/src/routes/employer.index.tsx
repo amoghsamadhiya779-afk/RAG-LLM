@@ -27,7 +27,7 @@ import { RecruiterUpsellPanel } from "@/components/auth/RecruiterUpsellPanel";
 import { useIsRecruiter } from "@/hooks/useRole";
 import type { EmployerJob, JobStatus } from "@/lib/api/types";
 
-export const Route = createFileRoute("/employer")({
+export const Route = createFileRoute("/employer/")({
   staticData: { transition: "fadeRise" },
   head: () => ({
     meta: [

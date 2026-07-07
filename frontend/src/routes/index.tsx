@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { queryOptions } from "@tanstack/react-query";
 import { ShrinkNavbar } from "@/components/fx";
 import { PixelHero } from "@/components/ui/pixel-perfect-hero";
@@ -78,11 +78,12 @@ function SectionSkeleton({ h = "h-[600px]" }: { h?: string }) {
 import { GalaxyBackground } from "@/components/landing/GalaxyBackground";
 
 function LandingPage() {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-transparent text-foreground">
       <ShrinkNavbar />
       <main>
-        <PixelHero />
+        <PixelHero onPrimaryClick={() => navigate({ to: "/dashboard/resume" })} />
         <Suspense fallback={<SectionSkeleton h="h-24" />}>
           <LogoMarquee />
         </Suspense>

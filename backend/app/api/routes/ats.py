@@ -9,10 +9,10 @@ from datetime import datetime, timezone
 import json
 
 from app.core.idempotency import IdempotentRoute
-from app.core.deps import require_user
+from app.core.deps import require_user, require_role
 from app.core.limits import check_rate_limit
 from app.db.session import get_db
-from app.db.models import User, Resume, Job, AtsReport
+from app.db.models import User, Resume, Job, AtsReport, RoleEnum
 from app.core.gemini_client import get_gemini_client
 from app.core.config import settings
 
@@ -35,7 +35,7 @@ COMMON_SKILLS = {"react", "python", "javascript", "typescript", "node", "java", 
 @router.post("/score")
 async def score_resume(
     payload: AtsScoreRequest,
-    user: User = Depends(require_user),
+    user: User = Depends(require_role([RoleEnum.seeker, RoleEnum.recruiter])),
     db: AsyncSession = Depends(get_db)
 ):
     await check_rate_limit(f"ratelimit:ats:{user.id}", limit=50)
@@ -190,7 +190,7 @@ async def score_resume(
 @router.get("/{id}")
 async def get_ats_report(
     id: str,
-    user: User = Depends(require_user),
+    user: User = Depends(require_role([RoleEnum.seeker, RoleEnum.recruiter])),
     db: AsyncSession = Depends(get_db)
 ):
     try:

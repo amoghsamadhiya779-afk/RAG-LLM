@@ -71,7 +71,7 @@ async def download_from_supabase(storage_path: str) -> bytes:
 async def upload_resume(
     payload: ResumeUploadRequest,
     background_tasks: BackgroundTasks,
-    user: User = Depends(require_role([RoleEnum.seeker])),
+    user: User = Depends(require_role([RoleEnum.seeker, RoleEnum.recruiter])),
     db: AsyncSession = Depends(get_db)
 ):
     # 1. Enforce IDOR check
@@ -135,7 +135,7 @@ async def upload_resume(
 
 @router.get("/mine", response_model=PaginatedResponse[ResumeResponse])
 async def get_my_resumes(
-    user: User = Depends(require_role([RoleEnum.seeker])),
+    user: User = Depends(require_role([RoleEnum.seeker, RoleEnum.recruiter])),
     db: AsyncSession = Depends(get_db)
 ):
     repo = ResumeRepository(db)
@@ -249,7 +249,7 @@ class AtsScoreReport(BaseModel):
 @router.post("/ats/score", response_model=AtsScoreReport)
 async def score_ats(
     request: AtsScoreRequest,
-    user: User = Depends(require_role([RoleEnum.seeker])),
+    user: User = Depends(require_role([RoleEnum.seeker, RoleEnum.recruiter])),
     db: AsyncSession = Depends(get_db)
 ):
     """

@@ -126,15 +126,18 @@ async def score_resume(
             res_data = json.loads(resp.text)
             gemini_score = int(res_data.get("experience_relevance", 50))
             suggestions = res_data.get("suggestions", [])
+            ai_feedback_available = True
         except Exception as e:
             print(f"Gemini ATS score failed: {e}")
             suggestions = [f"Consider adding '{k}' to your resume to better match this job." for k in missing_keywords[:3]]
             if not suggestions:
                 suggestions = ["Tailor your resume more specifically to the job description."]
+            ai_feedback_available = False
     else:
         suggestions = [f"Consider adding '{k}' to your resume to better match this job." for k in missing_keywords[:3]]
         if not suggestions:
             suggestions = ["Tailor your resume more specifically to the job description."]
+        ai_feedback_available = False
 
     # C. Overall Score Blend
     # 60% deterministic (average of the 3 sub-scores), 40% Gemini experience_relevance
@@ -155,7 +158,8 @@ async def score_resume(
         "sections": sections,
         "matched_keywords": matched_keywords,
         "missing_keywords": missing_keywords,
-        "suggestions": suggestions
+        "suggestions": suggestions,
+        "ai_feedback_available": ai_feedback_available
     }
     
     report = AtsReport(
@@ -179,6 +183,7 @@ async def score_resume(
         "matched_keywords": matched_keywords,
         "missing_keywords": missing_keywords,
         "suggestions": suggestions,
+        "ai_feedback_available": ai_feedback_available,
         "created_at": report.created_at.isoformat()
     }
 
@@ -213,5 +218,6 @@ async def get_ats_report(
         "matched_keywords": rdata.get("matched_keywords", []),
         "missing_keywords": rdata.get("missing_keywords", []),
         "suggestions": rdata.get("suggestions", []),
+        "ai_feedback_available": rdata.get("ai_feedback_available", True),
         "created_at": report.created_at.isoformat()
     }

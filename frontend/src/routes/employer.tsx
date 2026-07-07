@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import {
@@ -40,6 +40,7 @@ export const Route = createFileRoute("/employer")({
 
 function EmployerPage() {
   const canPost = useIsRecruiter();
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-transparent text-foreground">
       <ShrinkNavbar />
@@ -61,11 +62,12 @@ function EmployerPage() {
               </p>
             </div>
             {canPost ? (
-              <Link to="/employer/jobs/new">
-                <GradientButton className="gap-2">
-                  <Plus className="h-4 w-4" /> Post a new job
-                </GradientButton>
-              </Link>
+              <GradientButton 
+                className="gap-2"
+                onClick={() => navigate({ to: "/employer/jobs/new" })}
+              >
+                <Plus className="h-4 w-4" /> Post a new job
+              </GradientButton>
             ) : null}
           </div>
         </Reveal>
@@ -134,6 +136,7 @@ const statusStyles: Record<JobStatus, string> = {
 };
 
 function MyJobsTable() {
+  const navigate = useNavigate();
   const { data } = useSuspenseQuery({
     queryKey: ["employer", "jobs"],
     queryFn: listMyJobs,
@@ -147,7 +150,10 @@ function MyJobsTable() {
           title="No postings yet"
           description="Publish your first role and start collecting applicants in minutes."
           action={
-            <GradientButton className="gap-2">
+            <GradientButton 
+              className="gap-2"
+              onClick={() => navigate({ to: "/employer/jobs/new" })}
+            >
               <Plus className="h-4 w-4" /> Post a job
             </GradientButton>
           }

@@ -34,17 +34,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { createJob, type CreateJobInput } from "@/lib/api/employer";
+import { getJob } from "@/lib/api/jobs";
+import { updateJob, type CreateJobInput } from "@/lib/api/employer";
 import { BackButton } from "@/components/layout/BackButton";
 
-export const Route = createFileRoute("/employer/jobs/new")({
+export const Route = createFileRoute("/employer/jobs/$id/edit")({
   head: () => ({
     meta: [
-      { title: "Post a job — jOBiON" },
-      { name: "description", content: "Publish a new role with a live preview. Free — no featured upsell." },
+      { title: "Edit job — jOBiON" },
     ],
   }),
-  component: NewJobPage,
+  loader: async ({ params }) => {
+    return getJob(params.id);
+  },
+  component: EditJobPage,
 });
 
 const seniorityValues = ["intern", "junior", "mid", "senior", "staff", "principal"] as const;
@@ -74,30 +77,26 @@ const schema = z
     { path: ["salary_max"], message: "Max must be ≥ min" },
   );
 
-type FormValues = z.output<typeof schema>;
-
-const defaultValues: FormValues = {
-  title: "",
-  location: "Remote",
-  remote: true,
-  seniority: "senior",
-  employment_type: "full_time",
-  tags_raw: "React, TypeScript",
-  description_md:
-    "## About the role\n\nWe're hiring a senior engineer to help us ship product with taste. You'll own features end-to-end.\n\n### What you'll do\n- Ship high-quality UI\n- Collaborate with design + product\n- Care about craft",
-  apply_url: "",
-  salary_min: 140000 as unknown as number,
-  salary_max: 200000 as unknown as number,
-  currency: "USD",
-};
-
-function NewJobPage() {
+function EditJobPage() {
+  const job = Route.useLoaderData();
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema) as never,
-    defaultValues,
+    defaultValues: {
+      title: job.title || "",
+      location: job.location || "",
+      remote: job.remote,
+      seniority: (job.seniority as any) || "senior",
+      employment_type: (job.employment_type as any) || "full_time",
+      tags_raw: job.tags?.join(", ") || "",
+      description_md: job.description_md || "",
+      apply_url: job.apply_url || "",
+      salary_min: job.salary_min as any,
+      salary_max: job.salary_max as any,
+      currency: job.currency || "USD",
+    },
     mode: "onBlur",
   });
 
@@ -112,7 +111,7 @@ function NewJobPage() {
     [values.tags_raw],
   );
 
-  const createMutation = useMutation({ mutationFn: createJob });
+  const updateMutation = useMutation({ mutationFn: (payload: any) => updateJob(job.id, payload) });
 
   const onSubmit = async (v: FormValues) => {
     setSubmitting(true);
@@ -130,8 +129,8 @@ function NewJobPage() {
         salary_max: Number.isFinite(v.salary_max) ? Number(v.salary_max) : null,
         currency: v.currency || "USD",
       };
-      await createMutation.mutateAsync(payload);
-      toast.success("Submitted for review", {
+      await updateMutation.mutateAsync(payload);
+      toast.success("Job updated", {
         description: "Your job is pending and will go live shortly.",
       });
       navigate({ to: "/employer" });
@@ -157,7 +156,7 @@ function NewJobPage() {
             <ArrowLeft className="h-4 w-4" /> Back to employer
           </Link>
           <h1 className="text-4xl md:text-5xl font-semibold tracking-[-0.03em]">
-            Post a <GradientText>new job</GradientText>
+            Edit <GradientText>job</GradientText>
           </h1>
           <p className="text-muted-foreground mt-2 max-w-xl">
             Fill the form on the left; the preview on the right updates as you type. Posting is free.
@@ -255,9 +254,9 @@ function NewJobPage() {
             <div className="flex items-center gap-3 pt-2">
               <GradientButton type="submit" disabled={submitting}>
                 {submitting ? (
-                  <><Loader2 className="h-4 w-4 animate-spin" /> Submitting…</>
+                  <><Loader2 className="h-4 w-4 animate-spin" /> Saving…</>
                 ) : (
-                  <>Submit for review</>
+                  <>Save changes</>
                 )}
               </GradientButton>
               <span className="text-xs text-muted-foreground">

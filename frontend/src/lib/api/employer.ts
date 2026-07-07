@@ -4,7 +4,6 @@ import type { Applicant, ApplicantStage, EmployerJob, Job, Paginated } from "./t
 
 export interface CreateJobInput {
   title: string;
-  company_name: string;
   location: string;
   remote: boolean;
   seniority: Job["seniority"];
@@ -20,7 +19,6 @@ export interface CreateJobInput {
 export const createJob = (input: CreateJobInput) => {
   const payload = {
     ...input,
-    company: input.company_name,
     description_html: input.description_md,
     source: "internal",
     external_id: "tmp_id"
@@ -51,4 +49,10 @@ export const updateApplicantStage = (applicationId: string, stage: ApplicantStag
   apiFetch<Applicant>(`/applications/${applicationId}`, {
     method: "PATCH",
     body: { stage },
+  });
+
+export const updateJob = (jobId: string, payload: Partial<CreateJobInput> & { status?: string }) =>
+  apiFetch<EmployerJob>(`/jobs/${jobId}`, {
+    method: "PATCH",
+    body: payload as any,
   });

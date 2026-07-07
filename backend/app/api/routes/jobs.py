@@ -35,6 +35,7 @@ async def get_jobs(
         employment_type=employment_type,
         tags=tags,
         salary_min=salaryMin,
+        status="live"
     )
     
     offset = (page - 1) * page_size
@@ -47,7 +48,34 @@ async def get_jobs(
         page_size=page_size
     )
 
-@router.get("/mine", response_model=PaginatedResponse[JobResponse])
+def _employer_job_dict(job, applicant_count: int = 0, new_applicants: int = 0) -> dict:
+    return {
+        "id": str(job.id),
+        "source": job.source,
+        "title": job.title,
+        "company": job.company,
+        "location": job.location,
+        "remote": job.remote,
+        "seniority": job.seniority,
+        "employment_type": getattr(job, 'employment_type', None),
+        "job_type": getattr(job, 'employment_type', None),
+        "level": job.seniority,
+        "tags": getattr(job, 'tags', []) or [],
+        "description_md": getattr(job, 'description_html', None) or "",
+        "apply_url": getattr(job, 'apply_url', None),
+        "salary_min": getattr(job, 'salary_min', None),
+        "salary_max": getattr(job, 'salary_max', None),
+        "currency": getattr(job, 'currency', None),
+        "status": getattr(job, 'status', "live"),
+        "is_featured": False,
+        "featured_until": None,
+        "created_at": job.created_at.isoformat() if job and getattr(job, 'created_at', None) else None,
+        "views": 0, # TODO: add views column to Job model
+        "applicant_count": applicant_count,
+        "new_applicants": new_applicants
+    }
+
+@router.get("/mine")
 async def get_my_jobs(
     limit: int = Query(20, ge=1, le=100),
     page: int = Query(1, ge=1),
@@ -57,34 +85,69 @@ async def get_my_jobs(
     repo = JobsRepository(db)
     # Get user's company and find jobs associated with it
     from app.db.models import Company
-    from sqlalchemy import select
+    from sqlalchemy import select, func, case
     comp_stmt = select(Company).where(Company.owner_id == user.id)
     comp_res = await db.execute(comp_stmt)
     company = comp_res.scalars().first()
     
     if not company:
-        return PaginatedResponse(items=[], total=0, page=page, page_size=limit)
+        return {"items": [], "total": 0, "page": page, "pageSize": limit}
         
-    filters = JobFilters(query=company.name)
+    filters = JobFilters(company_id=company.id)
     offset = (page - 1) * limit
     jobs, total = await repo.query_jobs_with_count(filters, limit=limit, offset=offset)
     
-    return PaginatedResponse(
-        items=[JobResponse.model_validate(j) for j in jobs],
-        total=total,
-        page=page,
-        page_size=limit
-    )
+    app_counts = {}
+    new_app_counts = {}
+    if jobs:
+        from app.db.models import Application
+        from datetime import datetime, timezone, timedelta
+        
+        job_ids = [j.id for j in jobs]
+        seven_days_ago = datetime.now(timezone.utc) - timedelta(days=7)
+        
+        stmt = (
+            select(
+                Application.job_id,
+                func.count(Application.id).label("total_apps"),
+                func.sum(case((Application.created_at >= seven_days_ago, 1), else_=0)).label("new_apps")
+            )
+            .where(Application.job_id.in_(job_ids))
+            .group_by(Application.job_id)
+        )
+        res = await db.execute(stmt)
+        for row in res.all():
+            app_counts[row.job_id] = row.total_apps
+            new_app_counts[row.job_id] = int(row.new_apps or 0)
+
+    return {
+        "items": [_employer_job_dict(j, app_counts.get(j.id, 0), new_app_counts.get(j.id, 0)) for j in jobs],
+        "total": total,
+        "page": page,
+        "pageSize": limit
+    }
 
 from app.db.schemas import JobCreate, JobUpdate
 from app.services.rag.embeddings import build_embedding_model
+from fastapi import HTTPException
 
-@router.post("", response_model=JobResponse)
+@router.post("")
 async def create_job(
     job_in: JobCreate,
     user: User = Depends(require_role([RoleEnum.recruiter])),
     db: AsyncSession = Depends(get_db)
 ):
+    from app.db.models import Company
+    from sqlalchemy import select
+    comp_stmt = select(Company).where(Company.owner_id == user.id)
+    company = (await db.execute(comp_stmt)).scalars().first()
+    
+    if not company:
+        raise HTTPException(status_code=403, detail="You must set up a company profile before posting a job")
+        
+    job_in.company = company.name
+    job_in.company_id = company.id
+    
     # Enforce source='internal'
     job_in.source = "internal"
     
@@ -102,7 +165,7 @@ async def create_job(
     db.add(job)
     await db.commit()
     await db.refresh(job)
-    return JobResponse.model_validate(job)
+    return _employer_job_dict(job, 0, 0)
 
 from pydantic import BaseModel
 
@@ -143,7 +206,7 @@ async def get_employer_stats(
         total_applicants=app_count
     )
 
-@router.put("/{job_id}", response_model=JobResponse)
+@router.patch("/{job_id}")
 async def update_job(
     job_id: uuid.UUID,
     job_in: JobUpdate,
@@ -151,7 +214,14 @@ async def update_job(
     db: AsyncSession = Depends(get_db)
 ):
     from sqlalchemy import select
-    from app.db.models import Job
+    from app.db.models import Job, Company
+    
+    comp_stmt = select(Company).where(Company.owner_id == user.id)
+    company = (await db.execute(comp_stmt)).scalars().first()
+    
+    if not company:
+        raise HTTPException(status_code=403, detail="You must set up a company profile first")
+
     stmt = select(Job).where(Job.id == job_id)
     result = await db.execute(stmt)
     job = result.scalars().first()
@@ -159,12 +229,15 @@ async def update_job(
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
         
+    if not job.company_id or job.company_id != company.id:
+        raise HTTPException(status_code=403, detail="Not authorized to edit this job")
+        
     for k, v in job_in.model_dump(exclude_unset=True).items():
         setattr(job, k, v)
         
     await db.commit()
     await db.refresh(job)
-    return JobResponse.model_validate(job)
+    return _employer_job_dict(job, 0, 0)
 
 @router.get("/{job_id}", response_model=JobResponse)
 async def get_job(job_id: uuid.UUID, db: AsyncSession = Depends(get_db)):

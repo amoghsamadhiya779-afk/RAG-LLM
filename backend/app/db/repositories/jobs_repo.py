@@ -69,6 +69,10 @@ class JobsRepository:
             stmt = stmt.where(Job.seniority == filters.seniority)
         if filters.salary_min is not None:
             stmt = stmt.where(Job.salary_min >= filters.salary_min)
+        if filters.status:
+            stmt = stmt.where(Job.status == filters.status)
+        if filters.company_id:
+            stmt = stmt.where(Job.company_id == filters.company_id)
             
         if filters.employment_type:
             from sqlalchemy import cast, Text

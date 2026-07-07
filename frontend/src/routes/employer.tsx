@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
@@ -22,7 +22,7 @@ import { EmptyState } from "@/components/ui-ext/EmptyState";
 import { Badge } from "@/components/ui/badge";
 import { KpiCard } from "@/components/dashboard/KpiCard";
 import { formatDistanceToNow } from "@/lib/date";
-import { listMyJobs, getEmployerStats } from "@/lib/api/employer";
+import { listMyJobs, getEmployerStats, updateJob } from "@/lib/api/employer";
 import { RecruiterUpsellPanel } from "@/components/auth/RecruiterUpsellPanel";
 import { useIsRecruiter } from "@/hooks/useRole";
 import type { EmployerJob, JobStatus } from "@/lib/api/types";
@@ -166,12 +166,13 @@ function MyJobsTable() {
       </div>
 
       {/* Header */}
-      <div className="hidden md:grid grid-cols-[minmax(0,2.4fr)_100px_120px_130px_140px] gap-4 px-6 py-3 text-[11px] uppercase tracking-[0.18em] text-muted-foreground border-b border-foreground/5 font-mono">
+      <div className="hidden md:grid grid-cols-[minmax(0,2.4fr)_100px_120px_130px_140px_60px] gap-4 px-6 py-3 text-[11px] uppercase tracking-[0.18em] text-muted-foreground border-b border-foreground/5 font-mono">
         <div>Role</div>
         <div>Status</div>
         <div className="text-right">Views</div>
         <div className="text-right">Applicants</div>
         <div className="text-right">Posted</div>
+        <div></div>
       </div>
 
       <ul className="divide-y divide-white/5">
@@ -184,6 +185,11 @@ function MyJobsTable() {
 }
 
 function JobRow({ job, index }: { job: EmployerJob; index: number }) {
+  const queryClient = useQueryClient();
+  const closeJobMutation = useMutation({
+    mutationFn: () => updateJob(job.id, { status: "archived" }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["employer"] }),
+  });
   return (
     <motion.li
       initial={{ opacity: 0, y: 8 }}
@@ -243,6 +249,27 @@ function JobRow({ job, index }: { job: EmployerJob; index: number }) {
 
       <div className="md:text-right text-xs text-muted-foreground">
         {formatDistanceToNow(job.created_at)}
+      </div>
+
+      <div className="flex items-center justify-end gap-3 text-muted-foreground">
+        <Link
+          to="/employer/jobs/$id/edit"
+          params={{ id: job.id }}
+          className="hover:text-primary transition p-1"
+          title="Edit Job"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+        </Link>
+        {job.status !== "archived" && (
+          <button
+            onClick={() => closeJobMutation.mutate()}
+            disabled={closeJobMutation.isPending}
+            className="hover:text-rose-400 transition p-1 disabled:opacity-50"
+            title="Close Job"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
+        )}
       </div>
     </motion.li>
   );

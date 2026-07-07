@@ -99,6 +99,9 @@ class JobBase(CamelModel):
     description_html: Optional[str] = None
     apply_url: Optional[str] = None
     posted_at: Optional[datetime] = None
+    employment_type: Optional[str] = None
+    status: Optional[str] = None
+    company_id: Optional[uuid.UUID] = None
 
 class RawJob(JobBase):
     embedding: Optional[List[float]] = None
@@ -111,6 +114,8 @@ class JobFilters(CamelModel):
     employment_type: Optional[List[str]] = None
     tags: Optional[List[str]] = None
     salary_min: Optional[float] = None
+    status: Optional[str] = None
+    company_id: Optional[uuid.UUID] = None
 
 class JobCreate(JobBase):
     pass

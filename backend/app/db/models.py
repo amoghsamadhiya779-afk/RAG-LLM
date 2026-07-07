@@ -77,8 +77,9 @@ class Company(Base):
     about: Mapped[str] = mapped_column(String, nullable=False)
     location: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     size: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    industry: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    company_type: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
-
 class Job(Base):
     __tablename__ = "jobs"
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)

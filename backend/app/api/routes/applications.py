@@ -28,7 +28,7 @@ async def create_application(
     application = await repo.create(user.id, app_in)
     return ApplicationResponse.model_validate(application)
 
-@router.get("/jobs/{job_id}/applications", response_model=List[ApplicationWithRelationsResponse])
+@router.get("/jobs/{job_id}/applications")
 async def get_job_applications(
     job_id: uuid.UUID,
     user: User = Depends(require_role([RoleEnum.recruiter])),
@@ -36,7 +36,53 @@ async def get_job_applications(
 ):
     repo = ApplicationRepository(db)
     apps = await repo.get_for_job(job_id)
-    return [ApplicationWithRelationsResponse.model_validate(a) for a in apps]
+    
+    stage_map = {
+        "applied": "new",
+        "reviewing": "reviewed",
+        "interview": "interview",
+        "offer": "hired",
+        "rejected": "rejected",
+        "withdrawn": "rejected"
+    }
+
+    items = []
+    for app in apps:
+        usr = app.user
+        profile = usr.profile if usr else None
+        res = app.resume
+        
+        items.append({
+            "id": str(app.id),
+            "job_id": str(app.job_id),
+            "candidate": {
+                "id": str(usr.id) if usr else "",
+                "full_name": profile.full_name if profile else "Unknown",
+                "email": usr.email if usr else "",
+                "avatar_url": profile.avatar_url if profile else None,
+                "headline": profile.headline if profile else None,
+                "location": profile.location if profile else None
+            },
+            "resume": {
+                "id": str(res.id) if res else "",
+                "filename": res.file_name if res else "",
+                "storage_path": res.storage_path if res else "",
+                "preview_url": None
+            },
+            "ats_score": 0,
+            "matched_keywords": [],
+            "missing_keywords": [],
+            "cover_letter": app.cover_note,
+            "stage": stage_map.get(app.stage.value if app.stage else "applied", "new"),
+            "applied_at": app.created_at.isoformat() if app.created_at else None
+        })
+
+    return {
+        "items": items,
+        "total": len(items),
+        "page": 1,
+        "pageSize": max(len(items), 10)
+    }
 
 @router.get("/applications/mine")
 async def get_my_applications(
@@ -105,14 +151,33 @@ async def update_application_status(
     db: AsyncSession = Depends(get_db)
 ):
     repo = ApplicationRepository(db)
+    
+    # Reverse map frontend stage to backend ApplicationStageEnum
+    reverse_map = {
+        "new": "applied",
+        "reviewed": "reviewing",
+        "shortlisted": "reviewing",
+        "interview": "interview",
+        "hired": "offer",
+        "rejected": "rejected",
+        "withdrawn": "withdrawn"
+    }
+    
+    backend_stage = reverse_map.get(app_in.stage, app_in.stage)
+    
     # If user is a seeker, they can only set the stage to 'withdrawn'
     if user.profile.role == RoleEnum.seeker:
-        if app_in.stage != "withdrawn":
+        if backend_stage != "withdrawn":
             raise HTTPException(status_code=403, detail="Seekers can only withdraw applications")
-        # Also need to check if they own the application (handled by repo if we add user_id check, but let's fetch it first)
         app_model = await db.get(Application, application_id)
         if not app_model or app_model.user_id != user.id:
             raise HTTPException(status_code=404, detail="Application not found")
+
+    from app.db.models import ApplicationStageEnum
+    try:
+        app_in.stage = ApplicationStageEnum(backend_stage)
+    except ValueError:
+        raise HTTPException(status_code=422, detail="Invalid stage")
 
     application = await repo.update(application_id, app_in)
     if not application:

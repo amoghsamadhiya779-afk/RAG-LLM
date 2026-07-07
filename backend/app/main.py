@@ -186,6 +186,101 @@ async def migrate_me(
         }
     }
 
+from enum import Enum
+from pydantic import constr
+from typing import Optional
+
+class CompanyTypeEnum(str, Enum):
+    startup = "startup"
+    smb = "smb"
+    enterprise = "enterprise"
+    agency = "agency"
+    nonprofit = "nonprofit"
+    other = "other"
+
+class CompanyOnboardData(BaseModel):
+    name: constr(min_length=1, strip_whitespace=True)
+    industry: Optional[str] = None
+    company_type: CompanyTypeEnum
+    size: Optional[str] = None
+    website: Optional[str] = None
+    location: Optional[str] = None
+    description: Optional[str] = None
+
+class OnboardRecruiterPayload(BaseModel):
+    company: CompanyOnboardData
+
+@api_router.post("/me/role/recruiter")
+async def onboard_recruiter(
+    payload: OnboardRecruiterPayload,
+    user: User = Depends(require_user),
+    db: AsyncSession = Depends(get_db)
+):
+    from app.db.models import RoleEnum, Company, Profile
+    import uuid
+    import re
+
+    # 1. Update user role in Profile
+    profile_stmt = select(Profile).where(Profile.user_id == user.id)
+    profile_res = await db.execute(profile_stmt)
+    profile = profile_res.scalar_one_or_none()
+    
+    if profile:
+        profile.role = RoleEnum.recruiter
+    else:
+        profile = Profile(user_id=user.id, role=RoleEnum.recruiter, full_name=user.email.split('@')[0])
+        db.add(profile)
+        
+    # 2. Sync with Supabase (app_metadata) - disabled due to missing package
+    # 3. Create or Get Company
+    comp_stmt = select(Company).where(Company.owner_id == user.id)
+    comp_res = await db.execute(comp_stmt)
+    company = comp_res.scalar_one_or_none()
+    
+    if not company:
+        c_data = payload.company
+        # Generate unique slug
+        base_slug = re.sub(r'[^a-z0-9]+', '-', c_data.name.lower()).strip('-')
+        if not base_slug:
+            base_slug = "company"
+        unique_slug = f"{base_slug}-{str(uuid.uuid4())[:8]}"
+        
+        company = Company(
+            owner_id=user.id,
+            slug=unique_slug,
+            name=c_data.name,
+            website=c_data.website,
+            logo_url=None,
+            about=c_data.description or "",
+            location=c_data.location,
+            size=c_data.size,
+            industry=c_data.industry,
+            company_type=c_data.company_type.value if c_data.company_type else None
+        )
+        db.add(company)
+        
+    await db.commit()
+    await db.refresh(company)
+    
+    return {
+        "ok": True,
+        "role": "recruiter",
+        "company": {
+            "id": str(company.id),
+            "owner_id": str(company.owner_id),
+            "slug": company.slug,
+            "name": company.name,
+            "website": company.website,
+            "logo_url": company.logo_url,
+            "about": company.about,
+            "location": company.location,
+            "size": company.size,
+            "industry": company.industry,
+            "company_type": company.company_type,
+            "created_at": company.created_at.isoformat() if company.created_at else None
+        }
+    }
+
 app.include_router(api_router)
 
 @app.get("/health")

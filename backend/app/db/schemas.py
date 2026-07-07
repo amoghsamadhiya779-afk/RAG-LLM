@@ -172,7 +172,7 @@ class ApplicationCreate(ApplicationBase):
     pass
 
 class ApplicationUpdate(CamelModel):
-    stage: ApplicationStageEnum
+    stage: str
 
 class ApplicationResponse(ApplicationBase):
     id: uuid.UUID

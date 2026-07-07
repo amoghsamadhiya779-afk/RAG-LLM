@@ -17,9 +17,15 @@ class ApplicationRepository:
         return result.scalar_one_or_none()
 
     async def get_for_job(self, job_id: uuid.UUID) -> List[Application]:
+        from sqlalchemy.orm import selectinload
+        from app.db.models import User
         stmt = (
             select(Application)
             .where(Application.job_id == job_id)
+            .options(
+                selectinload(Application.user).selectinload(User.profile),
+                selectinload(Application.resume)
+            )
             .order_by(desc(Application.created_at))
         )
         result = await self.db.execute(stmt)

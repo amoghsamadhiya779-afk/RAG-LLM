@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 
 from app.db.session import get_db, AsyncSessionLocal
-from app.db.schemas import ResumeResponse, ParsedResume
+from app.db.schemas import ResumeResponse, ParsedResume, PaginatedResponse
 from app.db.resume_repo import ResumeRepository
 from app.core.deps import require_user, require_role
 from app.db.models import User, RoleEnum
@@ -133,15 +133,14 @@ async def upload_resume(
         "created_at": resume.uploaded_at.isoformat() if resume.uploaded_at else None
     }
 
-@router.get("/mine")
+@router.get("/mine", response_model=PaginatedResponse[ResumeResponse])
 async def get_my_resumes(
     user: User = Depends(require_role([RoleEnum.seeker])),
     db: AsyncSession = Depends(get_db)
 ):
     repo = ResumeRepository(db)
     resumes = await repo.get_mine(user.id)
-    items = [ResumeResponse.model_validate(r).model_dump() for r in resumes]
-    return {"items": items, "total": len(items)}
+    return {"items": resumes, "total": len(resumes), "page": 1, "page_size": max(1, len(resumes))}
 
 @router.get("/{resume_id}", response_model=ResumeResponse)
 async def get_resume(
@@ -188,12 +187,12 @@ async def get_resume_analysis(
     # Map parsed schema to what the frontend expects
     return {
         "status": "completed",
-        "extracted_skills": resume.parsed.get("skills", []),
-        "seniority_estimate": resume.parsed.get("seniority", "Unknown"),
-        "suggestions": resume.parsed.get("suggested_keywords", []),
+        "extracted_skills": resume.parsed.get("skills") or [],
+        "seniority_estimate": resume.parsed.get("seniority") or "Unknown",
+        "suggestions": resume.parsed.get("suggested_keywords") or [],
         "strengths": [],
         "gaps": [],
-        "summary": f"Identified {len(resume.parsed.get('skills', []))} core skills and estimated seniority as {resume.parsed.get('seniority', 'Unknown')}.",
+        "summary": f"Identified {len(resume.parsed.get('skills') or [])} core skills and estimated seniority as {resume.parsed.get('seniority') or 'Unknown'}.",
         "id": str(resume.id),
         "resume_id": str(resume.id)
     }

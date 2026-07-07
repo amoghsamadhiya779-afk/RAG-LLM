@@ -143,7 +143,7 @@ async def get_my_applications(
         "pageSize": max(len(items), 20)
     }
 
-@router.patch("/applications/{application_id}", response_model=ApplicationResponse)
+@router.patch("/applications/{application_id}")
 async def update_application_status(
     application_id: uuid.UUID,
     app_in: ApplicationUpdate,
@@ -156,7 +156,6 @@ async def update_application_status(
     reverse_map = {
         "new": "applied",
         "reviewed": "reviewing",
-        "shortlisted": "reviewing",
         "interview": "interview",
         "hired": "offer",
         "rejected": "rejected",
@@ -182,4 +181,13 @@ async def update_application_status(
     application = await repo.update(application_id, app_in)
     if not application:
         raise HTTPException(status_code=404, detail="Application not found")
-    return ApplicationResponse.model_validate(application)
+        
+    return {
+        "id": str(application.id),
+        "job_id": str(application.job_id),
+        "user_id": str(application.user_id),
+        "resume_id": str(application.resume_id) if application.resume_id else None,
+        "cover_note": application.cover_note,
+        "stage": application.stage.value if application.stage else None,
+        "created_at": application.created_at.isoformat() if application.created_at else None
+    }

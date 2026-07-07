@@ -62,7 +62,6 @@ const STAGES: { key: ApplicantStage | "all"; label: string }[] = [
   { key: "all", label: "All" },
   { key: "new", label: "New" },
   { key: "reviewed", label: "Reviewed" },
-  { key: "shortlisted", label: "Shortlisted" },
   { key: "interview", label: "Interview" },
   { key: "hired", label: "Hired" },
   { key: "rejected", label: "Rejected" },
@@ -71,7 +70,6 @@ const STAGES: { key: ApplicantStage | "all"; label: string }[] = [
 const stageStyles: Record<ApplicantStage, string> = {
   new: "border-primary/40 text-primary bg-primary/20",
   reviewed: "border-white/20 text-foreground/70 bg-white/5",
-  shortlisted: "border-primary/40 text-primary bg-primary/20",
   interview: "border-primary/40 text-primary bg-primary/20",
   hired: "border-emerald-400/40 text-emerald-200 bg-emerald-500/10",
   rejected: "border-rose-400/40 text-rose-200 bg-rose-500/10",

@@ -18,7 +18,7 @@ export interface Company {
 }
 
 export type Seniority = "intern" | "junior" | "mid" | "senior" | "staff" | "principal";
-export type JobStatus = "draft" | "pending" | "live" | "archived";
+export type JobStatus = "draft" | "pending" | "live" | "closed";
 export type EmploymentType = "full_time" | "part_time" | "contract" | "internship";
 
 export interface Job {
@@ -132,7 +132,7 @@ export interface EmployerJob extends Job {
   new_applicants: number;
 }
 
-export type ApplicantStage = "new" | "reviewed" | "shortlisted" | "interview" | "rejected" | "hired";
+export type ApplicantStage = "new" | "reviewed" | "interview" | "rejected" | "hired";
 
 export interface Applicant {
   id: string; // application id

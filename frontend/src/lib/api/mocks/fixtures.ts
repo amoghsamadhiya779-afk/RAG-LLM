@@ -283,10 +283,10 @@ registerMock("POST /admin/jobs/:id/reject", ({ path }) => {
   const idx = pendingJobs.findIndex((j) => j.id === id);
   if (idx >= 0) {
     const [job] = pendingJobs.splice(idx, 1);
-    job.status = "archived";
+    job.status = "closed";
     return job;
   }
-  return { ...mockJobs[0], status: "archived" as const };
+  return { ...mockJobs[0], status: "closed" as const };
 });
 registerMock("GET /admin/metrics", () => ({
   users: mockAdminUsers.length,
@@ -329,7 +329,7 @@ registerMock("POST /applications", ({ body }) => {
 // ---------- Employer ----------
 const myJobs = mockJobs.slice(0, 8).map((j, i) => ({
   ...j,
-  status: (["live", "live", "live", "pending", "draft", "live", "archived", "live"] as const)[i],
+  status: (["live", "live", "live", "pending", "draft", "live", "closed", "live"] as const)[i],
   views: 120 + i * 87 + (i % 3) * 40,
   applicant_count: 3 + i * 4 + (i % 4),
   new_applicants: i % 3 === 0 ? (i % 5) + 1 : 0,
@@ -399,7 +399,7 @@ function makeApplicants(jobId: string, count = 9) {
   return Array.from({ length: count }, (_, i) => {
     const first = firstNames[(i * 3) % firstNames.length];
     const last = lastNames[(i * 5) % lastNames.length];
-    const stage = (["new", "new", "reviewed", "shortlisted", "interview", "reviewed", "rejected", "shortlisted", "hired"] as const)[i % 9];
+    const stage = (["new", "new", "reviewed", "interview", "reviewed", "rejected", "hired"] as const)[i % 7];
     const score = 62 + ((i * 7) % 34);
     const matched = kwPool.filter((_, k) => (k + i) % 3 === 0).slice(0, 5);
     const missing = kwPool.filter((_, k) => (k + i) % 4 === 1).slice(0, 3);

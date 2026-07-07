@@ -12,7 +12,7 @@ from app.db.base import Base
 
 class RoleEnum(str, PyEnum):
     seeker = "seeker"
-    recruiter = "recruiter"
+    recruiter = "employer"
     admin = "admin"
 
 class JobStatusEnum(str, PyEnum):

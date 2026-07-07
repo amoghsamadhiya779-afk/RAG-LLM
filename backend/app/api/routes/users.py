@@ -19,7 +19,7 @@ async def become_recruiter(
     profile: Profile = Depends(get_current_profile),
     db: AsyncSession = Depends(get_db)
 ):
-    if profile.role.value == "recruiter":
+    if profile.role.value == "employer":
         return {"status": "success", "message": "Already a recruiter."}
         
     request_id = getattr(request.state, "request_id", "unknown")
@@ -29,8 +29,8 @@ async def become_recruiter(
         db.add(profile)
         await db.commit()
         
-        return {"status": "success", "message": "Role updated to recruiter. Please re-login to update your token."}
+        return {"status": "success", "role": "employer", "message": "Role updated to recruiter. Please re-login to update your token."}
     except Exception as e:
-        logger.error("become_recruiter_failed", error=str(e), user_id=user.id)
         await db.rollback()
+        logger.error("become_recruiter_failed", error=str(e), user_id=str(profile.user_id))
         raise APIError("update_failed", "Failed to update user role.", 500)

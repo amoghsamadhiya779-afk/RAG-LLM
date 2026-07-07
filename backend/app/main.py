@@ -265,7 +265,7 @@ async def onboard_recruiter(
     
     return {
         "ok": True,
-        "role": "recruiter",
+        "role": "employer",
         "company": {
             "id": str(company.id),
             "owner_id": str(company.owner_id),

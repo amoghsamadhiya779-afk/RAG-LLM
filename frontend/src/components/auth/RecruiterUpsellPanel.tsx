@@ -8,8 +8,8 @@ import { GradientButton } from "@/components/ui-ext/GradientButton";
 import { TurnstileGate, TURNSTILE_ENABLED } from "@/components/security/TurnstileGate";
 import { GuestActionHint } from "@/components/guest/GuestActionHint";
 import { useSession } from "@/features/auth/SessionProvider";
-import { becomeRecruiter } from "@/lib/api/account";
-import { ApiError } from "@/lib/api/client";
+import { GuestActionHint } from "@/components/guest/GuestActionHint";
+import { useSession } from "@/features/auth/SessionProvider";
 
 interface Props {
   title?: string;
@@ -28,23 +28,8 @@ export function RecruiterUpsellPanel({
   description = "Post free listings, review applicants, and see ATS-matched candidates. Create a free recruiter account to unlock posting.",
 }: Props) {
   const { isGuest } = useSession();
+  const { isGuest } = useSession();
   const router = useRouter();
-  const qc = useQueryClient();
-  const [tsToken, setTsToken] = useState<string | null>(null);
-
-  const upgrade = useMutation({
-    mutationFn: () =>
-      becomeRecruiter({ turnstileToken: tsToken ?? undefined }),
-    onSuccess: () => {
-      qc.invalidateQueries();
-      toast.success("You're now a recruiter — post your first job.");
-      router.invalidate();
-    },
-    onError: (err: unknown) => {
-      const e = err as ApiError | Error;
-      toast.error(e.message || "Couldn't upgrade — try again.");
-    },
-  });
 
   return (
     <GlassPanel className="p-8 sm:p-10">
@@ -81,18 +66,12 @@ export function RecruiterUpsellPanel({
               </GradientButton>
             </Link>
           ) : (
-            <>
-              <GradientButton
-                className="gap-2"
-                onClick={() => upgrade.mutate()}
-                disabled={upgrade.isPending || (TURNSTILE_ENABLED && !tsToken)}
-              >
-                {upgrade.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+            <Link to="/employer/onboarding">
+              <GradientButton className="gap-2">
                 Enable recruiter tools
                 <ArrowUpRight className="h-4 w-4" />
               </GradientButton>
-              <TurnstileGate enabled={true} onToken={setTsToken} />
-            </>
+            </Link>
           )}
         </div>
       </div>

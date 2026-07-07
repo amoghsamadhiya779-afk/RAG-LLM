@@ -78,7 +78,14 @@ function Report({ id }: { id: string }) {
   const matchedKeywords = data.matched_keywords || [];
   const missingKeywords = data.missing_keywords || [];
   const suggestions = data.suggestions || [];
-  const aiFeedbackAvailable = (data as any).ai_feedback_available !== false;
+  const sections = {
+    keywords: 0,
+    experience: 0,
+    education: 0,
+    formatting: 0,
+    ...(data.sections || {}),
+  };
+  const aiFeedbackAvailable = data.ai_feedback_available !== false;
 
   return (
     <div className="space-y-6">
@@ -90,10 +97,10 @@ function Report({ id }: { id: string }) {
               <MatchRing value={data.overall} size={180} stroke={12} label="Match" />
             </div>
             <div className="space-y-4">
-              <SectionBar label="Keywords" value={data.sections.keywords} />
-              <SectionBar label="Experience" value={data.sections.experience} />
-              <SectionBar label="Education" value={data.sections.education} />
-              <SectionBar label="Formatting" value={data.sections.formatting} />
+              <SectionBar label="Keywords" value={sections.keywords} />
+              <SectionBar label="Experience" value={sections.experience} />
+              <SectionBar label="Education" value={sections.education} />
+              <SectionBar label="Formatting" value={sections.formatting} />
             </div>
             <div className="flex flex-col gap-2 md:items-end">
               {!aiFeedbackAvailable && (
@@ -143,7 +150,7 @@ function Report({ id }: { id: string }) {
                     key={k}
                     initial={{ opacity: 0, y: 6 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="rounded-md border border-border/60 bg-background/60 px-2 py-0.5 text-[11px] text-muted-foreground"
+                    className="rounded-md border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[11px] text-emerald-600 dark:text-emerald-400"
                   >
                     {k}
                   </motion.span>
@@ -175,7 +182,7 @@ function Report({ id }: { id: string }) {
                     key={k}
                     initial={{ opacity: 0, y: 6 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="rounded-md border border-border/60 bg-background/60 px-2 py-0.5 text-[11px] text-muted-foreground"
+                    className="rounded-md border border-rose-500/20 bg-rose-500/10 px-2 py-0.5 text-[11px] text-rose-600 dark:text-rose-400"
                   >
                     {k}
                   </motion.span>
@@ -236,6 +243,14 @@ function ReportSkeleton() {
 }
 
 function exportReport(data: AtsScore) {
+  const sections = {
+    keywords: 0,
+    experience: 0,
+    education: 0,
+    formatting: 0,
+    ...(data.sections || {}),
+  };
+
   const lines = [
     `jOBiON ATS Report`,
     `Report ID: ${data.id}`,
@@ -243,11 +258,11 @@ function exportReport(data: AtsScore) {
     data.job_id ? `Job ID: ${data.job_id}` : null,
     `Created: ${new Date(data.created_at).toISOString()}`,
     ``,
-    `Overall Match: ${data.overall}%`,
-    `- Keywords:   ${data.sections.keywords}%`,
-    `- Experience: ${data.sections.experience}%`,
-    `- Education:  ${data.sections.education}%`,
-    `- Formatting: ${data.sections.formatting}%`,
+    `Overall Match: ${data.overall || 0}%`,
+    `- Keywords:   ${sections.keywords}%`,
+    `- Experience: ${sections.experience}%`,
+    `- Education:  ${sections.education}%`,
+    `- Formatting: ${sections.formatting}%`,
     ``,
     `Matched Keywords (${(data.matched_keywords || []).length}):`,
     ...(data.matched_keywords || []).map((k) => `  + ${k}`),

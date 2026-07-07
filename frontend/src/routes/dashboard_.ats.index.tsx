@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, FileText, CheckCircle2 } from "lucide-react";
 import DotFieldBackground from "@/components/backgrounds/DotFieldBackground";
+import { ShrinkNavbar } from "@/components/fx/ShrinkNavbar";
+import { BackButton } from "@/components/layout/BackButton";
 
 export const Route = createFileRoute("/dashboard_/ats/")({
   staticData: { transition: "fadeRise" },
@@ -47,9 +49,11 @@ function AtsIndex() {
   const isFormValid = selectedResumeId.length > 0 && jdText.trim().length > 10;
 
   return (
-    <div className="min-h-screen bg-transparent text-foreground relative">
+    <div className="min-h-screen bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] text-foreground relative">
       <DotFieldBackground />
+      <ShrinkNavbar />
       <main className="mx-auto max-w-4xl px-4 py-24 sm:px-6 sm:py-32 relative z-10">
+        <BackButton fallback="/dashboard" className="mb-6" />
         <div className="text-center">
           <p className="text-sm font-semibold uppercase tracking-widest text-primary">
             ATS scoring
@@ -90,7 +94,7 @@ function AtsIndex() {
                           <SelectItem key={r.id} value={r.id}>
                             <div className="flex items-center">
                               <FileText className="mr-2 h-4 w-4 text-muted-foreground" />
-                              {r.filename}
+                              {r.fileName}
                             </div>
                           </SelectItem>
                         ))

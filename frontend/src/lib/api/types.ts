@@ -75,7 +75,7 @@ export interface Application {
 
 export interface Resume {
   id: string;
-  filename: string;
+  fileName: string;
   storage_path: string;
   size_bytes: number;
   created_at: string;
@@ -107,6 +107,7 @@ export interface AtsScore {
   matched_keywords: string[];
   missing_keywords: string[];
   suggestions: string[];
+  ai_feedback_available: boolean;
   created_at: string;
 }
 

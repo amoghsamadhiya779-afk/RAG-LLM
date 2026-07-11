@@ -8,7 +8,7 @@ from app.db.session import get_db
 from app.db.schemas import ApplicationCreate, ApplicationUpdate, ApplicationResponse, ApplicationWithRelationsResponse
 from app.db.application_repo import ApplicationRepository
 from app.core.deps import require_user, require_role
-from app.db.models import User, RoleEnum, Application
+from app.db.models import User, RoleEnum, Application, ApplicationStageEnum
 
 router = APIRouter(route_class=IdempotentRoute, prefix="", tags=["applications"])
 
@@ -152,31 +152,13 @@ async def update_application_status(
 ):
     repo = ApplicationRepository(db)
     
-    # Reverse map frontend stage to backend ApplicationStageEnum
-    reverse_map = {
-        "new": "applied",
-        "reviewed": "reviewing",
-        "interview": "interview",
-        "hired": "offer",
-        "rejected": "rejected",
-        "withdrawn": "withdrawn"
-    }
-    
-    backend_stage = reverse_map.get(app_in.stage, app_in.stage)
-    
     # If user is a seeker, they can only set the stage to 'withdrawn'
     if user.profile.role == RoleEnum.seeker:
-        if backend_stage != "withdrawn":
+        if app_in.stage != ApplicationStageEnum.withdrawn:
             raise HTTPException(status_code=403, detail="Seekers can only withdraw applications")
         app_model = await db.get(Application, application_id)
         if not app_model or app_model.user_id != user.id:
             raise HTTPException(status_code=404, detail="Application not found")
-
-    from app.db.models import ApplicationStageEnum
-    try:
-        app_in.stage = ApplicationStageEnum(backend_stage)
-    except ValueError:
-        raise HTTPException(status_code=422, detail="Invalid stage")
 
     application = await repo.update(application_id, app_in)
     if not application:

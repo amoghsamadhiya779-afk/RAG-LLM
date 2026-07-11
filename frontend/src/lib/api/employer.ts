@@ -45,10 +45,18 @@ export const getEmployerStats = () =>
 export const listJobApplicants = (jobId: string) =>
   apiFetch<Paginated<Applicant>>(`/jobs/${jobId}/applications`);
 
+const REVERSE_STAGE_MAP: Record<ApplicantStage, string> = {
+  new: "applied",
+  reviewed: "reviewing",
+  interview: "interview",
+  hired: "offer",
+  rejected: "rejected",
+};
+
 export const updateApplicantStage = (applicationId: string, stage: ApplicantStage) =>
   apiFetch<Applicant>(`/applications/${applicationId}`, {
     method: "PATCH",
-    body: { stage },
+    body: { stage: REVERSE_STAGE_MAP[stage] || stage },
   });
 
 export const updateJob = (jobId: string, payload: Partial<CreateJobInput> & { status?: string }) =>

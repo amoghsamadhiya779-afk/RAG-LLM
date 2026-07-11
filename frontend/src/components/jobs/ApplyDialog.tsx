@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { GradientButton } from "@/components/ui-ext";
 import { createApplication } from "@/lib/api/applications";
+import { listResumes } from "@/lib/api/resumes";
 import type { Job } from "@/lib/api/types";
 
 interface ApplyDialogProps {
@@ -34,9 +35,17 @@ export function ApplyDialog({ job, size = "default" }: ApplyDialogProps) {
   const [cover, setCover] = useState("");
   const qc = useQueryClient();
 
+  // Grab the seeker's latest resume (if any) so we can attach a real UUID
+  const { data: resumes } = useQuery({
+    queryKey: ["resumes", "mine"],
+    queryFn: listResumes,
+    enabled: open,
+  });
+  const latestResumeId = resumes?.items?.[0]?.id;
+
   const mutation = useMutation({
     mutationFn: () =>
-      createApplication({ job_id: job.id, resume_id: "res_1", cover_letter: cover || undefined }),
+      createApplication({ job_id: job.id, resume_id: latestResumeId, cover_note: cover || undefined }),
     onMutate: async () => {
       // optimistic UX: close + confetti + toast; refetch applications after
       setOpen(false);

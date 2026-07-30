@@ -83,7 +83,7 @@ class Company(Base):
 class Job(Base):
     __tablename__ = "jobs"
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
-    source: Mapped[str] = mapped_column(String, nullable=False)
+    source: Mapped[str] = mapped_column(String, index=True, nullable=False)
     external_id: Mapped[str] = mapped_column(String, nullable=False)
     title: Mapped[str] = mapped_column(String, nullable=False)
     company: Mapped[Optional[str]] = mapped_column(String, nullable=True)
@@ -96,9 +96,9 @@ class Job(Base):
     currency: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     description_html: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     apply_url: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    status: Mapped[str] = mapped_column(String, default="live")
+    status: Mapped[str] = mapped_column(String, index=True, default="live")
     employment_type: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    company_id: Mapped[Optional[uuid.UUID]] = mapped_column(Uuid, ForeignKey("companies.id"), nullable=True)
+    company_id: Mapped[Optional[uuid.UUID]] = mapped_column(Uuid, ForeignKey("companies.id"), index=True, nullable=True)
     posted_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     embedding = mapped_column(Vector(768), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
@@ -107,17 +107,17 @@ class Job(Base):
 class Application(Base):
     __tablename__ = "applications"
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
-    job_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey("jobs.id"), nullable=False)
-    user_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey("users.id"), nullable=False)
+    job_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey("jobs.id"), index=True, nullable=False)
+    user_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey("users.id"), index=True, nullable=False)
     resume_id: Mapped[Optional[uuid.UUID]] = mapped_column(Uuid, ForeignKey("resumes.id"), nullable=True)
     cover_note: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    stage: Mapped[ApplicationStageEnum] = mapped_column(Enum(ApplicationStageEnum), default=ApplicationStageEnum.applied)
+    stage: Mapped[ApplicationStageEnum] = mapped_column(Enum(ApplicationStageEnum), index=True, default=ApplicationStageEnum.applied)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
 class Resume(Base):
     __tablename__ = "resumes"
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
-    user_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey("users.id"), nullable=False)
+    user_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey("users.id"), index=True, nullable=False)
     file_name: Mapped[str] = mapped_column(String, nullable=False)
     storage_path: Mapped[str] = mapped_column(String, nullable=False)
     size_bytes: Mapped[int] = mapped_column(Integer, nullable=False)

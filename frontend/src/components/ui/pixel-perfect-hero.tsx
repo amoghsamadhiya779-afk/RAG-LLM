@@ -1,10 +1,12 @@
-import React, { useEffect, useState, Suspense } from "react";
+import React, { Suspense, useEffect, useRef } from "react";
 import { Link } from "@tanstack/react-router";
+import { gsap } from "gsap";
 import { useReducedMotion } from "framer-motion";
 import { ArrowRight, Search } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/theme/ThemeProvider";
 import { useDevicePerformance } from "@/hooks/useDevicePerformance";
+import { useLenis } from "@/components/landing/LenisProvider";
+import { bindLenisOnce, loadScrollTrigger } from "@/lib/scrollTrigger";
 
 import { RotatingText } from "@/components/ui/rotating-text";
 
@@ -46,21 +48,58 @@ export function PixelHero({
   onPrimaryClick,
   jobsUrl = "/jobs",
 }: PixelHeroProps) {
-  // Paint hero content immediately (LCP) — no opacity gate.
-  const [isLoaded] = useState(true);
   const reducedMotion = useReducedMotion();
   const { resolvedTheme } = useTheme();
   const { isMobile, isLowTier } = useDevicePerformance();
+  const lenis = useLenis();
 
   const isDark = resolvedTheme === "dark";
-  const c1 = isDark ? "#284f73" : "#dbeafe";
-  const c2 = isDark ? "#261a57" : "#bfdbfe";
+  const c1 = isDark ? "#284f73" : "#c7ddfd";
+  const c2 = isDark ? "#261a57" : "#a9c8fb";
+
+  const sectionRef = useRef<HTMLElement>(null);
+  const bgWrapRef = useRef<HTMLDivElement>(null);
+  const scrubRef = useRef<HTMLDivElement>(null);
+
+  const enableScrollScrub = !isLowTier && !reducedMotion;
+
+  useEffect(() => {
+    if (!enableScrollScrub) return;
+    let ctx: gsap.Context | undefined;
+    let cancelled = false;
+
+    loadScrollTrigger().then(({ ScrollTrigger }) => {
+      if (cancelled || !sectionRef.current) return;
+      if (lenis) bindLenisOnce(lenis, ScrollTrigger);
+
+      ctx = gsap.context(() => {
+        gsap
+          .timeline({
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top top",
+              end: "bottom top",
+              scrub: 0.8,
+            },
+          })
+          .to(scrubRef.current, { yPercent: -18, scale: 0.94, opacity: 0, ease: "none" }, 0)
+          .to(bgWrapRef.current, { yPercent: -6, scale: 1.06, ease: "none" }, 0);
+      }, sectionRef);
+    });
+
+    return () => {
+      cancelled = true;
+      ctx?.revert();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enableScrollScrub, lenis]);
 
   return (
-    <section className="relative isolate flex min-h-[100dvh] w-full items-center justify-center overflow-hidden px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
-      <div 
-        className="absolute inset-0 -z-10" 
-        style={{ 
+    <section ref={sectionRef} className="relative isolate flex min-h-[100dvh] w-full items-center justify-center overflow-hidden px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+      <div
+        ref={bgWrapRef}
+        className="absolute inset-0 -z-10"
+        style={{
           WebkitMaskImage: "linear-gradient(to bottom, black 60%, transparent 100%)",
           maskImage: "linear-gradient(to bottom, black 60%, transparent 100%)"
         }}
@@ -69,12 +108,12 @@ export function PixelHero({
           <LightPillar
             topColor={c1}
             bottomColor={c2}
-            intensity={isDark ? 1.0 : 0.8}
+            intensity={isDark ? 1.0 : 0.95}
             rotationSpeed={0.3}
-            glowAmount={isDark ? 0.005 : 0.002}
+            glowAmount={isDark ? 0.005 : 0.0035}
             pillarWidth={3.0}
             pillarHeight={0.4}
-            noiseIntensity={isDark ? 0.5 : 0.2}
+            noiseIntensity={isDark ? 0.5 : 0.3}
             pillarRotation={0}
             interactive={!isMobile && !isLowTier}
             mixBlendMode="normal"
@@ -83,27 +122,22 @@ export function PixelHero({
         </Suspense>
       </div>
       
-      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center text-center">
+      <div className="hero-reveal relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center text-center">
+      <div ref={scrubRef}>
         {eyebrow ? (
-          <div
-            className={cn(
-              "inline-flex items-center gap-2 rounded-full border border-foreground/15 bg-foreground/5 px-3 py-1 font-mono text-[11px] tracking-widest text-foreground/70 uppercase backdrop-blur-md transition-all duration-700",
-              isLoaded ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
-            )}
-          >
+          <div className="inline-flex items-center gap-2 rounded-full border border-foreground/15 bg-foreground/5 px-3 py-1 font-mono text-[11px] tracking-widest text-foreground/70 uppercase backdrop-blur-md">
             <span className="h-1.5 w-1.5 rounded-full bg-[#6AA2FF] shadow-[0_0_10px_#6AA2FF]" />
             {eyebrow}
           </div>
         ) : null}
 
         <h1
-          className={cn(
-            "font-outfit mt-8 select-none font-extrabold leading-[0.95] tracking-[-0.04em] transition-all duration-1000 text-foreground",
-            isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
-          )}
+          className="font-outfit mt-8 select-none font-extrabold leading-[0.95] tracking-[-0.04em] text-foreground"
           style={{
             fontSize: "clamp(2.75rem, 10vw, 8rem)",
-            textShadow: isDark ? "0 2px 24px rgba(0,0,0,0.5), 0 0 60px rgba(46,111,255,0.15)" : "none",
+            textShadow: isDark
+              ? "0 2px 24px rgba(0,0,0,0.5), 0 0 60px rgba(46,111,255,0.15)"
+              : "0 1px 0 rgba(255,255,255,0.7), 0 2px 20px rgba(37,87,230,0.12)",
           }}
         >
           <span className="tahoe-glass-text italic">{word1}</span>
@@ -114,10 +148,7 @@ export function PixelHero({
         </h1>
 
         <div
-          className={cn(
-            "mt-6 flex items-baseline justify-center gap-3 text-foreground/90 transition-all duration-1000 delay-150",
-            isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-          )}
+          className="mt-6 flex items-baseline justify-center gap-3 text-foreground/90"
           style={{ fontSize: "clamp(1.25rem, 3vw, 2.25rem)" }}
         >
           <span className="font-sans font-medium tracking-[-0.02em] text-foreground/70">
@@ -148,21 +179,11 @@ export function PixelHero({
         </div>
 
 
-        <p
-          className={cn(
-            "mt-8 max-w-2xl text-balance text-base text-foreground/70 transition-all duration-1000 delay-200 sm:text-lg",
-            isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-          )}
-        >
+        <p className="mt-8 max-w-2xl text-balance text-base text-foreground/70 sm:text-lg">
           {description}
         </p>
 
-        <div
-          className={cn(
-            "mt-10 flex w-full max-w-md flex-col items-stretch gap-3 sm:w-auto sm:flex-row sm:items-center sm:justify-center transition-all duration-1000 delay-300",
-            isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-          )}
-        >
+        <div className="mt-10 flex w-full max-w-md flex-col items-stretch gap-3 sm:w-auto sm:flex-row sm:items-center sm:justify-center">
           <button
             type="button"
             onClick={onPrimaryClick}
@@ -186,12 +207,7 @@ export function PixelHero({
           </Link>
         </div>
 
-        <div
-          className={cn(
-            "mt-16 w-full transition-all duration-1000 delay-500",
-            isLoaded ? "opacity-100" : "opacity-0"
-          )}
-        >
+        <div className="mt-16 w-full">
           <p className="mb-4 font-mono text-[10px] tracking-[0.25em] text-foreground/40 uppercase">
             Candidates hired at
           </p>
@@ -208,6 +224,7 @@ export function PixelHero({
             </div>
           </div>
         </div>
+      </div>
       </div>
     </section>
   );

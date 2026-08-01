@@ -22,7 +22,7 @@ export interface ApiFetchOptions extends Omit<RequestInit, "body"> {
   timeout?: number;
 }
 
-function newRequestId(): string {
+export function newRequestId(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
     return crypto.randomUUID();
   }
@@ -67,7 +67,11 @@ async function runMock(method: string, path: string, body: unknown) {
   });
 }
 
-async function attachAuthHeaders(headers: Headers) {
+export function isMockMode(): boolean {
+  return mocksEnabled || !env.API_URL;
+}
+
+export async function attachAuthHeaders(headers: Headers) {
   try {
     const { data } = await supabase.auth.getSession();
     const token = data.session?.access_token;

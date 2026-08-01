@@ -8,6 +8,10 @@ export const deleteResume = (id: string) =>
 export const getResumeAnalysis = (id: string) =>
   apiFetch<ResumeAnalysis>(`/resumes/${id}/analysis`);
 
-/** Called by FastAPI after Supabase Storage upload; frontend sends storage_path. */
+/**
+ * Called by FastAPI after Supabase Storage upload; frontend sends storage_path.
+ * Returns immediately - parsing/embedding runs in the background. Poll
+ * getResumeAnalysis(id) (status: "pending" | "completed") to know when it's done.
+ */
 export const registerResume = (payload: { filename: string; storage_path: string }) =>
-  apiFetch<Resume>("/resumes", { method: "POST", body: payload, timeout: 60000 });
+  apiFetch<Resume>("/resumes", { method: "POST", body: payload });

@@ -94,8 +94,19 @@ function ResumePage() {
       const registered = await registerResume({ filename: f.name, storage_path: path });
       setResume(registered);
 
+      // Parsing/embedding runs in the background on the server; poll until
+      // it flips off "pending" instead of blocking the upload request on it.
       setPhase("analyzing");
-      const analysis = await getResumeAnalysis(registered.id);
+      let analysis = await getResumeAnalysis(registered.id);
+      const maxAttempts = 40; // ~80s ceiling at 2s intervals
+      for (let i = 0; i < maxAttempts && analysis.status === "pending"; i++) {
+        await new Promise((r) => setTimeout(r, 2000));
+        analysis = await getResumeAnalysis(registered.id);
+      }
+      if (analysis.status === "pending") {
+        throw new Error("Resume analysis is taking longer than expected. Please check back shortly.");
+      }
+
       qc.setQueryData(["resume-analysis", registered.id], analysis);
       setSelected(analysis.extracted_skills.slice(0, 6));
       setPhase("ready");

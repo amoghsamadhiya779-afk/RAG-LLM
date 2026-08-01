@@ -24,6 +24,7 @@ const DotField = memo(({
   const dotsRef = useRef([]);
   const mouseRef = useRef({ x: -9999, y: -9999, prevX: -9999, prevY: -9999, speed: 0 });
   const rafRef = useRef(null);
+  const runningRef = useRef(false);
   const sizeRef = useRef({ w: 0, h: 0, offsetX: 0, offsetY: 0 });
   const glowOpacity = useRef(0);
   const engagement = useRef(0);
@@ -64,6 +65,7 @@ const DotField = memo(({
       };
 
       buildDots(w, h);
+      wake();
     }
 
     function buildDots(w, h) {
@@ -90,6 +92,14 @@ const DotField = memo(({
       const s = sizeRef.current;
       mouseRef.current.x = e.pageX - s.offsetX;
       mouseRef.current.y = e.pageY - s.offsetY;
+      wake();
+    }
+
+    function wake() {
+      if (!runningRef.current && !document.hidden) {
+        runningRef.current = true;
+        rafRef.current = requestAnimationFrame(tick);
+      }
     }
 
     function updateMouseSpeed() {
@@ -103,7 +113,7 @@ const DotField = memo(({
       m.prevY = m.y;
     }
 
-    const speedInterval = setInterval(updateMouseSpeed, 20);
+    let speedInterval = setInterval(updateMouseSpeed, 20);
 
     let frameCount = 0;
 
@@ -115,6 +125,7 @@ const DotField = memo(({
       const p = propsRef.current;
       const len = dots.length;
       const t = frameCount * 0.02;
+      let maxOffset = 0;
 
       const targetEngagement = Math.min(m.speed / 5, 1);
       engagement.current += (targetEngagement - engagement.current) * 0.06;
@@ -177,6 +188,11 @@ const DotField = memo(({
           d.sy += (d.y - d.sy) * 0.1;
         }
 
+        const restDx = d.sx - d.ax;
+        const restDy = d.sy - d.ay;
+        const restOffset = Math.abs(restDx) + Math.abs(restDy);
+        if (restOffset > maxOffset) maxOffset = restOffset;
+
         let drawX = d.sx;
         let drawY = d.sy;
         if (p.waveAmplitude > 0) {
@@ -201,25 +217,61 @@ const DotField = memo(({
 
       ctx.fill();
 
+      // Once the cursor is idle and every dot has settled back onto its anchor,
+      // the next frame would be pixel-identical - so stop until input wakes us.
+      // Continuous effects (wave/sparkle) never reach a settled state.
+      const isAnimatedContinuously = p.waveAmplitude > 0 || p.sparkle;
+      const settled =
+        !isAnimatedContinuously &&
+        eng === 0 &&
+        maxOffset < 0.01 &&
+        glowOpacity.current < 0.01;
+
+      if (settled) {
+        runningRef.current = false;
+        rafRef.current = null;
+        return;
+      }
+
       rafRef.current = requestAnimationFrame(tick);
+    }
+
+    // A backgrounded tab should cost nothing: drop the rAF loop and the mouse
+    // speed sampler entirely, then resume when the tab becomes visible again.
+    function onVisibilityChange() {
+      if (document.hidden) {
+        if (rafRef.current) cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+        runningRef.current = false;
+        clearInterval(speedInterval);
+        speedInterval = null;
+      } else if (!speedInterval) {
+        speedInterval = setInterval(updateMouseSpeed, 20);
+        wake();
+      }
     }
 
     doResize();
     window.addEventListener('resize', resize);
     window.addEventListener('mousemove', onMouseMove, { passive: true });
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    runningRef.current = true;
     rafRef.current = requestAnimationFrame(tick);
 
     rebuildRef.current = () => {
       const { w, h } = sizeRef.current;
       if (w > 0 && h > 0) buildDots(w, h);
+      wake();
     };
 
     return () => {
-      cancelAnimationFrame(rafRef.current);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      runningRef.current = false;
       clearInterval(speedInterval);
       clearTimeout(resizeTimer);
       window.removeEventListener('resize', resize);
       window.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

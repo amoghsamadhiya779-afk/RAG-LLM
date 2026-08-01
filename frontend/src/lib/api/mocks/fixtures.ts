@@ -210,6 +210,13 @@ registerMock("POST /chat/messages", ({ body }) => {
     created_at: new Date().toISOString(),
   } satisfies ChatMessage;
 });
+// Matches the real backend contract used by ChatOrb / streamChatMessage
+// (POST /chat -> { response: string }), distinct from the ChatMessage-shaped
+// /chat/messages mocks above.
+registerMock("POST /chat", ({ body }) => {
+  const b = body as { message?: string };
+  return { response: `You said: "${b?.message ?? ""}". (mock response, streamed)` };
+});
 
 // Billing removed — jOBiON is free for everyone.
 

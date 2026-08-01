@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { ArrowLeft, Check, Download, Sparkles, X } from "lucide-react";
+import { ArrowLeft, Check, Download, Loader2, Sparkles, X } from "lucide-react";
 
 import { ShrinkNavbar } from "@/components/fx/ShrinkNavbar";
 import { MatchRing } from "@/components/fx/MatchRing";
@@ -71,8 +71,14 @@ function Report({ id }: { id: string }) {
   const { data } = useSuspenseQuery({
     queryKey: ["ats", id],
     queryFn: () => getAtsScore(id),
+    // Deterministic scores land instantly; the Gemini-derived "experience"
+    // section and suggestions fill in shortly after. Keep polling until
+    // the background enrichment task flips ai_status off "pending".
+    refetchInterval: (query) =>
+      query.state.data?.ai_status === "pending" ? 2000 : false,
   });
 
+  const isAiPending = data.ai_status === "pending";
   const onExport = () => exportReport(data);
 
   const matchedKeywords = data.matched_keywords || [];
@@ -93,12 +99,20 @@ function Report({ id }: { id: string }) {
       <Reveal>
         <GlassPanel className="p-8 md:p-10">
           <div className="grid gap-10 md:grid-cols-[auto_1fr_auto] md:items-center">
-            <div className="flex justify-center md:justify-start">
+            <div className="flex flex-col items-center gap-2 md:items-start">
               <MatchRing value={data.overall} size={180} stroke={12} label="Match" />
+              {isAiPending && (
+                <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                  <Loader2 className="size-3 animate-spin" /> Finalizing with AI&hellip;
+                </span>
+              )}
             </div>
             <div className="space-y-4">
               <SectionBar label="Keywords" value={sections.keywords} />
-              <SectionBar label="Experience" value={sections.experience} />
+              <SectionBar
+                label={isAiPending ? "Experience (scoring…)" : "Experience"}
+                value={sections.experience}
+              />
               <SectionBar label="Education" value={sections.education} />
               <SectionBar label="Formatting" value={sections.formatting} />
             </div>
@@ -203,7 +217,11 @@ function Report({ id }: { id: string }) {
               Actionable suggestions
             </h2>
           </div>
-          {suggestions.length === 0 ? (
+          {isAiPending ? (
+            <p className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="size-3.5 animate-spin" /> Generating AI suggestions&hellip;
+            </p>
+          ) : suggestions.length === 0 ? (
             <p className="text-sm text-muted-foreground">No suggestions right now.</p>
           ) : (
             <ol className="space-y-3">

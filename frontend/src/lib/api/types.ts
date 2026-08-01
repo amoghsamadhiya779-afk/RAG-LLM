@@ -84,6 +84,7 @@ export interface Resume {
 export interface ResumeAnalysis {
   id: string;
   resume_id: string;
+  status?: "pending" | "completed";
   summary: string;
   strengths: string[];
   gaps: string[];
@@ -108,6 +109,7 @@ export interface AtsScore {
   missing_keywords: string[];
   suggestions: string[];
   ai_feedback_available: boolean;
+  ai_status?: "pending" | "ready" | "failed";
   created_at: string;
 }
 

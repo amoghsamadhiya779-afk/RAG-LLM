@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { AnimatedJobionMark } from "@/components/brand/AnimatedJobionMark";
 import { AnimatedWordmark } from "@/components/brand/AnimatedWordmark";
+import { useDevicePerformance } from "@/hooks/useDevicePerformance";
 
 /**
  * Dedicated full-screen intro splash — one-time per session.
@@ -15,7 +16,8 @@ import { AnimatedWordmark } from "@/components/brand/AnimatedWordmark";
 
 const SEEN_KEY = "jobion:intro-seen-v2";
 const EASE = [0.16, 1, 0.3, 1] as const;
-const SPLASH_MS = 2400;
+// Long enough to read the wordmark, short enough not to feel like a gate.
+const SPLASH_MS = 1400;
 
 const isBrowser = typeof window !== "undefined";
 
@@ -36,12 +38,15 @@ function markSeen() {
 
 export function IntroSplash({ children }: { children: ReactNode }) {
   const reduce = useReducedMotion();
+  const { isLowTier } = useDevicePerformance();
   // Both server and client init to "idle" — guaranteed hydration match.
   // "idle" renders a plain black cover (no animation, no framer-motion).
   const [phase, setPhase] = useState<"idle" | "playing" | "done">("idle");
 
   useEffect(() => {
-    if (alreadySeen() || reduce) {
+    // Low-tier devices pay the splash's animation cost at the exact moment
+    // they're also hydrating and compiling shaders — skip straight to the app.
+    if (alreadySeen() || reduce || isLowTier) {
       markSeen();
       setPhase("done");
       return;
@@ -53,7 +58,7 @@ export function IntroSplash({ children }: { children: ReactNode }) {
       setPhase("done");
     }, SPLASH_MS);
     return () => window.clearTimeout(t);
-  }, [reduce]);
+  }, [reduce, isLowTier]);
 
   const skip = () => {
     markSeen();
@@ -97,7 +102,7 @@ export function IntroSplash({ children }: { children: ReactNode }) {
             <motion.div
               initial={{ opacity: 0, scale: 0.6 }}
               animate={{ opacity: [0, 0.55, 0.3], scale: [0.6, 1.2, 1] }}
-              transition={{ duration: 1.8, ease: EASE, times: [0, 0.55, 1] }}
+              transition={{ duration: 1.1, ease: EASE, times: [0, 0.55, 1] }}
               className="pointer-events-none absolute inset-0"
               style={{
                 background:
@@ -119,26 +124,27 @@ export function IntroSplash({ children }: { children: ReactNode }) {
               <motion.div
                 initial={{ scaleX: 0, opacity: 0 }}
                 animate={{ scaleX: 1, opacity: 1 }}
-                transition={{ duration: 0.9, ease: EASE, delay: 0.6 }}
+                transition={{ duration: 0.6, ease: EASE, delay: 0.35 }}
                 className="h-px w-48 origin-left bg-gradient-to-r from-transparent via-[#2E6FFF] to-transparent"
               />
 
               <motion.p
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, ease: EASE, delay: 0.9 }}
+                transition={{ duration: 0.5, ease: EASE, delay: 0.55 }}
                 className="max-w-md text-xs uppercase tracking-[0.35em] text-muted-foreground sm:text-sm"
               >
                 AI-powered tech job matching
               </motion.p>
             </div>
 
+            {/* Available immediately — never force a wait before letting the user dismiss it. */}
             <motion.button
               type="button"
               onClick={skip}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.4, ease: EASE, delay: 1.2 }}
+              transition={{ duration: 0.3, ease: EASE }}
               className="absolute bottom-8 right-8 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-[11px] uppercase tracking-widest text-muted-foreground backdrop-blur-md transition-colors hover:text-foreground"
             >
               Skip

@@ -324,9 +324,21 @@
   .aurora-a,
   .aurora-b,
   .aurora-c,
-  .gradient-ring {
+  .gradient-ring,
+  .hero-reveal {
     animation: none;
   }
+}
+
+/* Single, cohesive entrance for the whole hero block instead of several
+   separately-timed fades. Animates transform only (never opacity) so the
+   hero content is fully painted at first frame — doesn't delay LCP. */
+@keyframes hero-reveal {
+  from { transform: translateY(18px); }
+  to { transform: translateY(0); }
+}
+.hero-reveal {
+  animation: hero-reveal 650ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes shimmer {

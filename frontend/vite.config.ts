@@ -30,6 +30,12 @@ export default defineConfig({
               return "vendor-motion";
             if (id.includes("@supabase")) return "vendor-supabase";
             if (id.includes("@tanstack")) return "vendor-tanstack";
+            // Must come before the generic "gsap" check below, or
+            // ScrollTrigger gets folded into vendor-visuals — which is
+            // eagerly pulled in on nearly every route via pill-nav's
+            // static gsap import and the hero's three.js LightPillar —
+            // defeating the point of dynamically importing it.
+            if (id.includes("ScrollTrigger")) return "vendor-scrolltrigger";
             if (
               id.includes("three") ||
               id.includes("ogl") ||

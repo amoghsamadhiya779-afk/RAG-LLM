@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { MessageCircle, X, Send, AlertCircle, RefreshCw } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { apiFetch } from "@/lib/api/client";
+import { streamChatMessage } from "@/lib/api/chat";
 import { TurnstileGate, TURNSTILE_ENABLED } from "@/components/security/TurnstileGate";
 import { toast } from "sonner";
 import { useSession } from "@/features/auth/SessionProvider";
@@ -85,21 +85,43 @@ export function ChatOrb() {
     
     setIsLoading(true);
     setErrorState("none");
-    
+
+    const assistantId = `${Date.now()}-assistant`;
+    let assistantStarted = false;
+
     try {
-      const data = await apiFetch<any>("/api/v1/chat", {
-        method: "POST",
-        body: { message: text },
-        turnstileToken: tsToken ?? undefined,
-      });
-      
-      setMessages(prev => [...prev, { id: Date.now().toString(), role: "assistant", text: data.response }]);
+      await streamChatMessage(
+        text,
+        (event) => {
+          if (event.type === "token") {
+            if (!assistantStarted) {
+              assistantStarted = true;
+              setIsLoading(false);
+              setMessages(prev => [...prev, { id: assistantId, role: "assistant", text: event.text }]);
+            } else {
+              setMessages(prev =>
+                prev.map(m => (m.id === assistantId ? { ...m, text: m.text + event.text } : m))
+              );
+            }
+          } else if (event.type === "error" && !assistantStarted) {
+            setMessages(prev => [...prev, {
+              id: Date.now().toString(),
+              role: "error_bubble",
+              text: event.message,
+              isRetryable: true,
+            }]);
+            setPendingMessage(text);
+          }
+        },
+        { turnstileToken: tsToken ?? undefined },
+      );
+
       setPendingMessage(null);
-      
+
       if (!session && TURNSTILE_ENABLED) {
-          setTsToken(null); 
+          setTsToken(null);
       }
-      
+
     } catch (err: any) {
       if (err.status === 429) {
         setErrorState("budget");

@@ -1,36 +1,34 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense } from "react";
 import { useReducedMotion } from "framer-motion";
 import { Reveal } from "@/components/ui-ext";
+import { useDevicePerformance } from "@/hooks/useDevicePerformance";
 
 const Antigravity = lazy(() => import("@/components/ui/antigravity"));
 
 export function AntigravitySection() {
   const reduce = useReducedMotion();
-  const [mounted, setMounted] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const { isMobile, isLowTier } = useDevicePerformance();
 
-  useEffect(() => {
-    setMounted(true);
-    const mq = window.matchMedia("(max-width: 640px)");
-    const onChange = () => setIsMobile(mq.matches);
-    onChange();
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, []);
+  // The WebGL particle field is decorative. Skip it entirely for users who
+  // asked for less motion or whose device can't afford it — the section still
+  // reads correctly with just the copy.
+  const showParticles = !reduce && !isLowTier;
 
   return (
     <section className="relative w-full overflow-hidden bg-background min-h-[100dvh] flex flex-col items-center justify-center z-10">
 
       {/* Absolute Background Layer */}
-      <div className="absolute inset-0 z-0">
-        <Suspense fallback={null}>
-          <Antigravity 
-            color="#6aa2ff" 
-            count={isMobile ? 150 : 300} 
-            autoAnimate={isMobile}
-          />
-        </Suspense>
-      </div>
+      {showParticles && (
+        <div className="absolute inset-0 z-0">
+          <Suspense fallback={null}>
+            <Antigravity
+              color="#6aa2ff"
+              count={isMobile ? 150 : 300}
+              autoAnimate={isMobile}
+            />
+          </Suspense>
+        </div>
+      )}
 
       {/* Copy */}
       <div className="relative z-10 mx-auto flex max-w-3xl flex-col items-center px-6 text-center pointer-events-none">

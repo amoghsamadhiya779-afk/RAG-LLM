@@ -6,34 +6,14 @@ import { PixelHero } from "@/components/ui/pixel-perfect-hero";
 
 import { listJobs } from "@/lib/api/jobs";
 
-// Below-the-fold sections load in parallel with hero paint. Each Suspense
-// fallback holds a fixed height to prevent layout shift as chunks resolve.
-const LogoMarquee = lazy(() =>
-  import("@/components/landing/LogoMarquee").then((m) => ({ default: m.LogoMarquee })),
-);
-const HowItWorks = lazy(() =>
-  import("@/components/landing/HowItWorks").then((m) => ({ default: m.HowItWorks })),
-);
-const FeaturedJobs = lazy(() =>
-  import("@/components/landing/FeaturedJobs").then((m) => ({ default: m.FeaturedJobs })),
-);
-const StatsBand = lazy(() =>
-  import("@/components/landing/StatsBand").then((m) => ({ default: m.StatsBand })),
-);
-const AntigravitySection = lazy(() =>
-  import("@/components/landing/AntigravitySection").then((m) => ({
-    default: m.AntigravitySection,
-  })),
-);
-const Testimonials = lazy(() =>
-  import("@/components/landing/Testimonials").then((m) => ({ default: m.Testimonials })),
-);
-const PricingTeaser = lazy(() =>
-  import("@/components/landing/PricingTeaser").then((m) => ({ default: m.PricingTeaser })),
-);
-const Footer = lazy(() =>
-  import("@/components/landing/Footer").then((m) => ({ default: m.Footer })),
-);
+import { LogoMarquee } from "@/components/landing/LogoMarquee";
+import { HowItWorks } from "@/components/landing/HowItWorks";
+import { FeaturedJobs } from "@/components/landing/FeaturedJobs";
+import { StatsBand } from "@/components/landing/StatsBand";
+import { AntigravitySection } from "@/components/landing/AntigravitySection";
+import { Testimonials } from "@/components/landing/Testimonials";
+import { PricingTeaser } from "@/components/landing/PricingTeaser";
+import { Footer } from "@/components/landing/Footer";
 
 // Shared by loader (prime) + FeaturedJobs component (subscribe). Must stay
 // keyed identically to whatever FeaturedJobs consumes.
@@ -70,11 +50,6 @@ export const Route = createFileRoute("/")({
   component: LandingPage,
 });
 
-// Fixed-height section fallback: absorbs the lazy-chunk gap without CLS.
-function SectionSkeleton({ h = "h-[600px]" }: { h?: string }) {
-  return <div aria-hidden className={`${h} w-full`} />;
-}
-
 import { GalaxyBackground } from "@/components/landing/GalaxyBackground";
 
 function LandingPage() {
@@ -84,31 +59,15 @@ function LandingPage() {
       <ShrinkNavbar />
       <main>
         <PixelHero onPrimaryClick={() => navigate({ to: "/dashboard/resume" })} />
-        <Suspense fallback={<SectionSkeleton h="h-24" />}>
-          <LogoMarquee />
-        </Suspense>
-        <Suspense fallback={<SectionSkeleton />}>
-          <HowItWorks />
-        </Suspense>
-        <Suspense fallback={<SectionSkeleton />}>
-          <FeaturedJobs />
-        </Suspense>
-        <Suspense fallback={<SectionSkeleton h="h-[400px]" />}>
-          <StatsBand />
-        </Suspense>
-        <Suspense fallback={<SectionSkeleton h="h-[700px]" />}>
-          <AntigravitySection />
-        </Suspense>
-        <Suspense fallback={<SectionSkeleton />}>
-          <Testimonials />
-        </Suspense>
-        <Suspense fallback={<SectionSkeleton h="h-[400px]" />}>
-          <PricingTeaser />
-        </Suspense>
+        <LogoMarquee />
+        <HowItWorks />
+        <FeaturedJobs />
+        <StatsBand />
+        <AntigravitySection />
+        <Testimonials />
+        <PricingTeaser />
       </main>
-      <Suspense fallback={<SectionSkeleton h="h-64" />}>
-        <Footer />
-      </Suspense>
+      <Footer />
     </div>
   );
 }

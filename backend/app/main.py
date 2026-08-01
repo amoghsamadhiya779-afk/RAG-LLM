@@ -60,9 +60,26 @@ async def lifespan(app: FastAPI):
         from app.db.base import Base
         from app.db.session import engine
         from app.db.models import AtsReport
+        from sqlalchemy import text
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
             logger.info("Database schemas ensured.")
+
+            # create_all only creates missing tables, it does not add indexes to
+            # columns added to an already-existing table (e.g. index=True flags
+            # added after the table was first created). Apply those explicitly.
+            for stmt in (
+                "CREATE INDEX IF NOT EXISTS ix_jobs_source ON jobs (source)",
+                "CREATE INDEX IF NOT EXISTS ix_jobs_status ON jobs (status)",
+                "CREATE INDEX IF NOT EXISTS ix_jobs_company_id ON jobs (company_id)",
+                "CREATE INDEX IF NOT EXISTS ix_jobs_posted_at ON jobs (posted_at)",
+                "CREATE INDEX IF NOT EXISTS ix_applications_job_id ON applications (job_id)",
+                "CREATE INDEX IF NOT EXISTS ix_applications_user_id ON applications (user_id)",
+                "CREATE INDEX IF NOT EXISTS ix_applications_stage ON applications (stage)",
+                "CREATE INDEX IF NOT EXISTS ix_resumes_user_id ON resumes (user_id)",
+            ):
+                await conn.execute(text(stmt))
+            logger.info("Database indexes ensured.")
             
     yield
 
@@ -299,13 +316,16 @@ async def diagnostics(
     import subprocess
     import json
     import os
-    
+    import asyncio
+
     # Run the diagnose_apis.py script as a subprocess to keep it isolated
-    # and parse its output.
+    # and parse its output. Offloaded to a thread so the blocking subprocess
+    # wait doesn't freeze the event loop for other in-flight requests.
     script_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "scripts", "diagnose_apis.py")
     try:
-        result = subprocess.run(
-            [sys.executable, script_path], 
+        result = await asyncio.to_thread(
+            subprocess.run,
+            [sys.executable, script_path],
             capture_output=True, text=True, timeout=30
         )
         

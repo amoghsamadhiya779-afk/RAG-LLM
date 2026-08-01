@@ -35,6 +35,7 @@ class ApplicationRepository:
         stmt = (
             select(Application)
             .where(Application.user_id == user_id)
+            .options(selectinload(Application.job))
             .order_by(desc(Application.created_at))
         )
         result = await self.db.execute(stmt)

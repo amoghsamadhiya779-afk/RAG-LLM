@@ -114,17 +114,11 @@ async def upload_resume(
     
     repo = ResumeRepository(db)
     resume = await repo.create(user.id, safe_filename, payload.storage_path, len(file_bytes))
-    
-    # Process synchronously to avoid race conditions with frontend
-    await process_resume_bg(resume.id, file_bytes, safe_filename)
-    
-    # Update size and storage_path in DB
-    resume = await repo.get_by_id(resume.id)
-    resume.size_bytes = len(file_bytes)
-    resume.storage_path = payload.storage_path
-    await db.commit()
-    await db.refresh(resume)
-    
+
+    # Parsing + embedding happens in the background; resume.parsed stays null
+    # until it's done. Poll GET /resumes/{id}/analysis for status.
+    background_tasks.add_task(process_resume_bg, resume.id, file_bytes, safe_filename)
+
     return {
         "id": str(resume.id),
         "filename": resume.file_name,

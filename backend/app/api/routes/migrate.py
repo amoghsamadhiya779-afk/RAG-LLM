@@ -33,13 +33,13 @@ async def migrate_data(
     redis_key = f"idempotency:migrate:{user.id}:{idempotency_key}"
     
     # Check if already processed
-    existing_result = redis.get(redis_key)
+    existing_result = await redis.get(redis_key)
     if existing_result:
         return {"status": "success", "message": "Already processed."}
-        
+
     # In a real implementation we would upsert to db here and recompute ATS scores
-    
+
     # Save idempotency key for 48h
-    redis.setex(redis_key, 172800, "success")
+    await redis.setex(redis_key, 172800, "success")
     
     return {"status": "success", "message": "Data migrated successfully."}

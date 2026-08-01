@@ -38,10 +38,16 @@ def compile_array_sqlite(type_, compiler, **kw):
 
 @pytest.fixture(autouse=True)
 def mock_redis():
-    with patch("app.core.limits.redis", new=MagicMock()) as mock_r:
-        mock_r.get.return_value = None
-        mock_r.incr.return_value = 1
-        mock_r.incrby.return_value = 1
+    # app.core.limits.redis is an AsyncRedis client; mock its methods as
+    # AsyncMock so `await redis.get(...)` etc. work the same as in production.
+    mock_r = MagicMock()
+    mock_r.get = AsyncMock(return_value=None)
+    mock_r.incr = AsyncMock(return_value=1)
+    mock_r.incrby = AsyncMock(return_value=1)
+    mock_r.expire = AsyncMock(return_value=True)
+    mock_r.setex = AsyncMock(return_value=True)
+    mock_r.set = AsyncMock(return_value=True)
+    with patch("app.core.limits.redis", new=mock_r):
         # Provide same mock to migrate
         try:
             import app.api.routes.migrate

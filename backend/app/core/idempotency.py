@@ -37,7 +37,7 @@ class IdempotentRoute(APIRoute):
 
             redis_key = f"idemp:{user_id}:{request.method}:{request.url.path}:{idempotency_key}"
 
-            cached = redis.get(redis_key)
+            cached = await redis.get(redis_key)
             if cached:
                 try:
                     data = json.loads(cached)
@@ -61,7 +61,7 @@ class IdempotentRoute(APIRoute):
                         "status_code": response.status_code,
                         "body": body
                     }
-                    redis.setex(redis_key, 172800, json.dumps(cache_data)) # 48 hours
+                    await redis.setex(redis_key, 172800, json.dumps(cache_data)) # 48 hours
                 except Exception as e:
                     logger.error("idempotency_cache_error", error=str(e))
 

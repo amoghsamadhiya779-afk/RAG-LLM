@@ -1,4 +1,4 @@
-from upstash_redis import Redis
+from upstash_redis import AsyncRedis
 from fastapi import Request
 import time
 from .config import settings
@@ -9,7 +9,7 @@ import structlog
 logger = structlog.get_logger(__name__)
 
 try:
-    redis = Redis(url=str(settings.UPSTASH_REDIS_REST_URL), token=settings.UPSTASH_REDIS_REST_TOKEN)
+    redis = AsyncRedis(url=str(settings.UPSTASH_REDIS_REST_URL), token=settings.UPSTASH_REDIS_REST_TOKEN)
 except Exception as e:
     logger.error("redis_init_failed", error=str(e))
     redis = None
@@ -36,11 +36,11 @@ async def verify_turnstile(token: str) -> bool:
 async def check_rate_limit(key: str, limit: int, window: int = 86400):
     if not redis:
         return True # Fail open if redis is down
-        
-    current = redis.incr(key)
+
+    current = await redis.incr(key)
     if current == 1:
-        redis.expire(key, window)
-        
+        await redis.expire(key, window)
+
     if current > limit:
         logger.warning("rate_limit_exceeded", key=key, limit=limit)
         raise APIError("rate_limit_exceeded", f"Rate limit exceeded. Maximum {limit} requests allowed.", 429)
@@ -49,14 +49,14 @@ async def check_rate_limit(key: str, limit: int, window: int = 86400):
 async def check_ai_budget(tokens: int = 1):
     if not redis:
         return True
-    
+
     today = time.strftime("%Y-%m-%d")
     key = f"ai_budget:{today}"
-    
-    current = redis.incrby(key, tokens)
+
+    current = await redis.incrby(key, tokens)
     if current == tokens:
-        redis.expire(key, 86400)
-        
+        await redis.expire(key, 86400)
+
     if current > settings.DAILY_AI_BUDGET:
         logger.error("ai_budget_exhausted", current=current, limit=settings.DAILY_AI_BUDGET)
         raise APIError("ai_budget_exhausted", "Daily AI budget exhausted.", 429)

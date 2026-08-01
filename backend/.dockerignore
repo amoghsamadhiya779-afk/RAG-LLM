@@ -1,0 +1,43 @@
+# Secrets - must never enter the image
+.env
+.env.*
+
+# Virtualenvs (deps are installed from requirements.txt inside the image)
+.venv/
+venv/
+test_venv/
+
+# Python caches
+**/__pycache__/
+**/*.py[cod]
+**/*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local databases and logs
+**/*.db
+**/*.sqlite
+**/*.sqlite3
+**/*.log
+
+# Tests and one-off dev/debug scripts.
+# These patterns are deliberately root-only: `*` does not cross `/` in
+# .dockerignore, so scripts/ (diagnose_apis.py, check_connections.py, seed.py)
+# is preserved - /internal/diagnostics shells out to it at runtime.
+tests/
+test_*.py
+check_*.py
+verify_*.py
+explain_*.py
+gather_*.py
+diag*.json
+diagnostic_results.txt
+
+# Local data/index artifacts
+data/index/
+
+# Editor/OS noise
+.vscode/
+.idea/
+.DS_Store

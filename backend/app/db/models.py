@@ -99,7 +99,7 @@ class Job(Base):
     status: Mapped[str] = mapped_column(String, index=True, default="live")
     employment_type: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     company_id: Mapped[Optional[uuid.UUID]] = mapped_column(Uuid, ForeignKey("companies.id"), index=True, nullable=True)
-    posted_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    posted_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), index=True, nullable=True)
     embedding = mapped_column(Vector(768), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
@@ -113,6 +113,10 @@ class Application(Base):
     cover_note: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     stage: Mapped[ApplicationStageEnum] = mapped_column(Enum(ApplicationStageEnum), index=True, default=ApplicationStageEnum.applied)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
+    user: Mapped["User"] = relationship("User")
+    job: Mapped["Job"] = relationship("Job")
+    resume: Mapped[Optional["Resume"]] = relationship("Resume")
 
 class Resume(Base):
     __tablename__ = "resumes"

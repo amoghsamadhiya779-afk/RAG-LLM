@@ -128,7 +128,7 @@ async def get_my_jobs(
     }
 
 from app.db.schemas import JobCreate, JobUpdate
-from app.services.rag.embeddings import build_embedding_model
+from app.services.embeddings import embed_text
 from fastapi import HTTPException
 
 @router.post("")
@@ -151,11 +151,9 @@ async def create_job(
     # Enforce source='internal'
     job_in.source = "internal"
     
-    # Generate embedding for semantic search
-    model = build_embedding_model()
-    embeddings = model.embed([job_in.title + " " + (job_in.description_html or "")])
-    embedding = embeddings[0]
-    
+    # Generate embedding for semantic search (same model/dims as search_by_vector and chat)
+    embedding = await embed_text(job_in.title + " " + (job_in.description_html or ""))
+
     from app.db.models import Job
     job = Job(**job_in.model_dump(exclude_unset=True))
     job.embedding = embedding

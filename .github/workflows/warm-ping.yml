@@ -1,0 +1,16 @@
+name: warm-ping
+
+on:
+  schedule:
+    # Every 10 minutes. Hugging Face Spaces sleep after inactivity; a
+    # periodic hit keeps the container warm so real user requests don't
+    # pay a multi-second cold start.
+    - cron: "*/10 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping backend health endpoint
+        run: curl -sf --max-time 20 https://1amogh212-resume-intelligence.hf.space/health

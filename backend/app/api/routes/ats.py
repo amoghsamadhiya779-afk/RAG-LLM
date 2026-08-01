@@ -1,22 +1,33 @@
+import hashlib
 import re
 import uuid
 from typing import Optional, List, Dict
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from datetime import datetime, timezone
 import json
+import structlog
 
 from app.core.idempotency import IdempotentRoute
 from app.core.deps import require_user, require_role
-from app.core.limits import check_rate_limit
-from app.db.session import get_db
+from app.core.limits import check_rate_limit, redis
+from app.db.session import get_db, AsyncSessionLocal
 from app.db.models import User, Resume, Job, AtsReport, RoleEnum
 from app.core.gemini_client import get_gemini_client
 from app.core.config import settings
 
+logger = structlog.get_logger(__name__)
+
 router = APIRouter(route_class=IdempotentRoute, prefix="/ats", tags=["ats"])
+
+ATS_GEMINI_CACHE_TTL = 7 * 86400  # 7 days - same resume+JD pairing gets an instant repeat score
+
+
+def _ats_gemini_cache_key(resume_id: uuid.UUID, jd_text: str, model: str) -> str:
+    digest = hashlib.sha256(f"{resume_id}:{model}:{jd_text}".encode("utf-8")).hexdigest()
+    return f"ats_gemini_cache:{digest}"
 
 class AtsScoreRequest(BaseModel):
     resume_id: str
@@ -32,9 +43,105 @@ class GeminiResponse(BaseModel):
 # Common skills list for deterministic matching
 COMMON_SKILLS = {"react", "python", "javascript", "typescript", "node", "java", "c++", "c#", "aws", "docker", "kubernetes", "sql", "nosql", "postgres", "mongodb", "git", "ci/cd", "agile", "scrum", "html", "css", "vue", "angular", "ruby", "php", "go", "rust", "swift", "kotlin", "spring", "django", "flask", "express", "graphql", "rest", "linux", "unix", "bash", "powershell", "azure", "gcp"}
 
+async def _enrich_ats_report_with_gemini(
+    report_id: uuid.UUID,
+    resume_id: uuid.UUID,
+    parsed: dict,
+    jd_text: str,
+    keywords_score: int,
+    formatting_score: int,
+    education_score: int,
+    missing_keywords: List[str],
+):
+    """Runs the slow Gemini call in the background and merges the result into
+    the AtsReport row that was already returned to the client. Uses its own
+    DB session since the request-scoped session may already be closed by the
+    time this runs."""
+    gemini_score = 50
+    suggestions: List[str] = []
+    ai_feedback_available = False
+
+    api_key = settings.GEMINI_API_KEY
+    model = settings.GEMINI_MODEL
+    cache_key = _ats_gemini_cache_key(resume_id, jd_text, model)
+
+    cached = None
+    if redis:
+        try:
+            cached_raw = await redis.get(cache_key)
+            if cached_raw:
+                cached = json.loads(cached_raw)
+        except Exception as e:
+            logger.warning("ats_gemini_cache_read_failed", error=str(e))
+
+    if cached:
+        gemini_score = cached["gemini_score"]
+        suggestions = cached["suggestions"]
+        ai_feedback_available = cached["ai_feedback_available"]
+    elif api_key:
+        try:
+            from google.genai import types
+            genai_client = get_gemini_client()
+
+            config = types.GenerateContentConfig(
+                system_instruction="You are an expert ATS scorer. Analyze the resume against the JD. Output JSON with: experience_relevance (int 0-100), strengths (list of str), gaps (list of str), suggestions (list of str).",
+                response_mime_type="application/json",
+                temperature=0.0
+            )
+
+            resp = await genai_client.aio.models.generate_content(
+                model=model,
+                contents=f"RESUME:\n{json.dumps(parsed)}\n\nJD:\n{jd_text}",
+                config=config
+            )
+
+            res_data = json.loads(resp.text)
+            gemini_score = int(res_data.get("experience_relevance", 50))
+            suggestions = res_data.get("suggestions", [])
+            ai_feedback_available = True
+
+            if redis:
+                try:
+                    await redis.setex(cache_key, ATS_GEMINI_CACHE_TTL, json.dumps({
+                        "gemini_score": gemini_score,
+                        "suggestions": suggestions,
+                        "ai_feedback_available": ai_feedback_available,
+                    }))
+                except Exception as e:
+                    logger.warning("ats_gemini_cache_write_failed", error=str(e))
+        except Exception as e:
+            logger.warning("ats_gemini_enrichment_failed", error=str(e))
+            suggestions = [f"Consider adding '{k}' to your resume to better match this job." for k in missing_keywords[:3]]
+            if not suggestions:
+                suggestions = ["Tailor your resume more specifically to the job description."]
+    else:
+        suggestions = [f"Consider adding '{k}' to your resume to better match this job." for k in missing_keywords[:3]]
+        if not suggestions:
+            suggestions = ["Tailor your resume more specifically to the job description."]
+
+    deterministic_overall = (keywords_score + formatting_score + education_score) / 3.0
+    overall = int((deterministic_overall * 0.6) + (gemini_score * 0.4))
+
+    async with AsyncSessionLocal() as db:
+        res = await db.execute(select(AtsReport).where(AtsReport.id == report_id))
+        report_row = res.scalar_one_or_none()
+        if not report_row:
+            return
+
+        data = dict(report_row.report)
+        data["overall"] = overall
+        data["sections"] = {**data.get("sections", {}), "experience": gemini_score}
+        data["suggestions"] = suggestions
+        data["ai_feedback_available"] = ai_feedback_available
+        data["ai_status"] = "ready"
+        report_row.report = data
+        await db.commit()
+
+
 @router.post("/score")
 async def score_resume(
     payload: AtsScoreRequest,
+    background_tasks: BackgroundTasks,
     user: User = Depends(require_role([RoleEnum.seeker, RoleEnum.recruiter])),
     db: AsyncSession = Depends(get_db)
 ):
@@ -100,68 +207,31 @@ async def score_resume(
         education_score += 40
     education_score = min(100, education_score)
 
-    # B. Gemini Scoring Layer
-    gemini_score = 50
-    suggestions = []
-    
-    api_key = settings.GEMINI_API_KEY
-    if api_key:
-        try:
-            from google.genai import types
-            genai_client = get_gemini_client()
-            model = settings.GEMINI_MODEL
-            
-            config = types.GenerateContentConfig(
-                system_instruction="You are an expert ATS scorer. Analyze the resume against the JD. Output JSON with: experience_relevance (int 0-100), strengths (list of str), gaps (list of str), suggestions (list of str).",
-                response_mime_type="application/json",
-                temperature=0.0
-            )
-            
-            resp = await genai_client.aio.models.generate_content(
-                model=model,
-                contents=f"RESUME:\n{json.dumps(parsed)}\n\nJD:\n{jd_text}",
-                config=config
-            )
-            
-            res_data = json.loads(resp.text)
-            gemini_score = int(res_data.get("experience_relevance", 50))
-            suggestions = res_data.get("suggestions", [])
-            ai_feedback_available = True
-        except Exception as e:
-            print(f"Gemini ATS score failed: {e}")
-            suggestions = [f"Consider adding '{k}' to your resume to better match this job." for k in missing_keywords[:3]]
-            if not suggestions:
-                suggestions = ["Tailor your resume more specifically to the job description."]
-            ai_feedback_available = False
-    else:
-        suggestions = [f"Consider adding '{k}' to your resume to better match this job." for k in missing_keywords[:3]]
-        if not suggestions:
-            suggestions = ["Tailor your resume more specifically to the job description."]
-        ai_feedback_available = False
-
-    # C. Overall Score Blend
-    # 60% deterministic (average of the 3 sub-scores), 40% Gemini experience_relevance
+    # B. Provisional overall = deterministic score only. The Gemini-derived
+    # "experience" section and final blended overall are filled in by the
+    # background task below; ai_status tells the client whether to keep polling.
     deterministic_overall = (keywords_score + formatting_score + education_score) / 3.0
-    overall = int((deterministic_overall * 0.6) + (gemini_score * 0.4))
-    
+    overall = int(deterministic_overall)
+
     sections = {
         "keywords": keywords_score,
-        "experience": gemini_score,
+        "experience": 0,
         "education": education_score,
         "formatting": formatting_score
     }
-    
+
     jd_snippet = jd_text[:150] + "..." if len(jd_text) > 150 else jd_text
-    
+
     report_data = {
         "overall": overall,
         "sections": sections,
         "matched_keywords": matched_keywords,
         "missing_keywords": missing_keywords,
-        "suggestions": suggestions,
-        "ai_feedback_available": ai_feedback_available
+        "suggestions": [],
+        "ai_feedback_available": False,
+        "ai_status": "pending",
     }
-    
+
     report = AtsReport(
         user_id=user.id,
         resume_id=resume.id,
@@ -172,7 +242,19 @@ async def score_resume(
     db.add(report)
     await db.commit()
     await db.refresh(report)
-    
+
+    background_tasks.add_task(
+        _enrich_ats_report_with_gemini,
+        report.id,
+        resume.id,
+        parsed,
+        jd_text,
+        keywords_score,
+        formatting_score,
+        education_score,
+        missing_keywords,
+    )
+
     return {
         "id": str(report.id),
         "resume_id": str(report.resume_id),
@@ -182,8 +264,9 @@ async def score_resume(
         "sections": sections,
         "matched_keywords": matched_keywords,
         "missing_keywords": missing_keywords,
-        "suggestions": suggestions,
-        "ai_feedback_available": ai_feedback_available,
+        "suggestions": [],
+        "ai_feedback_available": False,
+        "ai_status": "pending",
         "created_at": report.created_at.isoformat()
     }
 
@@ -219,5 +302,7 @@ async def get_ats_report(
         "missing_keywords": rdata.get("missing_keywords", []),
         "suggestions": rdata.get("suggestions", []),
         "ai_feedback_available": rdata.get("ai_feedback_available", True),
+        # Reports created before this field existed have already fully run.
+        "ai_status": rdata.get("ai_status", "ready"),
         "created_at": report.created_at.isoformat()
     }

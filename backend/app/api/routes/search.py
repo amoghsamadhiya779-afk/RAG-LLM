@@ -23,18 +23,18 @@ async def search_web(
     # Redis cache check (1 hour)
     cache_key = f"web-search:{q.lower().strip()}"
     if redis:
-        cached = redis.get(cache_key)
+        cached = await redis.get(cache_key)
         if cached:
             return json.loads(cached)
-            
+
     # Execute search
     results = await search_jobs_web(q, limit=5)
-    
+
     # Adzuna enrichment is deferred per approval, so we just return results
     response = {"items": jsonable_encoder(results)}
-    
+
     # Cache the result
     if redis:
-        redis.setex(cache_key, 3600, json.dumps(response))
+        await redis.setex(cache_key, 3600, json.dumps(response))
         
     return response

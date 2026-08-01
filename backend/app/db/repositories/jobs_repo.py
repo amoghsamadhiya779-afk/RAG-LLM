@@ -112,6 +112,11 @@ class JobsRepository:
 
     async def search_by_vector(self, embedding: List[float], k: int = 50) -> List[Job]:
         # Using vector_cosine_ops (<=>) for order_by
-        stmt = select(Job).order_by(Job.embedding.cosine_distance(embedding)).limit(k)
+        stmt = (
+            select(Job)
+            .where(Job.status == "live")
+            .order_by(Job.embedding.cosine_distance(embedding))
+            .limit(k)
+        )
         result = await self.db.execute(stmt)
         return list(result.scalars().all())

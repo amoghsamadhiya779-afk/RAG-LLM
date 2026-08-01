@@ -59,6 +59,7 @@ function HowItWorksImpl() {
   const reducedMotion = useReducedMotion();
   const { isLowTier } = useDevicePerformance();
   const lenis = useLenis();
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
 
   // isLowTier already covers mobile viewports (useDevicePerformance treats
@@ -79,7 +80,7 @@ function HowItWorksImpl() {
         const steps = gsap.utils.toArray<HTMLElement>(".how-step", gridRef.current!);
         const tl = gsap.timeline({
           scrollTrigger: {
-            trigger: gridRef.current,
+            trigger: wrapperRef.current,
             start: "top top+=80",
             end: "+=120%",
             scrub: 0.6,
@@ -117,10 +118,12 @@ function HowItWorksImpl() {
         </Reveal>
 
         {enableScrollytelling ? (
-          <div ref={gridRef} className="mt-14 grid gap-6 md:grid-cols-3">
-            {STEPS.map((s, i) => (
-              <StepCard key={s.title} step={s} index={i} />
-            ))}
+          <div ref={wrapperRef} className="mt-14">
+            <div ref={gridRef} className="grid gap-6 md:grid-cols-3">
+              {STEPS.map((s, i) => (
+                <StepCard key={s.title} step={s} index={i} />
+              ))}
+            </div>
           </div>
         ) : (
           <StaggerGroup className="mt-14 grid gap-6 md:grid-cols-3">

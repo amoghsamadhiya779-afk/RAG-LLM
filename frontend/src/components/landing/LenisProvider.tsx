@@ -40,22 +40,7 @@ export function LenisProvider({ children }: { children: ReactNode }) {
     gsap.ticker.add(tick);
     gsap.ticker.lagSmoothing(0);
 
-    // Watch for DOM height changes (like Suspense boundaries resolving)
-    // and force ScrollTrigger to recalculate so we don't get white gaps.
-    let debounceTimer: ReturnType<typeof setTimeout>;
-    const observer = new ResizeObserver(() => {
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => {
-        loadScrollTrigger().then(({ ScrollTrigger }) => {
-          ScrollTrigger.refresh();
-        });
-      }, 100);
-    });
-    observer.observe(document.body);
-
     return () => {
-      observer.disconnect();
-      clearTimeout(debounceTimer);
       gsap.ticker.remove(tick);
       instance.destroy();
       setLenis(null);

@@ -73,7 +73,7 @@ export function Dropzone({ onFile, disabled }: DropzoneProps) {
         onDragLeave={() => setHover(false)}
         onDrop={onDrop}
         className={cn(
-          "group relative flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-white/10 bg-white/[0.02] p-10 text-center transition-colors",
+          "group relative flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-foreground/10 bg-foreground/[0.02] p-10 text-center transition-colors",
           hover && "border-primary/40 bg-primary/20/[0.04]",
           disabled && "pointer-events-none opacity-50",
         )}
@@ -81,7 +81,7 @@ export function Dropzone({ onFile, disabled }: DropzoneProps) {
       >
         <div className="relative">
           <div className="absolute inset-0 -z-10 rounded-full bg-gradient-to-br from-primary via-primary/70 to-primary blur-2xl opacity-60 group-hover:opacity-90 transition-opacity" />
-          <div className="grid size-14 place-items-center rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur">
+          <div className="grid size-14 place-items-center rounded-2xl border border-foreground/10 bg-foreground/[0.03] backdrop-blur">
             <UploadCloud className="size-6 text-zinc-200" />
           </div>
         </div>

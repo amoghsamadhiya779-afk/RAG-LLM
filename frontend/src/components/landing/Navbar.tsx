@@ -16,7 +16,7 @@ import {
 
 const NAV_ITEMS: PillNavItem[] = [
   { label: "Jobs", href: "/jobs" },
-  { label: "Resume", href: "/dashboard/resume" },
+  { label: "Dashboard", href: "/dashboard" },
   { label: "ATS", href: "/dashboard/ats" },
   { label: "Saved", href: "/saved" },
   { label: "Employer", href: "/employer" },

@@ -190,7 +190,7 @@ export function ChatOrb() {
           <motion.div
             key="panel"
             layoutId="chat-orb"
-            className="fixed bottom-0 right-0 sm:bottom-6 sm:right-6 z-50 flex h-[100dvh] w-full sm:h-[600px] sm:w-[400px] flex-col overflow-hidden sm:rounded-2xl border-t sm:border border-white/10 bg-background/95 backdrop-blur-3xl shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)]"
+            className="fixed bottom-0 right-0 sm:bottom-6 sm:right-6 z-50 flex h-[100dvh] w-full sm:h-[600px] sm:w-[400px] flex-col overflow-hidden sm:rounded-2xl border-t sm:border border-border bg-background/95 backdrop-blur-3xl shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)]"
           >
             <div
               className="flex shrink-0 items-center justify-between border-b border-border/60 px-4 py-3"
@@ -212,7 +212,7 @@ export function ChatOrb() {
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label="Close chat"
-                className="rounded-full p-2 text-muted-foreground hover:bg-white/5 hover:text-foreground transition-colors"
+                className="rounded-full p-2 text-muted-foreground hover:bg-foreground/5 hover:text-foreground transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>

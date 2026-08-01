@@ -49,7 +49,7 @@ export function GuestBanner() {
             "mb-6 flex flex-col gap-3 rounded-2xl border px-4 py-3 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between sm:px-5 " +
             (warning
               ? "border-amber-400/30 bg-amber-500/[0.06]"
-              : "border-white/10 bg-white/[0.03]")
+              : "border-border bg-foreground/[0.03]")
           }
         >
           <div className="flex min-w-0 items-center gap-3">
@@ -68,14 +68,14 @@ export function GuestBanner() {
                 <Sparkles className="h-4 w-4" />
               )}
             </span>
-            <p className="min-w-0 text-sm text-white/70">
+            <p className="min-w-0 text-sm text-foreground/70">
               {warning ? (
                 <>
-                  Your guest data expires <strong className="text-white">tomorrow</strong>.{" "}
+                  Your guest data expires <strong className="text-foreground">tomorrow</strong>.{" "}
                   <Link
                     to="/signup"
                     search={{ redirect: currentPath }}
-                    className="font-medium text-white underline-offset-4 hover:underline"
+                    className="font-medium text-foreground underline-offset-4 hover:underline"
                   >
                     Create a free account
                   </Link>{" "}
@@ -87,7 +87,7 @@ export function GuestBanner() {
                   <Link
                     to="/login"
                     search={{ redirect: currentPath }}
-                    className="font-medium text-white underline-offset-4 hover:underline"
+                    className="font-medium text-foreground underline-offset-4 hover:underline"
                   >
                     Create a free account
                   </Link>
@@ -100,7 +100,7 @@ export function GuestBanner() {
             <button
               type="button"
               onClick={clearData}
-              className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[11px] font-medium text-white/70 transition-colors hover:bg-white/[0.06] hover:text-white"
+              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-foreground/[0.03] px-2.5 py-1 text-[11px] font-medium text-foreground/70 transition-colors hover:bg-foreground/[0.06] hover:text-foreground"
             >
               <Trash2 className="h-3 w-3" />
               Clear my guest data
@@ -109,7 +109,7 @@ export function GuestBanner() {
               type="button"
               onClick={dismiss}
               aria-label="Dismiss"
-              className="-m-1.5 rounded-full p-1.5 text-white/50 transition-colors hover:bg-white/5 hover:text-white"
+              className="-m-1.5 rounded-full p-1.5 text-foreground/50 transition-colors hover:bg-foreground/5 hover:text-foreground"
             >
               <X className="h-4 w-4" />
             </button>

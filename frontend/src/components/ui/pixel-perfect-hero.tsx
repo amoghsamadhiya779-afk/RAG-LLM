@@ -123,7 +123,7 @@ export function PixelHero({
       </div>
       
       <div className="hero-reveal relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center text-center">
-      <div ref={scrubRef}>
+      <div ref={scrubRef} className="flex w-full flex-col items-center text-center">
         {eyebrow ? (
           <div className="inline-flex items-center gap-2 rounded-full border border-foreground/15 bg-foreground/5 px-3 py-1 font-mono text-[11px] tracking-widest text-foreground/70 uppercase backdrop-blur-md">
             <span className="h-1.5 w-1.5 rounded-full bg-[#6AA2FF] shadow-[0_0_10px_#6AA2FF]" />

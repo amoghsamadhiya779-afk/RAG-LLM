@@ -30,7 +30,7 @@ export function KeywordChips({ keywords, selected, onToggle, onAdd, onSearch }: 
             Tap keywords you want to search jobs for.
           </p>
         </div>
-        <span className="rounded-md border border-white/10 bg-white/[0.03] px-2 py-1 font-mono text-[11px] text-zinc-400">
+        <span className="rounded-md border border-foreground/10 bg-foreground/[0.03] px-2 py-1 font-mono text-[11px] text-zinc-400">
           {selected.length}/{keywords.length} selected
         </span>
       </div>
@@ -51,8 +51,8 @@ export function KeywordChips({ keywords, selected, onToggle, onAdd, onSearch }: 
                 className={cn(
                   "group inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-mono transition-colors",
                   active
-                    ? "border-primary/40 bg-gradient-to-r from-primary via-primary/70 to-primary text-white"
-                    : "border-white/10 bg-white/[0.03] text-zinc-300 hover:border-white/20 hover:text-white",
+                    ? "border-primary/40 bg-gradient-to-r from-primary via-primary/70 to-primary text-foreground"
+                    : "border-foreground/10 bg-foreground/[0.03] text-zinc-300 hover:border-foreground/20 hover:text-foreground",
                 )}
               >
                 {active ? <Check className="size-3" /> : <Plus className="size-3 opacity-60" />}
@@ -64,7 +64,7 @@ export function KeywordChips({ keywords, selected, onToggle, onAdd, onSearch }: 
       </div>
 
       <div className="flex items-center gap-2">
-        <div className="flex flex-1 items-center rounded-lg border border-white/10 bg-white/[0.03] px-3">
+        <div className="flex flex-1 items-center rounded-lg border border-foreground/10 bg-foreground/[0.03] px-3">
           <Plus className="size-3.5 text-zinc-500" />
           <input
             value={draft}
@@ -91,7 +91,7 @@ export function KeywordChips({ keywords, selected, onToggle, onAdd, onSearch }: 
         <Button
           onClick={onSearch}
           disabled={selected.length === 0}
-          className="gap-2 bg-gradient-to-r from-primary via-primary/70 to-primary text-white hover:opacity-90 disabled:opacity-40"
+          className="gap-2 bg-gradient-to-r from-primary via-primary/70 to-primary text-foreground hover:opacity-90 disabled:opacity-40"
         >
           <Search className="size-4" />
           Search jobs

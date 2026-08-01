@@ -34,7 +34,7 @@ export function ProgressStepper({ steps }: { steps: StepDef[] }) {
                   : "rgba(255,255,255,0.06)",
               }}
               transition={getOptimizedTransition(isLowTier)}
-              className="flex items-center gap-3 rounded-xl border bg-white/[0.02] p-3"
+              className="flex items-center gap-3 rounded-xl border bg-foreground/[0.02] p-3"
             >
               <div
                 className={cn(
@@ -45,7 +45,7 @@ export function ProgressStepper({ steps }: { steps: StepDef[] }) {
                     ? "border-primary/40 bg-primary/20 text-primary"
                     : active
                     ? "border-primary/40 bg-primary/20 text-primary"
-                    : "border-white/10 bg-white/5 text-zinc-500",
+                    : "border-foreground/10 bg-foreground/5 text-zinc-500",
                 )}
               >
                 {done ? (

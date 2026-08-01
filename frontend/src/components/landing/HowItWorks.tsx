@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 import { FileText, Sparkles, Send } from "lucide-react";
 import { useReducedMotion } from "framer-motion";
 import { gsap } from "gsap";
@@ -49,7 +49,13 @@ function StepCard({ step, index }: { step: (typeof STEPS)[number]; index: number
   );
 }
 
-export function HowItWorks() {
+// Memoized because GSAP's ScrollTrigger pin reparents the grid into a
+// spacer div outside React's knowledge. If an unrelated ancestor re-renders
+// (e.g. SessionProvider's auth-retry state) and React tries to reconcile
+// this subtree against the DOM shape it remembers, it crashes with
+// "removeChild: not a child of this node". Taking no props means this only
+// re-renders from its own hooks changing, never from a parent re-render.
+function HowItWorksImpl() {
   const reducedMotion = useReducedMotion();
   const { isLowTier } = useDevicePerformance();
   const lenis = useLenis();
@@ -127,3 +133,5 @@ export function HowItWorks() {
     </section>
   );
 }
+
+export const HowItWorks = memo(HowItWorksImpl);

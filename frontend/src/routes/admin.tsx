@@ -85,13 +85,13 @@ function AdminPage() {
   const isAdmin = role === "admin" || preview;
 
   return (
-    <div className="min-h-screen bg-transparent text-white">
+    <div className="min-h-screen bg-transparent text-foreground">
       <ShrinkNavbar />
       <div className="mx-auto max-w-7xl px-6 pt-28 pb-24">
         <Reveal>
           <Link
             to="/dashboard"
-            className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-white transition mb-6"
+            className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-foreground transition mb-6"
           >
             <ArrowLeft className="w-4 h-4" /> Back to dashboard
           </Link>
@@ -100,7 +100,7 @@ function AdminPage() {
         <Reveal>
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary via-primary/70 to-primary flex items-center justify-center">
-              <ShieldCheck className="w-5 h-5 text-white" />
+              <ShieldCheck className="w-5 h-5 text-foreground" />
             </div>
             <div>
               <h1 className="text-4xl font-semibold tracking-[-0.03em]">
@@ -145,7 +145,7 @@ function RoleGate({
   return (
     <div className="mt-16">
       <GlassPanel className="p-10 text-center max-w-xl mx-auto">
-        <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-6">
+        <div className="w-14 h-14 rounded-2xl bg-foreground/5 border border-foreground/10 flex items-center justify-center mx-auto mb-6">
           <Lock className="w-6 h-6 text-zinc-400" />
         </div>
         <h2 className="text-2xl font-semibold tracking-[-0.02em] mb-2">
@@ -159,13 +159,13 @@ function RoleGate({
         <div className="flex items-center justify-center gap-3">
           <Link
             to="/dashboard"
-            className="inline-flex items-center px-4 h-10 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-sm transition"
+            className="inline-flex items-center px-4 h-10 rounded-lg bg-foreground/5 border border-foreground/10 hover:bg-foreground/10 text-sm transition"
           >
             Back to dashboard
           </Link>
           <button
             onClick={onPreview}
-            className="inline-flex items-center px-4 h-10 rounded-lg border border-white/10 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition"
+            className="inline-flex items-center px-4 h-10 rounded-lg border border-foreground/10 text-sm text-zinc-400 hover:text-foreground hover:bg-foreground/5 transition"
           >
             Preview as admin (demo)
           </button>
@@ -191,7 +191,7 @@ function AdminWorkspace({
           </p>
           <button
             onClick={onExitPreview}
-            className="text-xs text-primary hover:text-white underline underline-offset-4"
+            className="text-xs text-primary hover:text-foreground underline underline-offset-4"
           >
             Exit preview
           </button>
@@ -203,17 +203,17 @@ function AdminWorkspace({
       </QueryBoundary>
 
       <Tabs defaultValue="moderation" className="w-full">
-        <TabsList className="bg-white/5 border border-white/10 rounded-lg p-1 h-11">
+        <TabsList className="bg-foreground/5 border border-foreground/10 rounded-lg p-1 h-11">
           <TabsTrigger
             value="moderation"
-            className="data-[state=active]:bg-white/10 data-[state=active]:text-white rounded-md px-4 h-9 text-sm"
+            className="data-[state=active]:bg-foreground/10 data-[state=active]:text-foreground rounded-md px-4 h-9 text-sm"
           >
             <ClipboardList className="w-4 h-4 mr-2" />
             Moderation queue
           </TabsTrigger>
           <TabsTrigger
             value="users"
-            className="data-[state=active]:bg-white/10 data-[state=active]:text-white rounded-md px-4 h-9 text-sm"
+            className="data-[state=active]:bg-foreground/10 data-[state=active]:text-foreground rounded-md px-4 h-9 text-sm"
           >
             <Users className="w-4 h-4 mr-2" />
             Users
@@ -379,7 +379,7 @@ function PendingJobRow({
           <Link
             to="/jobs/$id"
             params={{ id: job.id }}
-            className="text-base font-medium tracking-[-0.02em] hover:text-white text-zinc-100 transition truncate block"
+            className="text-base font-medium tracking-[-0.02em] hover:text-foreground text-zinc-100 transition truncate block"
           >
             {job.title}
           </Link>
@@ -392,7 +392,7 @@ function PendingJobRow({
               {job.tags.slice(0, 4).map((t) => (
                 <span
                   key={t}
-                  className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-zinc-400"
+                  className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-foreground/5 border border-foreground/10 text-zinc-400"
                 >
                   {t}
                 </span>
@@ -404,7 +404,7 @@ function PendingJobRow({
           <button
             disabled={busy}
             onClick={onReject}
-            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-rose-500/10 hover:border-rose-500/30 hover:text-rose-300 text-sm text-zinc-300 transition disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg border border-foreground/10 bg-foreground/5 hover:bg-rose-500/10 hover:border-rose-500/30 hover:text-rose-300 text-sm text-zinc-300 transition disabled:opacity-50"
           >
             <X className="w-4 h-4" /> Reject
           </button>
@@ -497,10 +497,10 @@ function UsersTable() {
           placeholder="Search users by name or email…"
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          className="bg-white/5 border-white/10 h-10"
+          className="bg-foreground/5 border-foreground/10 h-10"
         />
         <Select value={roleFilter} onValueChange={(v) => setRoleFilter(v as Role | "all")}>
-          <SelectTrigger className="w-full sm:w-44 bg-white/5 border-white/10 h-10">
+          <SelectTrigger className="w-full sm:w-44 bg-foreground/5 border-foreground/10 h-10">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -520,7 +520,7 @@ function UsersTable() {
         />
       ) : (
         <GlassPanel className="p-0 overflow-hidden">
-          <div className="grid grid-cols-[1fr_auto_auto_auto] gap-4 px-5 py-3 border-b border-white/5 text-[10px] uppercase tracking-[0.12em] text-zinc-500">
+          <div className="grid grid-cols-[1fr_auto_auto_auto] gap-4 px-5 py-3 border-b border-foreground/5 text-[10px] uppercase tracking-[0.12em] text-zinc-500">
             <div>User</div>
             <div className="hidden md:block">Joined</div>
             <div>Role</div>
@@ -567,9 +567,9 @@ function UserRow({
     .toUpperCase();
 
   return (
-    <div className="grid grid-cols-[1fr_auto_auto_auto] gap-4 items-center px-5 py-3 border-b border-white/5 last:border-b-0 hover:bg-white/[0.02] transition">
+    <div className="grid grid-cols-[1fr_auto_auto_auto] gap-4 items-center px-5 py-3 border-b border-foreground/5 last:border-b-0 hover:bg-foreground/[0.02] transition">
       <div className="flex items-center gap-3 min-w-0">
-        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-primary border border-white/10 flex items-center justify-center text-xs font-mono text-white shrink-0">
+        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-primary border border-foreground/10 flex items-center justify-center text-xs font-mono text-foreground shrink-0">
           {initials}
         </div>
         <div className="min-w-0">
@@ -604,7 +604,7 @@ function UserRow({
               <Trash2 className="w-4 h-4" />
             </button>
           </AlertDialogTrigger>
-          <AlertDialogContent className="bg-transparent border-white/10">
+          <AlertDialogContent className="bg-transparent border-foreground/10">
             <AlertDialogHeader>
               <AlertDialogTitle>Delete {user.full_name ?? user.email}?</AlertDialogTitle>
               <AlertDialogDescription>
@@ -613,12 +613,12 @@ function UserRow({
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel className="bg-white/5 border-white/10">
+              <AlertDialogCancel className="bg-foreground/5 border-foreground/10">
                 Cancel
               </AlertDialogCancel>
               <AlertDialogAction
                 onClick={onDelete}
-                className="bg-rose-500 hover:bg-rose-600 text-white"
+                className="bg-rose-500 hover:bg-rose-600 text-foreground"
               >
                 Delete
               </AlertDialogAction>

@@ -76,6 +76,7 @@ export function PixelHero({
         style={{
           y: enableScrollScrub ? bgY : 0,
           scale: enableScrollScrub ? bgScale : 1,
+          willChange: "transform",
           WebkitMaskImage: "linear-gradient(to bottom, black 60%, transparent 100%)",
           maskImage: "linear-gradient(to bottom, black 60%, transparent 100%)"
         }}
@@ -105,6 +106,7 @@ export function PixelHero({
           y: enableScrollScrub ? contentY : 0,
           scale: enableScrollScrub ? contentScale : 1,
           opacity: enableScrollScrub ? contentOpacity : 1,
+          willChange: "transform, opacity",
         }}
       >
         {eyebrow ? (

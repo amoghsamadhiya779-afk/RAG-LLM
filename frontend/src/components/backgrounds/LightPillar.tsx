@@ -58,12 +58,12 @@ export const LightPillar = ({
     if (isMobile && quality !== 'low') effectiveQuality = 'low';
 
     const qualitySettings = {
-      low: { iterations: 24, waveIterations: 1, pixelRatio: 0.5, precision: 'mediump', stepMultiplier: 1.5 },
-      medium: { iterations: 40, waveIterations: 2, pixelRatio: 0.65, precision: 'mediump', stepMultiplier: 1.2 },
+      low: { iterations: 20, waveIterations: 1, pixelRatio: 0.5, precision: 'mediump', stepMultiplier: 2.0 },
+      medium: { iterations: 35, waveIterations: 2, pixelRatio: 0.65, precision: 'mediump', stepMultiplier: 1.5 },
       high: {
-        iterations: 80,
-        waveIterations: 4,
-        pixelRatio: Math.min(window.devicePixelRatio, 2),
+        iterations: 60,
+        waveIterations: 3,
+        pixelRatio: Math.min(window.devicePixelRatio, 1.25),
         precision: 'highp',
         stepMultiplier: 1.0
       }
@@ -244,8 +244,25 @@ export const LightPillar = ({
     let lastTime = performance.now();
     const targetFPS = effectiveQuality === 'low' ? 30 : 60;
     const frameTime = 1000 / targetFPS;
+    let isVisible = true;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        isVisible = entries[0].isIntersecting;
+        if (isVisible && !rafRef.current) {
+          lastTime = performance.now();
+          rafRef.current = requestAnimationFrame(animate);
+        }
+      },
+      { threshold: 0 }
+    );
+    observer.observe(container);
 
     const animate = currentTime => {
+      if (!isVisible) {
+        rafRef.current = null;
+        return;
+      }
       if (!materialRef.current || !rendererRef.current || !sceneRef.current || !cameraRef.current) return;
 
       const deltaTime = currentTime - lastTime;
@@ -282,6 +299,7 @@ export const LightPillar = ({
     window.addEventListener('resize', handleResize, { passive: true });
 
     return () => {
+      observer.disconnect();
       window.removeEventListener('resize', handleResize);
       if (interactive) {
         container.removeEventListener('mousemove', handleMouseMove);

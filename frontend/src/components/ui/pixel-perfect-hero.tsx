@@ -1,12 +1,9 @@
-import React, { Suspense, useEffect, useRef } from "react";
+import React, { Suspense, useRef } from "react";
 import { Link } from "@tanstack/react-router";
-import { gsap } from "gsap";
-import { useReducedMotion } from "framer-motion";
+import { useReducedMotion, useScroll, useTransform, motion } from "framer-motion";
 import { ArrowRight, Search } from "lucide-react";
 import { useTheme } from "@/components/theme/ThemeProvider";
 import { useDevicePerformance } from "@/hooks/useDevicePerformance";
-import { useLenis } from "@/components/landing/LenisProvider";
-import { bindLenisOnce, loadScrollTrigger } from "@/lib/scrollTrigger";
 
 import { RotatingText } from "@/components/ui/rotating-text";
 
@@ -51,55 +48,34 @@ export function PixelHero({
   const reducedMotion = useReducedMotion();
   const { resolvedTheme } = useTheme();
   const { isMobile, isLowTier } = useDevicePerformance();
-  const lenis = useLenis();
 
   const isDark = resolvedTheme === "dark";
   const c1 = isDark ? "#284f73" : "#c7ddfd";
   const c2 = isDark ? "#261a57" : "#a9c8fb";
 
   const sectionRef = useRef<HTMLElement>(null);
-  const bgWrapRef = useRef<HTMLDivElement>(null);
-  const scrubRef = useRef<HTMLDivElement>(null);
-
+  
   const enableScrollScrub = !isLowTier && !reducedMotion;
 
-  useEffect(() => {
-    if (!enableScrollScrub) return;
-    let ctx: gsap.Context | undefined;
-    let cancelled = false;
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"]
+  });
 
-    loadScrollTrigger().then(({ ScrollTrigger }) => {
-      if (cancelled || !sectionRef.current) return;
-      if (lenis) bindLenisOnce(lenis, ScrollTrigger);
-
-      ctx = gsap.context(() => {
-        gsap
-          .timeline({
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: "top top",
-              end: "bottom top",
-              scrub: 0.8,
-            },
-          })
-          .to(scrubRef.current, { yPercent: -18, scale: 0.94, opacity: 0, ease: "none" }, 0)
-          .to(bgWrapRef.current, { yPercent: -6, scale: 1.06, ease: "none" }, 0);
-      }, sectionRef);
-    });
-
-    return () => {
-      cancelled = true;
-      ctx?.revert();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enableScrollScrub, lenis]);
+  const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "-6%"]);
+  const bgScale = useTransform(scrollYProgress, [0, 1], [1, 1.06]);
+  
+  const contentY = useTransform(scrollYProgress, [0, 1], ["0%", "-18%"]);
+  const contentScale = useTransform(scrollYProgress, [0, 1], [1, 0.94]);
+  const contentOpacity = useTransform(scrollYProgress, [0, 1], [1, 0]);
 
   return (
     <section ref={sectionRef} className="relative isolate flex min-h-[100dvh] w-full items-center justify-center overflow-hidden px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
-      <div
-        ref={bgWrapRef}
+      <motion.div
         className="absolute inset-0 -z-10"
         style={{
+          y: enableScrollScrub ? bgY : 0,
+          scale: enableScrollScrub ? bgScale : 1,
           WebkitMaskImage: "linear-gradient(to bottom, black 60%, transparent 100%)",
           maskImage: "linear-gradient(to bottom, black 60%, transparent 100%)"
         }}
@@ -120,10 +96,17 @@ export function PixelHero({
             quality={isLowTier ? "low" : "high"}
           />
         </Suspense>
-      </div>
+      </motion.div>
       
       <div className="hero-reveal relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center text-center">
-      <div ref={scrubRef} className="flex w-full flex-col items-center text-center">
+      <motion.div 
+        className="flex w-full flex-col items-center text-center"
+        style={{
+          y: enableScrollScrub ? contentY : 0,
+          scale: enableScrollScrub ? contentScale : 1,
+          opacity: enableScrollScrub ? contentOpacity : 1,
+        }}
+      >
         {eyebrow ? (
           <div className="inline-flex items-center gap-2 rounded-full border border-foreground/15 bg-foreground/5 px-3 py-1 font-mono text-[11px] tracking-widest text-foreground/70 uppercase backdrop-blur-md">
             <span className="h-1.5 w-1.5 rounded-full bg-[#6AA2FF] shadow-[0_0_10px_#6AA2FF]" />
@@ -224,7 +207,7 @@ export function PixelHero({
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
       </div>
     </section>
   );

@@ -1,8 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { gsap } from "gsap";
 import Lenis from "lenis";
 import { useDevicePerformance } from "@/hooks/useDevicePerformance";
-import { loadScrollTrigger } from "@/lib/scrollTrigger";
 
 const LenisContext = createContext<Lenis | null>(null);
 
@@ -31,17 +29,13 @@ export function LenisProvider({ children }: { children: ReactNode }) {
     });
     setLenis(instance);
 
-    // Drive Lenis off GSAP's ticker (one shared frame loop for scroll +
-    // ScrollTrigger + any other gsap animation) instead of a separate
-    // requestAnimationFrame loop.
-    const tick = (time: number) => {
-      instance.raf(time * 1000); // gsap ticker time is in seconds
-    };
-    gsap.ticker.add(tick);
-    gsap.ticker.lagSmoothing(0);
+    function raf(time: number) {
+      instance.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
 
     return () => {
-      gsap.ticker.remove(tick);
       instance.destroy();
       setLenis(null);
     };

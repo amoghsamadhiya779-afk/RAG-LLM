@@ -59,27 +59,30 @@ async def lifespan(app: FastAPI):
         # Ensure all tables are created (creates missing tables, like AtsReport)
         from app.db.base import Base
         from app.db.session import engine
-        from app.db.models import AtsReport
         from sqlalchemy import text
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-            logger.info("Database schemas ensured.")
+        
+        try:
+            async with engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
+                logger.info("Database schemas ensured.")
 
-            # create_all only creates missing tables, it does not add indexes to
-            # columns added to an already-existing table (e.g. index=True flags
-            # added after the table was first created). Apply those explicitly.
-            for stmt in (
-                "CREATE INDEX IF NOT EXISTS ix_jobs_source ON jobs (source)",
-                "CREATE INDEX IF NOT EXISTS ix_jobs_status ON jobs (status)",
-                "CREATE INDEX IF NOT EXISTS ix_jobs_company_id ON jobs (company_id)",
-                "CREATE INDEX IF NOT EXISTS ix_jobs_posted_at ON jobs (posted_at)",
-                "CREATE INDEX IF NOT EXISTS ix_applications_job_id ON applications (job_id)",
-                "CREATE INDEX IF NOT EXISTS ix_applications_user_id ON applications (user_id)",
-                "CREATE INDEX IF NOT EXISTS ix_applications_stage ON applications (stage)",
-                "CREATE INDEX IF NOT EXISTS ix_resumes_user_id ON resumes (user_id)",
-            ):
-                await conn.execute(text(stmt))
-            logger.info("Database indexes ensured.")
+                # create_all only creates missing tables, it does not add indexes to
+                # columns added to an already-existing table (e.g. index=True flags
+                # added after the table was first created). Apply those explicitly.
+                for stmt in (
+                    "CREATE INDEX IF NOT EXISTS ix_jobs_source ON jobs (source)",
+                    "CREATE INDEX IF NOT EXISTS ix_jobs_status ON jobs (status)",
+                    "CREATE INDEX IF NOT EXISTS ix_jobs_company_id ON jobs (company_id)",
+                    "CREATE INDEX IF NOT EXISTS ix_jobs_posted_at ON jobs (posted_at)",
+                    "CREATE INDEX IF NOT EXISTS ix_applications_job_id ON applications (job_id)",
+                    "CREATE INDEX IF NOT EXISTS ix_applications_user_id ON applications (user_id)",
+                    "CREATE INDEX IF NOT EXISTS ix_applications_stage ON applications (stage)",
+                    "CREATE INDEX IF NOT EXISTS ix_resumes_user_id ON resumes (user_id)",
+                ):
+                    await conn.execute(text(stmt))
+                logger.info("Database indexes ensured.")
+        except Exception as e:
+            logger.error(f"Failed to ensure database schemas/indexes during boot (DB might be asleep or unreachable): {e}")
             
     yield
 
